@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import { Metadata } from "next";
 import { auth } from "./auth/auth.functions";
 
-export const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
