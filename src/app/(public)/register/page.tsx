@@ -1,14 +1,14 @@
 import { Metadata } from "next";
-import SignupForm from "./signup-form";
+import RegisterForm from "./register-form";
 
 export const metadata: Metadata = {
-  title: "Signup",
+  title: "Cadastrar",
 };
 
-export default function SignupPage() {
+export default function RegisterPage() {
   return (
     <main className="flex items-center justify-center md:h-screen">
-      <SignupForm />
+      <RegisterForm />
     </main>
   );
 }

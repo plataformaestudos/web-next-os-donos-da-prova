@@ -1,8 +1,8 @@
-import "@/global.css";
+import "@/app/global.css";
 
+import { ClientProviders } from "./provider";
 import { Inter } from "next/font/google";
 import { Metadata } from "next";
-import { auth } from "./auth/auth.functions";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,10 +20,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  console.log(await auth());
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>{children}</body>
+      <body className={`${inter.className} antialiased`}>
+        <ClientProviders>{children}</ClientProviders>
+      </body>
     </html>
   );
 }

@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
-import { authenticate } from "../auth.actions";
+import { authenticate } from "../../../auth/auth.actions";
 import { useActionState } from "react";
 
 export default function LoginForm() {

@@ -4,30 +4,61 @@ import NextAuth from "next-auth";
 const users = [
   {
     id: "1",
+    role: "admin",
     name: "Admin",
     email: "admin@email.com",
     password: "123456",
   },
+  {
+    id: "2",
+    role: "collaborator",
+    name: "Colaborador",
+    email: "colaborador@email.com",
+    password: "123456",
+  },
+  {
+    id: "3",
+    role: "student",
+    name: "Estudante",
+    email: "estudante@email.com",
+    password: "123456",
+  },
 ];
 
-const publicRoutes = ["/auth/signup", "/landing"];
+const publicRoutes = ["/", "/cadastro"];
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
-    signIn: "/auth/login",
+    signIn: "/login",
   },
+  trustHost: true,
   callbacks: {
     authorized: async ({ auth, request: { nextUrl } }) => {
-      const isLoggedIn = !!auth;
+      const isLoggedIn = !!auth?.user;
 
       if (isLoggedIn || publicRoutes.includes(nextUrl.pathname)) {
-        if (nextUrl.pathname === "/auth/login")
+        if (nextUrl.pathname === "/login" || nextUrl.pathname === "/cadastro")
           return Response.redirect(new URL("/", nextUrl));
         return true;
       } else {
         return false;
       }
     },
+    jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = (user as { role: string }).role;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      session.user.id = token.id as string;
+      (session.user as unknown as { role: string }).role = token.role as string;
+      return session;
+    },
+  },
+  session: {
+    strategy: "jwt",
   },
   providers: [
     Credentials({
