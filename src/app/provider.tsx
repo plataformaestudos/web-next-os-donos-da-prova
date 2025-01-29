@@ -4,13 +4,7 @@ import "@ant-design/v5-patch-for-react-19";
 
 import { ConfigProvider, ThemeConfig, theme as antdTheme } from "antd";
 import { PropsWithChildren, createContext, useState } from "react";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { StyleProvider } from "@ant-design/cssinjs";

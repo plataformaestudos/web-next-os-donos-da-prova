@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Button, Segmented, Switch, theme } from "antd";
+import { Avatar, Button, Segmented, theme } from "antd";
 import { MenuOutlined, MoonFilled, SunFilled } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 

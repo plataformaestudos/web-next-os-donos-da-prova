@@ -1,5 +1,4 @@
 import { MenuModel } from "@/model/menu.model";
-import { ResponseModel } from "@/model/common.model";
 import { createClient } from "@/util/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
