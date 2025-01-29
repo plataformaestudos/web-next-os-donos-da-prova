@@ -1,14 +1,19 @@
 import type { NextConfig } from "next";
 
 const routeAlias: {
-  [key: string]: string;
+  [routeInPTBR: string]: string;
 } = {
   "/cadastro": "/signup",
   "/conta": "/account",
-  "/concursos": "/exams",
-  "/concursos/novo": "/exams/new",
-  "/concursos/:id": "/exams/:id",
-  "/simulado": "/practice-exam",
+  "/modulos": "/modules",
+  "/modulos/novo": "/modules/new",
+  "/modulos/:id": "/modules/:id",
+  "/questoes": "/questions",
+  "/questoes/nova": "/questions/new",
+  "/questoes/:id": "/questions/:id",
+  "/simulados": "/question-books",
+  "/simulados/novo": "/question-books/new",
+  "/simulados/:id": "/question-books/:id",
 };
 
 const nextConfig: NextConfig = {

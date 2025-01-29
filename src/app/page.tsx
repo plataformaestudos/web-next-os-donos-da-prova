@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { auth } from "src/auth";
+import { createClient } from "@/util/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function IndexPage() {
-  const session = await auth();
+  const supabase = await createClient();
 
-  if (session?.user) {
+  const { data } = await supabase.auth.getUser();
+
+  if (data?.user) {
     redirect("/home");
   }
 

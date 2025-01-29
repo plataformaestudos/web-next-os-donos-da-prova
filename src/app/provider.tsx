@@ -1,19 +1,58 @@
 "use client";
 
-import { PropsWithChildren } from "react";
-import { RouterProvider } from "react-aria-components";
-import { useRouter } from "next/navigation";
+import "@ant-design/v5-patch-for-react-19";
 
-declare module "react-aria-components" {
-  interface RouterConfig {
-    routerOptions: NonNullable<
-      Parameters<ReturnType<typeof useRouter>["push"]>[1]
-    >;
+import { ConfigProvider, ThemeConfig, theme as antdTheme } from "antd";
+import { PropsWithChildren, createContext, useState } from "react";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+
+import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { StyleProvider } from "@ant-design/cssinjs";
+
+const queryClient = new QueryClient();
+
+export const ThemeProvider = createContext(
+  {} as {
+    theme: string;
+    setTheme: (theme: "light" | "dark") => void;
   }
-}
+);
+
+const defaultTheme: ThemeConfig = {
+  token: {
+    colorPrimary: "#4338ca",
+  },
+};
+
+const themes = {
+  light: {
+    ...defaultTheme,
+    algorithm: antdTheme.defaultAlgorithm,
+  },
+  dark: {
+    ...defaultTheme,
+    algorithm: antdTheme.darkAlgorithm,
+  },
+} as Record<string, ThemeConfig>;
 
 export function ClientProviders({ children }: PropsWithChildren) {
-  let router = useRouter();
+  const [theme, setTheme] = useState("light");
 
-  return <RouterProvider navigate={router.push}>{children}</RouterProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider.Provider value={{ theme, setTheme }}>
+        <AntdRegistry>
+          <StyleProvider layer>
+            <ConfigProvider theme={themes[theme]}>{children}</ConfigProvider>
+          </StyleProvider>
+        </AntdRegistry>
+      </ThemeProvider.Provider>
+    </QueryClientProvider>
+  );
 }

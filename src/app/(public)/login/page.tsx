@@ -1,14 +1,24 @@
-import LoginForm from "./login-form";
-import { Metadata } from "next";
+import { login, signup } from "./actions";
 
-export const metadata: Metadata = {
-  title: "Login",
-};
+import { createClient } from "@/util/supabase/server";
+import { redirect } from "next/navigation";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const supabase = await createClient();
+
+  const { data } = await supabase.auth.getUser();
+  if (data?.user) {
+    redirect("/home");
+  }
+
   return (
-    <main className="flex items-center justify-center md:h-screen">
-      <LoginForm />
-    </main>
+    <form>
+      <label htmlFor="email">Email:</label>
+      <input id="email" name="email" type="email" required />
+      <label htmlFor="password">Password:</label>
+      <input id="password" name="password" type="password" required />
+      <button formAction={login}>Log in</button>
+      <button formAction={signup}>Sign up</button>
+    </form>
   );
 }
