@@ -42,7 +42,7 @@ export function ClientProviders({ children }: PropsWithChildren) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider.Provider value={{ theme, setTheme }}>
         <AntdRegistry>
-          <StyleProvider layer>
+          <StyleProvider>
             <ConfigProvider theme={themes[theme]}>{children}</ConfigProvider>
           </StyleProvider>
         </AntdRegistry>

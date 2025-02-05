@@ -1,6 +1,12 @@
 "use client";
 
-import { LuBook, LuBookCheck, LuHouse, LuMenu } from "react-icons/lu";
+import {
+  LuBook,
+  LuBookCheck,
+  LuFileQuestion,
+  LuHouse,
+  LuMenu,
+} from "react-icons/lu";
 import { redirect, usePathname } from "next/navigation";
 
 import Link from "next/link";
@@ -16,6 +22,7 @@ const icons = {
   home: <LuHouse className="flex-shrink-0" color="#fff" size={24} />,
   book: <LuBook className="flex-shrink-0" color="#fff" size={24} />,
   bookCheck: <LuBookCheck className="flex-shrink-0" color="#fff" size={24} />,
+  question: <LuFileQuestion className="flex-shrink-0" color="#fff" size={24} />,
 };
 
 export function Navbar() {
