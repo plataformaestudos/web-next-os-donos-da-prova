@@ -1,7 +1,7 @@
-import { Button, Tooltip } from "antd";
-import { LuArrowLeft, LuClipboardCopy } from "react-icons/lu";
+import { Button, Divider } from "antd";
 
 import Link from "next/link";
+import { LuArrowLeft } from "react-icons/lu";
 import { QuestionForm } from "../question-form.component";
 import { QuestionTitle } from "./copy-question-id.component";
 import { createClient } from "@/util/supabase/server";
@@ -19,17 +19,21 @@ export default async function EditQuestionPage({
     .select(
       `
       id,
-      statement,
-      question_options ( id, description, is_correct )
+      text,
+      question_alternatives ( id, text, is_correct )
     `
     )
     .eq("id", id);
 
-  const question = data![0];
+  const question = data?.[0];
+
+  if (!question) {
+    return null;
+  }
 
   return (
     <div className="py-4 px-8 w-full">
-      <div className="flex justify-between items-center pb-4 border-b border-b-gray-200">
+      <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Link href="/questions">
             <Button shape="circle" icon={<LuArrowLeft />} />
@@ -45,15 +49,12 @@ export default async function EditQuestionPage({
           Salvar
         </Button>
       </div>
-      <div className="mt-4">
-        <QuestionForm
-          statement={question.statement}
-          options={question.question_options.map((qo) => qo.description)}
-          correctOption={(
-            question.question_options.findIndex((qo) => qo.is_correct) + 1
-          )?.toString()}
-        />
-      </div>
+      <Divider />
+      <QuestionForm
+        id={question.id}
+        text={question.text}
+        alternatives={question.question_alternatives}
+      />
     </div>
   );
 }

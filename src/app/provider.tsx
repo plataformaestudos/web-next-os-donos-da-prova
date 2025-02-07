@@ -2,7 +2,7 @@
 
 import "@ant-design/v5-patch-for-react-19";
 
-import { ConfigProvider, ThemeConfig, theme as antdTheme } from "antd";
+import { App, ConfigProvider, ThemeConfig, theme as antdTheme } from "antd";
 import { PropsWithChildren, createContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -20,6 +20,7 @@ export const ThemeProvider = createContext(
 
 const defaultTheme: ThemeConfig = {
   token: {
+    fontFamily: "Inter, Inter Fallback",
     colorPrimary: "#4338ca",
   },
 };
@@ -43,7 +44,9 @@ export function ClientProviders({ children }: PropsWithChildren) {
       <ThemeProvider.Provider value={{ theme, setTheme }}>
         <AntdRegistry>
           <StyleProvider>
-            <ConfigProvider theme={themes[theme]}>{children}</ConfigProvider>
+            <ConfigProvider theme={themes[theme]}>
+              <App>{children}</App>
+            </ConfigProvider>
           </StyleProvider>
         </AntdRegistry>
       </ThemeProvider.Provider>

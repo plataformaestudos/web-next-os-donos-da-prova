@@ -1,10 +1,11 @@
 "use client";
 
+import { App, Tooltip } from "antd";
 import { LuClipboardCheck, LuClipboardCopy } from "react-icons/lu";
-import { Tooltip, message } from "antd";
 import { useEffect, useState } from "react";
 
 export function QuestionTitle({ id }: { id: string }) {
+  const { message } = App.useApp();
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -34,10 +35,13 @@ export function QuestionTitle({ id }: { id: string }) {
       }}
     >
       <div>
-        <h1 className="text-xl font-bold leading-none">Código da questão</h1>
+        <h1 className="text-xl font-bold leading-none">Questão</h1>
         <span className="text-xs text-gray-600">{id}</span>
       </div>
-      <Tooltip title="Copiar para a área de transferência" placement="top">
+      <Tooltip
+        title="Copiar código da questão para a área de transferência"
+        placement="top"
+      >
         <span>
           {copied ? (
             <LuClipboardCheck size={20} />
