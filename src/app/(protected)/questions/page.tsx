@@ -1,4 +1,6 @@
-import { Button } from "antd";
+import { Button, List } from "antd";
+
+import Item from "antd/es/list/Item";
 import Link from "next/link";
 import { createClient } from "@/util/supabase/server";
 
@@ -18,7 +20,15 @@ export default async function QuestionsPage() {
         </Link>
       </div>
       <div className="mt-4">
-        <p>Número de questões: {questions?.length}</p>
+        <List>
+          {questions?.map((question) => (
+            <Item key={question.id}>
+              <Link href={`/questions/${question.id}`}>
+                <span dangerouslySetInnerHTML={{ __html: question.text }} />
+              </Link>
+            </Item>
+          ))}
+        </List>
       </div>
     </div>
   );

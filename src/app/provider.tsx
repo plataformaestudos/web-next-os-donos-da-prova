@@ -7,7 +7,6 @@ import { PropsWithChildren, createContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { StyleProvider } from "@ant-design/cssinjs";
 
 const queryClient = new QueryClient();
 
@@ -40,16 +39,14 @@ export function ClientProviders({ children }: PropsWithChildren) {
   const [theme, setTheme] = useState("light");
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider.Provider value={{ theme, setTheme }}>
-        <AntdRegistry>
-          <StyleProvider>
-            <ConfigProvider theme={themes[theme]}>
-              <App>{children}</App>
-            </ConfigProvider>
-          </StyleProvider>
-        </AntdRegistry>
-      </ThemeProvider.Provider>
-    </QueryClientProvider>
+    <AntdRegistry>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider.Provider value={{ theme, setTheme }}>
+          <ConfigProvider theme={themes[theme]}>
+            <App>{children}</App>
+          </ConfigProvider>
+        </ThemeProvider.Provider>
+      </QueryClientProvider>
+    </AntdRegistry>
   );
 }

@@ -1,4 +1,5 @@
 import "./styles.css";
+import "katex/dist/katex.min.css";
 
 import { EditorContent, useEditor } from "@tiptap/react";
 
@@ -8,6 +9,7 @@ import { FontSize } from "./extensions/font-size.tiptap-extension";
 import { Fragment } from "@tiptap/pm/model";
 import ImageResize from "tiptap-extension-resize-image";
 import ListKeymap from "@tiptap/extension-list-keymap";
+import { Mathematics } from "@tiptap-pro/extension-mathematics";
 import Placeholder from "@tiptap/extension-placeholder";
 import StarterKit from "@tiptap/starter-kit";
 import TextStyle from "@tiptap/extension-text-style";
@@ -147,6 +149,7 @@ export function TiptapEditor({
           });
         },
       }),
+      Mathematics,
     ],
     immediatelyRender: false,
     onFocus: () => {

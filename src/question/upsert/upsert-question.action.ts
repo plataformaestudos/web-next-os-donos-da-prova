@@ -1,14 +1,13 @@
 "use server";
 
-import { UpsertQuestionDTO } from "./question.dto";
+import { UpsertQuestionDTO } from "../question.dto";
 import { createClient } from "@/util/supabase/server";
 import { redirect } from "next/navigation";
 
-export async function createQuestion({
-  id,
-  text,
-  alternatives,
-}: UpsertQuestionDTO) {
+export async function upsertQuestionAndAlternatives(
+  _: boolean,
+  { id, text, alternatives }: UpsertQuestionDTO
+) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("questions")
@@ -37,4 +36,6 @@ export async function createQuestion({
 
     redirect(`/questions/${question_id}`);
   }
+
+  return false;
 }

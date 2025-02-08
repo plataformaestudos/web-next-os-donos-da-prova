@@ -2,8 +2,10 @@ import { Button, Divider } from "antd";
 
 import Link from "next/link";
 import { LuArrowLeft } from "react-icons/lu";
-import { QuestionForm } from "../question-form.component";
-import { QuestionTitle } from "./copy-question-id.component";
+import { PreviewOrEditQuestion } from "@/question/preview-or-edit-question.component";
+import { QuestionFormSubmitButton } from "@/question/question-form-submit-button.component";
+import { QuestionTitle } from "@/question/question-title.component";
+import { UpserQuestionProvider } from "@/question/upsert/upsert-question.context";
 import { createClient } from "@/util/supabase/server";
 
 export default async function EditQuestionPage({
@@ -32,29 +34,26 @@ export default async function EditQuestionPage({
   }
 
   return (
-    <div className="py-4 px-8 w-full">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Link href="/questions">
-            <Button shape="circle" icon={<LuArrowLeft />} />
-          </Link>
-          <QuestionTitle id={question.id} />
+    <UpserQuestionProvider>
+      <div className="py-4 px-8 w-full">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <Link href="/questions">
+              <Button shape="circle" icon={<LuArrowLeft />} />
+            </Link>
+            <QuestionTitle id={question.id} />
+          </div>
+          <QuestionFormSubmitButton />
         </div>
-        <Button
-          type="primary"
-          size="large"
-          form="new-question-form"
-          htmlType="submit"
-        >
-          Salvar
-        </Button>
+        <Divider />
+        <PreviewOrEditQuestion
+          question={{
+            id: question.id,
+            text: question.text,
+            alternatives: question.question_alternatives,
+          }}
+        />
       </div>
-      <Divider />
-      <QuestionForm
-        id={question.id}
-        text={question.text}
-        alternatives={question.question_alternatives}
-      />
-    </div>
+    </UpserQuestionProvider>
   );
 }
