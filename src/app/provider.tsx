@@ -5,8 +5,25 @@ import "@ant-design/v5-patch-for-react-19";
 import { App, ConfigProvider, ThemeConfig, theme as antdTheme } from "antd";
 import { PropsWithChildren, createContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { StyleProvider, createCache, extractStyle } from "@ant-design/cssinjs";
 
-import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { useServerInsertedHTML } from "next/navigation";
+
+export const RootStyleRegistry = ({ children }: PropsWithChildren) => {
+  const [cache] = useState(() => createCache());
+
+  useServerInsertedHTML(() => {
+    return (
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `</script>${extractStyle(cache)}<script>`,
+        }}
+      />
+    );
+  });
+
+  return <StyleProvider cache={cache}>{children}</StyleProvider>;
+};
 
 const queryClient = new QueryClient();
 
@@ -39,7 +56,7 @@ export function ClientProviders({ children }: PropsWithChildren) {
   const [theme, setTheme] = useState("light");
 
   return (
-    <AntdRegistry>
+    <RootStyleRegistry>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider.Provider value={{ theme, setTheme }}>
           <ConfigProvider theme={themes[theme]}>
@@ -47,6 +64,6 @@ export function ClientProviders({ children }: PropsWithChildren) {
           </ConfigProvider>
         </ThemeProvider.Provider>
       </QueryClientProvider>
-    </AntdRegistry>
+    </RootStyleRegistry>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { App, Button, Divider, Popconfirm, Select } from "antd";
+import { App, Button, Divider, Popconfirm, Select, Typography } from "antd";
 import { FaChevronDown, FaX } from "react-icons/fa6";
 import React, { useState } from "react";
 
@@ -10,6 +10,8 @@ import { TiptapEditor } from "@/ui/tiptap-editor/tiptap-editor.component";
 import { useCommonTokens } from "@/util/use-common-tokens.hook";
 import { useMultipleEditors } from "@/ui/tiptap-editor/use-multiple-editors.component";
 import { useUpsertQuestion } from "./upsert/upsert-question.context";
+
+const { Text } = Typography;
 
 interface QuestionFormProps {
   id?: string;
@@ -22,7 +24,7 @@ interface QuestionFormProps {
 }
 
 export function QuestionForm(props: QuestionFormProps) {
-  const { upsertQuestion } = useUpsertQuestion();
+  const { upsertQuestion, error } = useUpsertQuestion();
 
   const { message } = App.useApp();
   const { menu, onFocus } = useMultipleEditors();
@@ -191,6 +193,7 @@ export function QuestionForm(props: QuestionFormProps) {
             />
           </label>
         </form>
+        {error && <Text type="danger">{error}</Text>}
       </div>
     </>
   );

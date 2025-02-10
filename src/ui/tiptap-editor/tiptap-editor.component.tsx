@@ -159,7 +159,8 @@ export function TiptapEditor({
     onBlur: () => {
       setIsFocused(false);
     },
-    onUpdate: ({ editor }) => onChange(editor.getHTML()),
+    onUpdate: ({ editor }) =>
+      onChange(editor.getText() ? editor.getHTML() : ""),
     onTransaction({ transaction }) {
       handleImageDeletes(transaction);
     },

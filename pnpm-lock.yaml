@@ -11,12 +11,12 @@ importers:
       '@ant-design/colors':
         specifier: ^7.2.0
         version: 7.2.0
+      '@ant-design/cssinjs':
+        specifier: ^1.23.0
+        version: 1.23.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@ant-design/icons':
         specifier: ^5.6.0
         version: 5.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@ant-design/nextjs-registry':
-        specifier: ^1.0.2
-        version: 1.0.2(@ant-design/cssinjs@1.23.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(antd@5.23.3(moment@2.22.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(next@15.2.0-canary.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@ant-design/v5-patch-for-react-19':
         specifier: ^1.0.3
         version: 1.0.3(antd@5.23.3(moment@2.22.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -174,15 +174,6 @@ packages:
     resolution: {integrity: sha512-Mb6QkQmPLZsmIHJ6oBsoyKrrT8/kAUdQ6+8q38e2bQSclROi69SiDlI4zZroaIPseae1w110RJH0zGrphAvlSQ==}
     engines: {node: '>=8'}
     peerDependencies:
-      react: '>=16.0.0'
-      react-dom: '>=16.0.0'
-
-  '@ant-design/nextjs-registry@1.0.2':
-    resolution: {integrity: sha512-hmeBsD3Aq+bR9zlzvnE+zU0jGX6uamad5dk9nw/O5oZ7Pu+zonL+MuyUUw/olMOzqjq9iY+DZciJr9F86th3YQ==}
-    peerDependencies:
-      '@ant-design/cssinjs': ^1.18.2
-      antd: ^5.0.0
-      next: ^14.0.0 || ^15.0.0
       react: '>=16.0.0'
       react-dom: '>=16.0.0'
 
@@ -2674,14 +2665,6 @@ snapshots:
       '@babel/runtime': 7.26.7
       classnames: 2.5.1
       rc-util: 5.44.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
-
-  '@ant-design/nextjs-registry@1.0.2(@ant-design/cssinjs@1.23.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(antd@5.23.3(moment@2.22.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(next@15.2.0-canary.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
-    dependencies:
-      '@ant-design/cssinjs': 1.23.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      antd: 5.23.3(moment@2.22.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      next: 15.2.0-canary.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
