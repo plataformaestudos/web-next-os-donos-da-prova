@@ -33,6 +33,9 @@ const nextConfig: NextConfig = {
   experimental: {
     ppr: "incremental",
   },
+  compiler: {
+    styledComponents: true,
+  },
 };
 
 export default nextConfig;

@@ -1,6 +1,8 @@
 "use client";
 
-import { Avatar, Button, Segmented, theme } from "antd";
+import * as Styled from "./header.style";
+
+import { Avatar, Button, Tooltip, theme } from "antd";
 import { MenuOutlined, MoonFilled, SunFilled } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 
@@ -29,26 +31,19 @@ export function Header() {
   }, [supabase.auth]);
 
   return (
-    <div className="flex items-center justify-between px-4 h-20 sm:h-16 flex-shrink-0">
+    <Styled.Container>
       <Button
         onClick={() => setIsNavbarCollapsed(!isNavbarCollapsed)}
-        icon={<MenuOutlined size={24} className="text-indigo-700" />}
+        icon={<MenuOutlined size={24} />}
       />
       <div className="flex items-center gap-4">
-        <Segmented<"light" | "dark">
-          options={[
-            {
-              icon: <MoonFilled />,
-              value: "dark",
-            },
-            {
-              icon: <SunFilled />,
-              value: "light",
-            },
-          ]}
-          value={theme as "light" | "dark"}
-          onChange={setTheme}
-        />
+        <Tooltip title={theme === "light" ? "Modo escuro" : "Modo claro"}>
+          <Button
+            type="text"
+            icon={theme === "light" ? <MoonFilled /> : <SunFilled />}
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          />
+        </Tooltip>
         <Avatar
           size="large"
           style={{
@@ -59,6 +54,6 @@ export function Header() {
           {userEmail.charAt(0).toUpperCase()}
         </Avatar>
       </div>
-    </div>
+    </Styled.Container>
   );
 }
