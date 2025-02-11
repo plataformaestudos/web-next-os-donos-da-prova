@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const routeAlias: {
   [routeInPTBR: string]: string;
@@ -34,6 +33,9 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     ppr: "incremental",
+  },
+  compiler: {
+    styledComponents: true,
   },
 };
 

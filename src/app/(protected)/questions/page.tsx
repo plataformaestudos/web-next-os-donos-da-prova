@@ -1,6 +1,7 @@
 import { Button, List } from "antd";
+import Item, { Meta } from "antd/es/list/Item";
 
-import Item from "antd/es/list/Item";
+import { DeleteQuestionButton } from "@/question/delete/delete-question-button.component";
 import Link from "next/link";
 import { createClient } from "@/util/supabase/server";
 
@@ -22,10 +23,19 @@ export default async function QuestionsPage() {
       <div className="mt-4">
         <List>
           {questions?.map((question) => (
-            <Item key={question.id}>
-              <Link href={`/questions/${question.id}`}>
-                <span dangerouslySetInnerHTML={{ __html: question.text }} />
-              </Link>
+            <Item
+              key={question.id}
+              actions={[
+                <Link key="edit" href={`/questions/${question.id}`}>
+                  Editar
+                </Link>,
+                <DeleteQuestionButton key="delete" questionId={question.id} />,
+              ]}
+            >
+              <Meta
+                title={question.text.replace(/<[^>]+>/g, "")}
+                description={question.id}
+              />
             </Item>
           ))}
         </List>

@@ -8,3 +8,7 @@ export interface QuestionAlternativeModel {
   text: string;
   is_correct: boolean;
 }
+
+export interface QuestionWithAlternativesModel extends QuestionModel {
+  question_alternatives: QuestionAlternativeModel[];
+}

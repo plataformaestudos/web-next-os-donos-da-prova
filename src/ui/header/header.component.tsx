@@ -1,12 +1,13 @@
 "use client";
 
-import { Avatar, Button, Segmented, theme } from "antd";
-import { MenuOutlined, MoonFilled, SunFilled } from "@ant-design/icons";
+import * as Styled from "./header.style";
+
+import { Avatar, Button, Tooltip, theme } from "antd";
+import { MoonFilled, SunFilled } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 
 import { ThemeProvider } from "@/app/provider";
 import { createClient } from "@/util/supabase/client";
-import { useNabvarContext } from "../navbar/navbar.context";
 
 const { useToken } = theme;
 
@@ -14,7 +15,6 @@ export function Header() {
   const supabase = createClient();
   const { token } = useToken();
   const { theme, setTheme } = useContext(ThemeProvider);
-  const { isNavbarCollapsed, setIsNavbarCollapsed } = useNabvarContext();
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
@@ -29,22 +29,15 @@ export function Header() {
   }, [supabase.auth]);
 
   return (
-    <div className="flex items-center justify-between px-4 h-20 sm:h-16 flex-shrink-0">
+    <Styled.Container>
       <div className="flex items-center gap-4 ml-auto">
-        <Segmented<"light" | "dark">
-          options={[
-            {
-              icon: <MoonFilled />,
-              value: "dark",
-            },
-            {
-              icon: <SunFilled />,
-              value: "light",
-            },
-          ]}
-          value={theme as "light" | "dark"}
-          onChange={setTheme}
-        />
+        <Tooltip title={theme === "light" ? "Modo escuro" : "Modo claro"}>
+          <Button
+            type="text"
+            icon={theme === "light" ? <MoonFilled /> : <SunFilled />}
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          />
+        </Tooltip>
         <Avatar
           size="large"
           style={{
@@ -55,7 +48,6 @@ export function Header() {
           {userEmail.charAt(0).toUpperCase()}
         </Avatar>
       </div>
-    </div>
-
+    </Styled.Container>
   );
 }
