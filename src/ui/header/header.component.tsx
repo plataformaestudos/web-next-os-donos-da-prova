@@ -30,7 +30,7 @@ export function Header() {
 
   return (
     <Styled.Container>
-      <div className="flex items-center gap-4 ml-auto">
+      <Styled.RightContent>
         <Tooltip title={theme === "light" ? "Modo escuro" : "Modo claro"}>
           <Button
             type="text"
@@ -47,7 +47,7 @@ export function Header() {
         >
           {userEmail.charAt(0).toUpperCase()}
         </Avatar>
-      </div>
+      </Styled.RightContent>
     </Styled.Container>
   );
 }
