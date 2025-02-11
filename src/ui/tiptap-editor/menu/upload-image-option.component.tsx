@@ -11,7 +11,7 @@ export function UploadImageOption() {
       <input
         type="file"
         id="img-upload"
-        className="hidden"
+        style={{ display: "none" }}
         onChange={(ev) => {
           const file = ev.target.files?.[0];
           if (file && editor) {

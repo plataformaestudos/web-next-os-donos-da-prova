@@ -1,14 +1,18 @@
 "use client";
 
-import { Button, Form, Input, Typography, message } from "antd";
+import * as Styled from "./page.style";
+
+import { App, Button, Form, Input, Typography } from "antd";
 import { login, signup } from "./actions";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const { Title } = Typography;
 
 export default function LoginPage() {
+  const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const router = useRouter();
@@ -42,22 +46,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="flex w-full max-w-4xl">
-        <div className="w-1/2 h-full relative">
-          <img
+    <Styled.Container>
+      <Styled.Card>
+        <Styled.LogoContainer>
+          <Image
+            width={448}
+            height={448}
             src="/images/os-donos-logo.jpeg"
             alt="Logo"
-            className="object-cover w-full h-full"
           />
-        </div>
-        <div className="w-1/2 p-8 bg-white rounded-lg shadow-md">
-          <Title level={2} className="text-center mb-4 text-3xl">
-            Login
-          </Title>
+        </Styled.LogoContainer>
+        <Styled.FormContainer>
+          <Title level={2}>Login</Title>
           <Form form={form} layout="vertical">
             <Form.Item
-              label={<span className="text-base">Email</span>}
+              label={<span>Email</span>}
               name="email"
               rules={[
                 { required: true, message: "Por favor, insira seu email!" },
@@ -68,7 +71,7 @@ export default function LoginPage() {
             </Form.Item>
 
             <Form.Item
-              label={<span className="text-base">Senha</span>}
+              label={<span>Senha</span>}
               name="password"
               rules={[
                 { required: true, message: "Por favor, insira sua senha!" },
@@ -88,7 +91,7 @@ export default function LoginPage() {
               </Button>
             </Form.Item>
 
-            <div className="text-center">
+            <div>
               <span>Não tem uma conta? </span>
               <Button
                 type="link"
@@ -99,8 +102,8 @@ export default function LoginPage() {
               </Button>
             </div>
           </Form>
-        </div>
-      </div>
-    </div>
+        </Styled.FormContainer>
+      </Styled.Card>
+    </Styled.Container>
   );
 }

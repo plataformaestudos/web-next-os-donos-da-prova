@@ -88,6 +88,7 @@ export const Link = styled(NextLink)<{ $active: boolean }>`
   margin-bottom: 16px;
   border-radius: 4px;
   width: calc(100% - 32px);
+  height: 40px;
 
   transition: background-color 200ms ease-in-out;
 
@@ -96,6 +97,11 @@ export const Link = styled(NextLink)<{ $active: boolean }>`
   }
 
   ${({ $active }) => $active && `background-color: #0150be;`}
+
+  svg {
+    color: #fff;
+    flex-shrink: 0;
+  }
 `;
 
 export const LinkText = styled.span<{ $collapsed: boolean }>`

@@ -12,10 +12,3 @@ export const Container = styled.div`
     height: 4rem;
   }
 `;
-
-export const RightContent = styled.div`
-display: flex;
-align-items: center;
-gap: 16px;
-margin-left: auto;
-`;

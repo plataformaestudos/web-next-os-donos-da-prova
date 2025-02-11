@@ -1,3 +1,5 @@
+import * as Styled from "./page.style";
+
 import { Button, Divider } from "antd";
 
 import Link from "next/link";
@@ -35,16 +37,16 @@ export default async function EditQuestionPage({
 
   return (
     <UpserQuestionProvider>
-      <div className="py-4 px-8 w-full">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
+      <Styled.QuestionContainer>
+        <Styled.QuestionHeader>
+          <Styled.QuestionTitle>
             <Link href="/questions">
               <Button shape="circle" icon={<LuArrowLeft />} />
             </Link>
             <QuestionTitle id={question.id} />
-          </div>
+          </Styled.QuestionTitle>
           <QuestionFormSubmitButton />
-        </div>
+        </Styled.QuestionHeader>
         <Divider />
         <PreviewOrEditQuestion
           question={{
@@ -53,7 +55,7 @@ export default async function EditQuestionPage({
             alternatives: question.question_alternatives,
           }}
         />
-      </div>
+      </Styled.QuestionContainer>
     </UpserQuestionProvider>
   );
 }

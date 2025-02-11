@@ -4,6 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 
 export function useMenus() {
   const supabase = createClient();
+  supabase.auth
+    .getSession()
+    .then((session) => console.log(session.data.session?.access_token));
   const { data, isLoading } = useQuery({
     queryKey: ["menus"],
     queryFn: async () =>

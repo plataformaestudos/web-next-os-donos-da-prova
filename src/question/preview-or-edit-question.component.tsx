@@ -1,6 +1,7 @@
 "use client";
 
 import { EditOutlined, EyeOutlined } from "@ant-design/icons";
+import { Flex, Segmented, Space } from "antd";
 import {
   QuestionAlternativeModel,
   QuestionModel,
@@ -8,7 +9,6 @@ import {
 
 import { QuestionForm } from "./question-form.component";
 import { QuestionPreview } from "./question-preview.component";
-import { Segmented } from "antd";
 import { useState } from "react";
 
 export function PreviewOrEditQuestion({
@@ -19,19 +19,18 @@ export function PreviewOrEditQuestion({
   const [editing, setEditing] = useState(false);
 
   return (
-    <>
-      <div className="mb-4">
-        <Segmented
-          defaultValue={1}
-          options={[
-            { value: 1, label: "Visualizar", icon: <EyeOutlined /> },
-            { value: 2, label: "Editar", icon: <EditOutlined /> },
-          ]}
-          onChange={(value) => {
-            setEditing(value === 2);
-          }}
-        />
-      </div>
+    <Flex vertical gap={16} justify="start">
+      <Segmented
+        style={{ alignSelf: "start" }}
+        defaultValue={1}
+        options={[
+          { value: 1, label: "Visualizar", icon: <EyeOutlined /> },
+          { value: 2, label: "Editar", icon: <EditOutlined /> },
+        ]}
+        onChange={(value) => {
+          setEditing(value === 2);
+        }}
+      />
 
       {!editing && question ? (
         <QuestionPreview
@@ -46,6 +45,6 @@ export function PreviewOrEditQuestion({
           alternatives={question?.alternatives}
         />
       )}
-    </>
+    </Flex>
   );
 }

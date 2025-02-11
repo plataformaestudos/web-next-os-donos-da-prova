@@ -1,5 +1,7 @@
 "use client";
 
+import * as Styled from "./question-title.style";
+
 import { App, Tooltip } from "antd";
 import { LuClipboardCheck, LuClipboardCopy } from "react-icons/lu";
 import { useEffect, useState } from "react";
@@ -20,8 +22,7 @@ export function QuestionTitle({ id }: { id: string }) {
   }, [copied]);
 
   return (
-    <div
-      className="flex gap-2 items-center cursor-pointer"
+    <Styled.Container
       onClick={() => {
         navigator.clipboard
           .writeText(id)
@@ -34,10 +35,10 @@ export function QuestionTitle({ id }: { id: string }) {
           });
       }}
     >
-      <div>
-        <h1 className="text-xl font-bold leading-none">Questão</h1>
-        <span className="text-xs text-gray-600">{id}</span>
-      </div>
+      <Styled.TitleContainer>
+        <h1>Questão</h1>
+        <span>{id}</span>
+      </Styled.TitleContainer>
       <Tooltip
         title="Copiar código da questão para a área de transferência"
         placement="top"
@@ -50,6 +51,6 @@ export function QuestionTitle({ id }: { id: string }) {
           )}
         </span>
       </Tooltip>
-    </div>
+    </Styled.Container>
   );
 }

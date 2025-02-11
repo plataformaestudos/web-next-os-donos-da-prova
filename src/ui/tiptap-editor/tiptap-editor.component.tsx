@@ -1,8 +1,6 @@
 import "./styles.css";
 import "katex/dist/katex.min.css";
 
-import { EditorContent, useEditor } from "@tiptap/react";
-
 import { Editor } from "@tiptap/core";
 import FileHandler from "@tiptap-pro/extension-file-handler";
 import { FontSize } from "./extensions/font-size.tiptap-extension";
@@ -12,16 +10,14 @@ import ListKeymap from "@tiptap/extension-list-keymap";
 import { Mathematics } from "@tiptap-pro/extension-mathematics";
 import Placeholder from "@tiptap/extension-placeholder";
 import StarterKit from "@tiptap/starter-kit";
+import { StyledEditorContent } from "./tiptap-editor.stye";
 import TextStyle from "@tiptap/extension-text-style";
 import { Transaction } from "@tiptap/pm/state";
 import Underline from "@tiptap/extension-underline";
-import clsx from "clsx";
 import { createClient } from "@/util/supabase/client";
-import { theme } from "antd";
+import { useEditor } from "@tiptap/react";
 import { useState } from "react";
 import { v4 as uuid } from "uuid";
-
-const { useToken } = theme;
 
 export async function uploadFile(file: File) {
   const client = createClient();
@@ -165,18 +161,6 @@ export function TiptapEditor({
       handleImageDeletes(transaction);
     },
   });
-  const { token } = useToken();
 
-  return (
-    <EditorContent
-      editor={editor}
-      style={{
-        backgroundColor: editable ? token.colorBgElevated : undefined,
-      }}
-      className={clsx("transition-colors", {
-        "p-1 border rounded-md flex-1": editable,
-        "border-blue-400": isFocused,
-      })}
-    />
-  );
+  return <StyledEditorContent editor={editor} $focused={isFocused} />;
 }

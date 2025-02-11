@@ -1,5 +1,7 @@
 "use client";
 
+import * as Styled from "./question-form.style";
+
 import { App, Button, Divider, Popconfirm, Select, Typography } from "antd";
 import { FaChevronDown, FaX } from "react-icons/fa6";
 import React, { useState } from "react";
@@ -7,7 +9,6 @@ import React, { useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { QUESTION_FORM_ID } from "./question-form.constant";
 import { TiptapEditor } from "@/ui/tiptap-editor/tiptap-editor.component";
-import { useCommonTokens } from "@/util/use-common-tokens.hook";
 import { useMultipleEditors } from "@/ui/tiptap-editor/use-multiple-editors.component";
 import { useUpsertQuestion } from "./upsert/upsert-question.context";
 
@@ -43,8 +44,6 @@ export function QuestionForm(props: QuestionFormProps) {
       alternatives[0]._uiId
   );
 
-  const { colorBgContainer } = useCommonTokens();
-
   function onChangeCorrectAlternative(id: string, index: number) {
     setCorrectAlternative(id);
     message.destroy("alternativeChosen");
@@ -57,144 +56,134 @@ export function QuestionForm(props: QuestionFormProps) {
   }
 
   return (
-    <>
-      <div
-        className="mt-6 p-4 rounded-md"
-        style={{ backgroundColor: colorBgContainer }}
+    <Styled.QuestionFormContainer>
+      {menu}
+      <Divider />
+      <form
+        id={QUESTION_FORM_ID}
+        action={() =>
+          upsertQuestion({
+            id: props.id,
+            text,
+            alternatives: alternatives.map((alt) => ({
+              id: alt.id,
+              text: alt.text,
+              is_correct: alt.id === correctAlternative,
+            })),
+          })
+        }
       >
-        {menu}
+        <label>
+          <Styled.Label>Enunciado</Styled.Label>
+          <TiptapEditor
+            placeholder="Enunciado"
+            defaultValue={props?.text ?? ""}
+            onFocus={onFocus}
+            onChange={setText}
+          />
+        </label>
         <Divider />
-        <form
-          id={QUESTION_FORM_ID}
-          action={() =>
-            upsertQuestion({
-              id: props.id,
-              text,
-              alternatives: alternatives.map((alt) => ({
-                id: alt.id,
-                text: alt.text,
-                is_correct: alt.id === correctAlternative,
-              })),
-            })
+        <label htmlFor="alternatives">
+          <Styled.Label>Alternativas</Styled.Label>
+          {alternatives.map(({ _uiId, text }, index) => (
+            <Styled.Alternative key={_uiId}>
+              <Button
+                shape="circle"
+                onClick={() => onChangeCorrectAlternative(_uiId, index)}
+                type={correctAlternative === _uiId ? "primary" : "default"}
+              >
+                {String.fromCharCode(65 + index)}
+              </Button>
+              <TiptapEditor
+                placeholder="Alternativa"
+                defaultValue={text}
+                onFocus={onFocus}
+                onChange={(text) => {
+                  setAlternatives(
+                    alternatives.map((alt) => {
+                      if (alt._uiId === _uiId) {
+                        return {
+                          ...alt,
+                          text,
+                        };
+                      }
+                      return alt;
+                    })
+                  );
+                }}
+              />
+              <Popconfirm
+                okText="Remover"
+                cancelText="Cancelar"
+                disabled={!text}
+                placement="left"
+                title="Você tem certeza que quer remover essa alternativa?"
+                onConfirm={() =>
+                  setAlternatives(
+                    alternatives.filter((alt) => alt._uiId !== _uiId)
+                  )
+                }
+              >
+                <Button
+                  icon={<FaX size={10} />}
+                  size="small"
+                  type="text"
+                  onClick={
+                    !text
+                      ? () =>
+                          setAlternatives(
+                            alternatives.filter((alt) => alt._uiId !== _uiId)
+                          )
+                      : undefined
+                  }
+                />
+              </Popconfirm>
+            </Styled.Alternative>
+          ))}
+        </label>
+        <Button
+          icon={<PlusOutlined />}
+          type="text"
+          onClick={() =>
+            setAlternatives(
+              alternatives.concat({
+                _uiId: Math.random().toString(),
+                text: "",
+              })
+            )
           }
         >
-          <label>
-            <p className="font-bold text-lg mb-2">Enunciado</p>
-            <TiptapEditor
-              placeholder="Enunciado"
-              defaultValue={props?.text ?? ""}
-              onFocus={onFocus}
-              onChange={setText}
-            />
-          </label>
-          <Divider />
-          <label htmlFor="alternatives">
-            <p className="font-bold text-lg mb-2 mt-4">Alternativas</p>
-            {alternatives.map(({ _uiId, text }, index) => (
-              <div key={_uiId} className="flex items-center gap-2 pb-4">
-                <Button
-                  shape="circle"
-                  onClick={() => onChangeCorrectAlternative(_uiId, index)}
-                  type={correctAlternative === _uiId ? "primary" : "default"}
-                >
-                  {String.fromCharCode(65 + index)}
-                </Button>
-                <TiptapEditor
-                  placeholder="Alternativa"
-                  defaultValue={text}
-                  onFocus={onFocus}
-                  onChange={(text) => {
-                    setAlternatives(
-                      alternatives.map((alt) => {
-                        if (alt._uiId === _uiId) {
-                          return {
-                            ...alt,
-                            text,
-                          };
-                        }
-                        return alt;
-                      })
-                    );
-                  }}
-                />
-                <Popconfirm
-                  okText="Remover"
-                  cancelText="Cancelar"
-                  disabled={!text}
-                  placement="left"
-                  title="Você tem certeza que quer remover essa alternativa?"
-                  onConfirm={() =>
-                    setAlternatives(
-                      alternatives.filter((alt) => alt._uiId !== _uiId)
-                    )
+          Adicionar alternativa
+        </Button>
+        <Divider />
+        <label>
+          <Styled.Label>Alternativa correta</Styled.Label>
+          <Select
+            style={{ width: 290 }}
+            suffixIcon={<FaChevronDown />}
+            placeholder="Selecione a alternativa correta"
+            value={correctAlternative}
+            onChange={(id, option) =>
+              onChangeCorrectAlternative(
+                id,
+                (
+                  option as {
+                    value: string;
+                    index: number;
+                    label: string;
                   }
-                >
-                  <Button
-                    icon={
-                      <span className="text-gray-500">
-                        <FaX size={10} />
-                      </span>
-                    }
-                    size="small"
-                    type="text"
-                    onClick={
-                      !text
-                        ? () =>
-                            setAlternatives(
-                              alternatives.filter((alt) => alt._uiId !== _uiId)
-                            )
-                        : undefined
-                    }
-                  />
-                </Popconfirm>
-              </div>
-            ))}
-          </label>
-          <Button
-            className="mt-2"
-            icon={<PlusOutlined />}
-            type="text"
-            onClick={() =>
-              setAlternatives(
-                alternatives.concat({
-                  _uiId: Math.random().toString(),
-                  text: "",
-                })
+                ).index
               )
             }
-          >
-            Adicionar alternativa
-          </Button>
-          <Divider />
-          <label>
-            <p className="font-bold text-lg mb-2 mt-4">Alternativa correta</p>
-            <Select
-              style={{ width: 290 }}
-              suffixIcon={<FaChevronDown />}
-              placeholder="Selecione a alternativa correta"
-              value={correctAlternative}
-              onChange={(id, option) =>
-                onChangeCorrectAlternative(
-                  id,
-                  (
-                    option as {
-                      value: string;
-                      index: number;
-                      label: string;
-                    }
-                  ).index
-                )
-              }
-              options={alternatives.map(({ _uiId }, index) => ({
-                value: _uiId,
-                index,
-                label: `Alternativa ${String.fromCharCode(65 + index)}`,
-              }))}
-            />
-          </label>
-        </form>
-        {error && <Text type="danger">{error}</Text>}
-      </div>
-    </>
+            options={alternatives.map(({ _uiId }, index) => ({
+              value: _uiId,
+              index,
+              label: `Alternativa ${String.fromCharCode(65 + index)}`,
+            }))}
+          />
+        </label>
+      </form>
+      {error && <Text type="danger">{error}</Text>}
+    </Styled.QuestionFormContainer>
   );
 }

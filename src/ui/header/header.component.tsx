@@ -2,7 +2,7 @@
 
 import * as Styled from "./header.style";
 
-import { Avatar, Button, Tooltip, theme } from "antd";
+import { Avatar, Button, Flex, Tooltip, theme } from "antd";
 import { MoonFilled, SunFilled } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 
@@ -30,7 +30,7 @@ export function Header() {
 
   return (
     <Styled.Container>
-      <Styled.RightContent>
+      <Flex align="center" gap="16px">
         <Tooltip title={theme === "light" ? "Modo escuro" : "Modo claro"}>
           <Button
             type="text"
@@ -47,7 +47,7 @@ export function Header() {
         >
           {userEmail.charAt(0).toUpperCase()}
         </Avatar>
-      </Styled.RightContent>
+      </Flex>
     </Styled.Container>
   );
 }

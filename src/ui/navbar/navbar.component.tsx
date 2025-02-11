@@ -4,9 +4,8 @@ import * as Styled from "./navbar.style";
 
 import { Button, Skeleton, Tooltip } from "antd";
 import { LuBook, LuBookCheck, LuFileQuestion, LuHouse } from "react-icons/lu";
-import { CgProfile } from "react-icons/cg";
-import { redirect, usePathname } from "next/navigation";
 
+import { CgProfile } from "react-icons/cg";
 import { FaArrowRightToBracket } from "react-icons/fa6";
 import { MenuOutlined } from "@ant-design/icons";
 import { createClient } from "@/util/supabase/client";
@@ -14,6 +13,7 @@ import { useHorizontalSwipe } from "@/util/use-horizontal-swipe.hook";
 import { useIsMobile } from "@/util/use-media-query.hook";
 import { useMenus } from "./use-menus.hook";
 import { useNabvarContext } from "./navbar.context";
+import { usePathname } from "next/navigation";
 
 const icons = {
   home: <LuHouse className="flex-shrink-0" color="#fff" size={24} />,
@@ -21,7 +21,6 @@ const icons = {
   bookCheck: <LuBookCheck className="flex-shrink-0" color="#fff" size={24} />,
   question: <LuFileQuestion className="flex-shrink-0" color="#fff" size={24} />,
   profile: <CgProfile className="flex-shrink-0" color="#fff" size={24} />,
-
 };
 
 export function Navbar() {
@@ -105,17 +104,19 @@ export function Navbar() {
           })}
           <span style={{ flex: 1 }} />
           <Tooltip title={isNavbarCollapsed ? "Sair" : null} placement="right">
-            <Button
-              icon={<FaArrowRightToBracket />}
-              type="primary"
-              size="large"
+            <Styled.Link
+              key="/login"
+              href="/login"
+              $active={false}
               onClick={() => {
                 supabase.auth.signOut();
-                redirect("/login");
               }}
             >
-              {isNavbarCollapsed ? null : "Sair"}
-            </Button>
+              <FaArrowRightToBracket size={20} />
+              <Styled.LinkText $collapsed={isNavbarCollapsed}>
+                {isNavbarCollapsed ? null : "Sair"}
+              </Styled.LinkText>
+            </Styled.Link>
           </Tooltip>
         </Styled.MenuItemsContainer>
       </Styled.Container>

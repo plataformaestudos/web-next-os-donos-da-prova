@@ -1,3 +1,5 @@
+import * as Styled from "./page.style";
+
 import { Button, List } from "antd";
 import Item, { Meta } from "antd/es/list/Item";
 
@@ -11,35 +13,33 @@ export default async function QuestionsPage() {
   const { data: questions } = await supabase.from("questions").select();
 
   return (
-    <div className="py-4 px-8 w-full">
-      <div className="flex justify-between items-center pb-4 border-b border-b-gray-200">
-        <h1 className="text-4xl font-bold">Questões</h1>
+    <Styled.QuestionsContainer>
+      <Styled.QuestionsHeader>
+        <Styled.Title>Questões</Styled.Title>
         <Link href="/questions/new">
           <Button type="primary" size="large">
             Criar questão
           </Button>
         </Link>
-      </div>
-      <div className="mt-4">
-        <List>
-          {questions?.map((question) => (
-            <Item
-              key={question.id}
-              actions={[
-                <Link key="edit" href={`/questions/${question.id}`}>
-                  Editar
-                </Link>,
-                <DeleteQuestionButton key="delete" questionId={question.id} />,
-              ]}
-            >
-              <Meta
-                title={question.text.replace(/<[^>]+>/g, "")}
-                description={question.id}
-              />
-            </Item>
-          ))}
-        </List>
-      </div>
-    </div>
+      </Styled.QuestionsHeader>
+      <List>
+        {questions?.map((question) => (
+          <Item
+            key={question.id}
+            actions={[
+              <Link key="edit" href={`/questions/${question.id}`}>
+                Editar
+              </Link>,
+              <DeleteQuestionButton key="delete" questionId={question.id} />,
+            ]}
+          >
+            <Meta
+              title={question.text.replace(/<[^>]+>/g, "")}
+              description={question.id}
+            />
+          </Item>
+        ))}
+      </List>
+    </Styled.QuestionsContainer>
   );
 }

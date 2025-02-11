@@ -1,3 +1,5 @@
+import * as Styled from "./font-size-option.style";
+
 import { FaFont, FaSortDown, FaSortUp } from "react-icons/fa6";
 
 import { Dropdown } from "antd";
@@ -9,24 +11,24 @@ export function FontSizeOption() {
 
   return (
     <Dropdown
-      disabled={!editor?.can().chain().focus().setFontSize("1rem").run()}
+      disabled={!editor?.can().chain().focus().setFontSize("16px").run()}
       menu={{
         onClick: ({ key: fontSize }) => {
           editor?.chain().focus().setFontSize(fontSize).run();
         },
         items: [
           {
-            key: "0.75rem",
-            label: <span className="text-xs">Pequeno</span>,
+            key: "12px",
+            label: <Styled.Small>Pequeno</Styled.Small>,
           },
-          { key: "1rem", label: <span>Normal</span> },
+          { key: "16px", label: <Styled.Normal>Normal</Styled.Normal> },
           {
-            key: "1.25rem",
-            label: <span className="text-xl">Grande</span>,
+            key: "20px",
+            label: <Styled.Large>Grande</Styled.Large>,
           },
           {
-            key: "1.5rem",
-            label: <span className="text-2xl">Gigante</span>,
+            key: "24px",
+            label: <Styled.Huge>Gigante</Styled.Huge>,
           },
         ],
       }}
@@ -36,13 +38,13 @@ export function FontSizeOption() {
         <Option
           tooltip="Tamanho do texto"
           isActive={false}
-          isDisabled={!editor?.can().chain().focus().setFontSize("1rem").run()}
+          isDisabled={!editor?.can().chain().focus().setFontSize("16px").run()}
         >
           <FaFont />
-          <div className="flex flex-col items-center -ml-1.5 -mt-0.5">
-            <FaSortUp size={8} className="-mb-1" />
+          <Styled.CustomIcon>
+            <FaSortUp size={8} className="sort-up" />
             <FaSortDown size={8} />
-          </div>
+          </Styled.CustomIcon>
         </Option>
       </span>
     </Dropdown>
