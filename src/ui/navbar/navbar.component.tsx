@@ -138,6 +138,13 @@ export function Navbar() {
         </div>
         <button
           onClick={() => {
+            redirect("/perfil");
+          }}
+        >
+          Meu Perfil
+        </button>
+        <button
+          onClick={() => {
             supabase.auth.signOut();
             redirect("/login");
           }}

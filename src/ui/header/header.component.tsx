@@ -30,11 +30,7 @@ export function Header() {
 
   return (
     <div className="flex items-center justify-between px-4 h-20 sm:h-16 flex-shrink-0">
-      <Button
-        onClick={() => setIsNavbarCollapsed(!isNavbarCollapsed)}
-        icon={<MenuOutlined size={24} className="text-indigo-700" />}
-      />
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 ml-auto">
         <Segmented<"light" | "dark">
           options={[
             {
@@ -60,5 +56,6 @@ export function Header() {
         </Avatar>
       </div>
     </div>
+
   );
 }

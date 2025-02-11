@@ -15,6 +15,7 @@ const routeAlias: {
   "/simulados": "/question-books",
   "/simulados/novo": "/question-books/new",
   "/simulados/:id": "/question-books/:id",
+  "/perfil": "/profile",
 };
 
 const nextConfig: NextConfig = {
