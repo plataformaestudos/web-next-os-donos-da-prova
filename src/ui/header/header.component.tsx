@@ -2,20 +2,19 @@
 
 import * as Styled from "./header.style";
 
-import { Avatar, Button, Flex, Tooltip, theme } from "antd";
-import { MoonFilled, SunFilled } from "@ant-design/icons";
+import { Button, Flex, Tooltip } from "antd";
+import { MenuOutlined, MoonFilled, SunFilled } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 
 import { ThemeProvider } from "@/app/provider";
 import { createClient } from "@/util/supabase/client";
-
-const { useToken } = theme;
+import { useNabvarContext } from "../navbar/navbar.context";
 
 export function Header() {
   const supabase = createClient();
-  const { token } = useToken();
   const { theme, setTheme } = useContext(ThemeProvider);
   const [userEmail, setUserEmail] = useState("");
+  const { isNavbarCollapsed, setIsNavbarCollapsed } = useNabvarContext();
 
   useEffect(() => {
     async function getUser() {
@@ -30,6 +29,12 @@ export function Header() {
 
   return (
     <Styled.Container>
+      <Styled.LeftContainer>
+        <Button
+          onClick={() => setIsNavbarCollapsed(!isNavbarCollapsed)}
+          icon={<MenuOutlined size={24} />}
+        />
+      </Styled.LeftContainer>
       <Flex align="center" gap="16px">
         <Tooltip title={theme === "light" ? "Modo escuro" : "Modo claro"}>
           <Button
@@ -38,15 +43,9 @@ export function Header() {
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           />
         </Tooltip>
-        <Avatar
-          size="large"
-          style={{
-            backgroundColor: token.colorBgElevated,
-            color: token.colorText,
-          }}
-        >
+        <Styled.StyledAvatar>
           {userEmail.charAt(0).toUpperCase()}
-        </Avatar>
+        </Styled.StyledAvatar>
       </Flex>
     </Styled.Container>
   );
