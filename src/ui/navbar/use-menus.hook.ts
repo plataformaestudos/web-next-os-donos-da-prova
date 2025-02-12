@@ -1,17 +1,16 @@
+import HttpClient from "@/util/http-client.util";
 import { MenuModel } from "@/model/menu.model";
-import { createClient } from "@/util/supabase/client";
+import { ResponseModel } from "@/model/common.model";
 import { useQuery } from "@tanstack/react-query";
 
 export function useMenus() {
-  const supabase = createClient();
   const { data, isLoading } = useQuery({
     queryKey: ["menus"],
     queryFn: async () =>
-      await supabase
-        .from("menus")
-        .select()
+      HttpClient.fetch("/menu/menus", { method: "GET" })
+        .then((response) => response.json())
         .then(
-          (response) =>
+          (response: ResponseModel<MenuModel[]>) =>
             response.data?.sort(
               ({ order: orderA }, { order: orderB }) => orderA - orderB
             ) as Array<MenuModel>
