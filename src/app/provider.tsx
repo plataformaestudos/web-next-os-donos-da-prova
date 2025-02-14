@@ -64,6 +64,12 @@ const defaultTheme: ThemeConfig = {
   token: {
     fontFamily: "Inter, Inter Fallback",
   },
+  components: {
+    Tree: {
+      indentSize: 12,
+      titleHeight: 32,
+    },
+  },
 };
 
 const themes = {

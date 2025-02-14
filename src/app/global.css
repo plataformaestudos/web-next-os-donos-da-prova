@@ -1,3 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.ant-tree-node-content-wrapper {
+  cursor: auto !important;
+}
+
+.ant-dropdown-menu-item.this-dropdown-has-popconfirm {
+  padding: 0 !important;
+}

@@ -4,9 +4,9 @@ import { Button, Divider } from "antd";
 
 import Link from "next/link";
 import { LuArrowLeft } from "react-icons/lu";
-import { QuestionForm } from "@/question/question-form.component";
-import { QuestionFormSubmitButton } from "@/question/question-form-submit-button.component";
-import { UpserQuestionProvider } from "@/question/upsert/upsert-question.context";
+import { QuestionForm } from "@/questions/question-form.component";
+import { QuestionFormSubmitButton } from "@/questions/question-form-submit-button.component";
+import { UpserQuestionProvider } from "@/questions/upsert/upsert-question.context";
 
 export default function NewQuestionPage() {
   return (

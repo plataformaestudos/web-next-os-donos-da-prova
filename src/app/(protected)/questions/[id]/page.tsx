@@ -4,10 +4,10 @@ import { Button, Divider } from "antd";
 
 import Link from "next/link";
 import { LuArrowLeft } from "react-icons/lu";
-import { PreviewOrEditQuestion } from "@/question/preview-or-edit-question.component";
-import { QuestionFormSubmitButton } from "@/question/question-form-submit-button.component";
-import { QuestionTitle } from "@/question/question-title.component";
-import { UpserQuestionProvider } from "@/question/upsert/upsert-question.context";
+import { PreviewOrEditQuestion } from "@/questions/preview-or-edit-question.component";
+import { QuestionFormSubmitButton } from "@/questions/question-form-submit-button.component";
+import { QuestionTitle } from "@/questions/question-title.component";
+import { UpserQuestionProvider } from "@/questions/upsert/upsert-question.context";
 import { createClient } from "@/util/supabase/server";
 
 export default async function EditQuestionPage({

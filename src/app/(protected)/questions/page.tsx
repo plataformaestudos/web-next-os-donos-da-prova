@@ -3,7 +3,7 @@ import * as Styled from "./page.style";
 import { Button, List } from "antd";
 import Item, { Meta } from "antd/es/list/Item";
 
-import { DeleteQuestionButton } from "@/question/delete/delete-question-button.component";
+import { DeleteQuestionButton } from "@/questions/delete/delete-question-button.component";
 import Link from "next/link";
 import { createClient } from "@/util/supabase/server";
 
