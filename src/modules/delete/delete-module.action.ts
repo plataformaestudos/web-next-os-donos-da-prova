@@ -10,7 +10,7 @@ export async function deleteModule(id: string) {
     await supabase.from("modules").delete().match({ id });
 
     revalidatePath("/modules");
-    redirect(`/modules`);
+    redirect("/modules");
   } catch {
     return false;
   }

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import { DataNode } from "antd/es/tree";
 import { ModuleTitle } from "./module-title.component";
 import { Tree } from "antd";
 
@@ -40,14 +39,18 @@ const updateTreeData = (
   });
 
 export function ModulesTree(props: ModulesTreeProps) {
+  const [loadedKeys, setLoadedKeys] = useState<string[]>([]);
   const [tree, setTree] = useState(props.modules);
 
   useEffect(() => {
     setTree(props.modules);
+    setLoadedKeys([]);
   }, [props.modules]);
 
   return (
     <Tree
+      loadedKeys={loadedKeys}
+      onLoad={(lk) => setLoadedKeys(lk as string[])}
       rootStyle={{
         padding: "8px 8px 4px 8px",
       }}

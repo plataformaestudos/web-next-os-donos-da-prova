@@ -3,3 +3,10 @@ export interface ModuleModel {
   name: string;
   parent_module?: string;
 }
+
+export interface ModuleViewModel {
+  key: string;
+  title: string;
+  isLeaf?: boolean;
+  children?: ModuleViewModel[];
+}

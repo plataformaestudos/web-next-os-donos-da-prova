@@ -1,4 +1,4 @@
 export interface CreateModuleDTO {
-  parent_module_id: string | null;
+  parentModuleId: string | null;
   name: string;
 }

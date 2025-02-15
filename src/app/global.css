@@ -6,6 +6,10 @@ body {
   margin: 0;
 }
 
+.ant-tree {
+  outline: none !important;
+}
+
 .ant-tree-node-content-wrapper {
   cursor: auto !important;
 }

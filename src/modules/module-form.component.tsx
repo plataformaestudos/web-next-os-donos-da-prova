@@ -1,10 +1,11 @@
 "use client";
 
-import { Button, Divider, Dropdown, Flex, Input } from "antd";
+import { Button, Dropdown, Flex, Input } from "antd";
 import { Module, ModulesTree } from "./modules-tree.component";
 
 import { FaFolderTree } from "react-icons/fa6";
 import Title from "antd/es/typography/Title";
+import { loadChildrenModules } from "./load-modules.action";
 import { useCreateModule } from "./create/create-module.context";
 
 export interface ModuleFormProps {
@@ -28,36 +29,18 @@ export function ModuleForm({ id, name, childModules }: ModuleFormProps) {
           {childModules && (
             <ModulesTree
               modules={childModules}
-              loadData={async function loadData(key: string) {
-                console.log(key);
-                return Promise.resolve([]);
-              }}
+              loadData={loadChildrenModules}
             />
           )}
         </label>
-        <Dropdown
-          menu={{
-            onClick: () => openCreateModal(id || null),
-            items: [
-              {
-                key: "new",
-                label: "Criar um novo módulo",
-              },
-              {
-                key: "use-exisiting",
-                label: "Buscar um módulo",
-              },
-            ],
-          }}
+        <Button
+          onClick={() => openCreateModal(id && name ? { id, name } : null)}
+          type="text"
+          icon={<FaFolderTree />}
+          style={{ alignSelf: "flex-start" }}
         >
-          <Button
-            type="text"
-            icon={<FaFolderTree />}
-            style={{ alignSelf: "flex-start" }}
-          >
-            Adicionar módulo filho
-          </Button>
-        </Dropdown>
+          Adicionar módulo filho
+        </Button>
       </Flex>
     </form>
   );

@@ -1,9 +1,8 @@
-import { Button, Input } from "antd";
-
+import { Button } from "antd";
 import { ModuleForm } from "@/modules/module-form.component";
-import { ModulesTree } from "@/modules/modules-tree.component";
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { createClient } from "@/util/supabase/server";
+import { loadChildrenModules } from "@/modules/load-modules.action";
 
 export default async function EditModulePage({
   params,
@@ -21,34 +20,20 @@ export default async function EditModulePage({
       name
     `
     )
-    .eq("id", id);
+    .eq("id", id)
+    .limit(1)
+    .single();
 
-  const { data: subModules } = await supabase
-    .from("modules_submodules")
-    .select(
-      `
-      details:modules!module_id (id, name)
-    `
-    )
-    .eq("parent_module_id", id);
-
-  const _module = data?.[0];
-
-  const childModules = subModules
-    ?.flatMap((result) => result.details)
-    .map((details) => ({
-      key: details.id,
-      title: details.name,
-    }));
-
-  if (!_module) {
+  if (!data) {
     return null;
   }
+
+  const childrenModules = await loadChildrenModules(data.id);
 
   return (
     <PageLayout
       backHref="/modules"
-      title={_module.name}
+      title={data.name}
       actions={[
         <Button key="save" type="primary" size="large">
           Salvar
@@ -56,9 +41,9 @@ export default async function EditModulePage({
       ]}
     >
       <ModuleForm
-        id={_module.id}
-        name={_module.name}
-        childModules={childModules || []}
+        id={data.id}
+        name={data.name}
+        childModules={childrenModules || []}
       />
     </PageLayout>
   );

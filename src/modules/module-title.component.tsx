@@ -1,4 +1,4 @@
-import { Button, Dropdown, Flex, Popconfirm } from "antd";
+import { Button, Dropdown, Flex } from "antd";
 import {
   EditOutlined,
   EllipsisOutlined,
@@ -29,7 +29,7 @@ export function ModuleTitle({ id, title }: { id: string; title: string }) {
               key: "create",
               icon: <PlusOutlined />,
               label: "Criar módulo filho",
-              onClick: () => openCreateModal(id),
+              onClick: () => openCreateModal({ id, name: title }),
             },
             {
               key: "edit",
