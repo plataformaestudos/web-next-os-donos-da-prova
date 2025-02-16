@@ -30,7 +30,7 @@ export function ModuleTitle({
       {
         key: "create",
         icon: <PlusOutlined />,
-        label: "Criar módulo filho",
+        label: "Adicionar módulo filho",
         onClick: () => openCreateModal({ id, name: title }),
       },
       {

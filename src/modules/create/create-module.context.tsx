@@ -79,7 +79,7 @@ export const CreateModuleProvider = ({ children }: PropsWithChildren) => {
                 {parentModuleName}
               </Typography.Text>
               <Title level={5} style={{ margin: 0 }}>
-                Vincular módulo
+                Adicionar módulo filho
               </Title>
             </Flex>
           ) : (
