@@ -7,6 +7,7 @@ export interface ModuleModel {
 export interface ModuleViewModel {
   key: string;
   title: string;
+  parentModuleId?: string;
   isLeaf?: boolean;
   children?: ModuleViewModel[];
 }

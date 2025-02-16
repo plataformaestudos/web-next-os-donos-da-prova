@@ -8,6 +8,7 @@ import { Tree } from "antd";
 export interface Module {
   key: string;
   title: string;
+  parentModuleId?: string;
   isLeaf?: boolean;
   children?: Module[];
 }
@@ -26,7 +27,10 @@ const updateTreeData = (
     if (node.key === key) {
       return {
         ...node,
-        children,
+        children: children.map((child) => ({
+          ...child,
+          key: `${key}|${child.key}`,
+        })),
       };
     }
     if (node.children) {
@@ -66,7 +70,9 @@ export function ModulesTree(props: ModulesTreeProps) {
           setTree((origin) => updateTreeData(origin, key, newChildren));
         }
       }}
-      titleRender={({ key, title }) => <ModuleTitle id={key} title={title} />}
+      titleRender={({ key, title, parentModuleId }) => (
+        <ModuleTitle id={key} title={title} parentModuleId={parentModuleId} />
+      )}
     />
   );
 }

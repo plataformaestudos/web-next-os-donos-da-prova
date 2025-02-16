@@ -11,7 +11,6 @@ export async function upsertQuestionAndAlternatives(
   },
   { id, text, alternatives }: UpsertQuestionDTO
 ): Promise<{ error: string | null }> {
-  console.log(id, text, alternatives);
   if (!text) {
     return {
       error: "A pergunta não pode ser vazia",

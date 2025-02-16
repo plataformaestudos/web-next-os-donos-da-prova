@@ -3,7 +3,13 @@
 import * as Styled from "./navbar.style";
 
 import { Button, Skeleton, Tooltip } from "antd";
-import { LuBook, LuBookCheck, LuFileQuestion, LuHouse } from "react-icons/lu";
+import {
+  LuBook,
+  LuBookCheck,
+  LuFileQuestion,
+  LuFolders,
+  LuHouse,
+} from "react-icons/lu";
 
 import { CgProfile } from "react-icons/cg";
 import { FaArrowRightToBracket } from "react-icons/fa6";
@@ -16,11 +22,12 @@ import { useNabvarContext } from "./navbar.context";
 import { usePathname } from "next/navigation";
 
 const icons = {
-  home: <LuHouse className="flex-shrink-0" color="#fff" size={24} />,
-  book: <LuBook className="flex-shrink-0" color="#fff" size={24} />,
-  bookCheck: <LuBookCheck className="flex-shrink-0" color="#fff" size={24} />,
-  question: <LuFileQuestion className="flex-shrink-0" color="#fff" size={24} />,
-  profile: <CgProfile className="flex-shrink-0" color="#fff" size={24} />,
+  home: <LuHouse color="#fff" size={24} />,
+  book: <LuBook color="#fff" size={24} />,
+  bookCheck: <LuBookCheck color="#fff" size={24} />,
+  question: <LuFileQuestion color="#fff" size={24} />,
+  profile: <CgProfile color="#fff" size={24} />,
+  module: <LuFolders color="#fff" size={24} />,
 };
 
 export function Navbar() {
@@ -88,7 +95,7 @@ export function Navbar() {
               <Styled.Link
                 key={item.link}
                 href={item.link}
-                $active={new RegExp(item.active_regex).test(pathname)}
+                $active={new RegExp(item.activeRegex).test(pathname)}
                 onClick={() => {
                   if (isMobile) {
                     setIsNavbarCollapsed(true);

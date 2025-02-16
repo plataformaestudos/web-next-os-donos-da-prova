@@ -6,5 +6,5 @@ export interface MenuModel {
   level: number;
   order: number;
   link: string;
-  active_regex: string;
+  activeRegex: string;
 }

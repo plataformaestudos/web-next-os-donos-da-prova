@@ -54,12 +54,10 @@ export async function assignModuleToParent({
 }> {
   const supabase = await createClient();
 
-  const a = await supabase.from("modules_submodules").insert({
+  await supabase.from("modules_submodules").insert({
     module_id: moduleId,
     parent_module_id: parentModuleId,
   });
-
-  console.log(a, parentModuleId, moduleId);
 
   revalidatePath(`/modules/${parentModuleId}`);
 

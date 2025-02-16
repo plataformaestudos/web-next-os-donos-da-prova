@@ -1,40 +1,54 @@
 "use client";
 
-import { Button, Dropdown, Flex, Input } from "antd";
+import { Button, Flex, Input, Typography } from "antd";
 import { Module, ModulesTree } from "./modules-tree.component";
 
 import { FaFolderTree } from "react-icons/fa6";
+import { MODULE_FORM_ID } from "./module-form.constant";
 import Title from "antd/es/typography/Title";
 import { loadChildrenModules } from "./load-modules.action";
 import { useCreateModule } from "./create/create-module.context";
+import { useState } from "react";
+import { useUpdateModule } from "./update/update-module.context";
 
 export interface ModuleFormProps {
-  id?: string;
-  name?: string;
+  id: string;
+  name: string;
   childModules: Module[];
 }
 
-export function ModuleForm({ id, name, childModules }: ModuleFormProps) {
+export function ModuleForm(props: ModuleFormProps) {
+  const { updateModule, error, isPending } = useUpdateModule();
   const { openCreateModal } = useCreateModule();
 
+  const [name, setName] = useState(props.name);
+
   return (
-    <form action="">
+    <form
+      id={MODULE_FORM_ID}
+      action={() => updateModule({ id: props.id, name })}
+    >
       <Flex vertical gap={8}>
         <label>
           <Title level={5}>Nome do módulo</Title>
-          <Input defaultValue={name} />
+          <Input
+            disabled={isPending}
+            onChange={(ev) => setName(ev.target.value)}
+            defaultValue={name}
+          />
+          {error && <Typography.Text type="danger">{error}</Typography.Text>}
         </label>
         <label>
           <Title level={5}>Nome do módulo</Title>
-          {childModules && (
+          {props.childModules && (
             <ModulesTree
-              modules={childModules}
+              modules={props.childModules}
               loadData={loadChildrenModules}
             />
           )}
         </label>
         <Button
-          onClick={() => openCreateModal(id && name ? { id, name } : null)}
+          onClick={() => openCreateModal({ id: props.id, name })}
           type="text"
           icon={<FaFolderTree />}
           style={{ alignSelf: "flex-start" }}

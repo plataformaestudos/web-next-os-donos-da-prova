@@ -13,7 +13,7 @@ export default async function IndexPage() {
 
   return (
     <main>
-      <h1 className={` mb-4 text-xl md:text-2xl`}>Landing</h1>
+      <h1>Landing</h1>
       <Link href="/login">Login</Link>
     </main>
   );

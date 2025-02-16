@@ -1,6 +1,7 @@
-import { Button } from "antd";
 import { ModuleForm } from "@/modules/module-form.component";
+import { ModuleFormSubmitButton } from "@/modules/module-form-submit-button.component";
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
+import { UpdateModuleProvider } from "@/modules/update/update-module.context";
 import { createClient } from "@/util/supabase/server";
 import { loadChildrenModules } from "@/modules/load-modules.action";
 
@@ -31,20 +32,18 @@ export default async function EditModulePage({
   const childrenModules = await loadChildrenModules(data.id);
 
   return (
-    <PageLayout
-      backHref="/modules"
-      title={data.name}
-      actions={[
-        <Button key="save" type="primary" size="large">
-          Salvar
-        </Button>,
-      ]}
-    >
-      <ModuleForm
-        id={data.id}
-        name={data.name}
-        childModules={childrenModules || []}
-      />
-    </PageLayout>
+    <UpdateModuleProvider>
+      <PageLayout
+        backHref="/modules"
+        title={data.name}
+        actions={[<ModuleFormSubmitButton key="update-module" />]}
+      >
+        <ModuleForm
+          id={data.id}
+          name={data.name}
+          childModules={childrenModules || []}
+        />
+      </PageLayout>
+    </UpdateModuleProvider>
   );
 }

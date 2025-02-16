@@ -1,22 +1,13 @@
 "use client";
 
-import {
-  App,
-  Button,
-  Divider,
-  Flex,
-  Input,
-  Modal,
-  Segmented,
-  Select,
-  Typography,
-} from "antd";
+import { App, Divider, Flex, Input, Modal, Segmented, Typography } from "antd";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import {
   PropsWithChildren,
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useState,
   useTransition,
 } from "react";
@@ -56,13 +47,28 @@ export const CreateModuleProvider = ({ children }: PropsWithChildren) => {
     []
   );
 
-  const [showSearch, setShowSearch] = useState(parentModuleId ? true : false);
+  const resetState = () => {
+    setName("");
+    setIsOpen(false);
+    setError(null);
+    setParentModuleId(null);
+    setParentModuleName(null);
+    setShowSearch(false);
+  };
+
+  const [showSearch, setShowSearch] = useState(!!parentModuleId);
+
+  useEffect(() => {
+    setShowSearch(!!parentModuleId);
+  }, [parentModuleId]);
+
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
 
   return (
     <CreateModuleContext.Provider value={{ openCreateModal }}>
       {children}
       <Modal
+        destroyOnClose
         title={
           parentModuleName ? (
             <Flex vertical>
@@ -96,9 +102,7 @@ export const CreateModuleProvider = ({ children }: PropsWithChildren) => {
                   setError(error);
                 } else {
                   message.success("Módulo vinculado com sucesso!");
-                  setError(null);
-                  setName("");
-                  setIsOpen(false);
+                  resetState();
                 }
               });
             } else {
@@ -110,16 +114,14 @@ export const CreateModuleProvider = ({ children }: PropsWithChildren) => {
                   setError(error);
                 } else {
                   message.success("Módulo criado com sucesso!");
-                  setError(null);
-                  setName("");
-                  setIsOpen(false);
+                  resetState();
                 }
               });
             }
           });
         }}
         onCancel={() => {
-          setIsOpen(false);
+          resetState();
         }}
       >
         <Divider style={{ margin: "12px 0" }} />

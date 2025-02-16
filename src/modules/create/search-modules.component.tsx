@@ -27,12 +27,10 @@ export function SearchModules({
     setFetching(true);
     setQuery(newQuery);
 
-    queryModules(newQuery)
-      .then(({ data }) => {
+    queryModules(newQuery, moduleId)
+      .then((modules) => {
         setOptions(
-          data
-            ?.filter(({ id }) => id !== moduleId)
-            .map(({ id, name }) => ({ value: id, label: name })) ?? []
+          modules?.map(({ key, title }) => ({ value: key, label: title })) ?? []
         );
       })
       .finally(() => {
