@@ -24,6 +24,7 @@ export default async function EditQuestionPage({
       `
       id,
       text,
+      comment,
       question_alternatives ( id, text, is_correct )
     `
     )
@@ -52,6 +53,7 @@ export default async function EditQuestionPage({
           question={{
             id: question.id,
             text: question.text,
+            comment: question.comment,
             alternatives: question.question_alternatives,
           }}
         />

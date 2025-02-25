@@ -3,8 +3,7 @@
 import styled from "styled-components";
 
 export const QuestionFormContainer = styled.div`
-  margin-top: 24px;
-  padding: 16px;
+  padding: 16px 16px 64px;
   border-radius: 6px;
   background-color: ${(props) => props.theme.colorBgContainer};
 `;

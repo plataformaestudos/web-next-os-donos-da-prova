@@ -9,7 +9,7 @@ export async function upsertQuestionAndAlternatives(
   _: {
     error: string | null;
   },
-  { id, text, alternatives }: UpsertQuestionDTO
+  { id, text, comment, alternatives }: UpsertQuestionDTO
 ): Promise<{ error: string | null }> {
   if (!text) {
     return {
@@ -30,6 +30,7 @@ export async function upsertQuestionAndAlternatives(
     .upsert({
       id,
       text,
+      comment,
     })
     .select();
 

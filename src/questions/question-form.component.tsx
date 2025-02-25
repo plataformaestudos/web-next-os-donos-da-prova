@@ -17,6 +17,7 @@ const { Text } = Typography;
 interface QuestionFormProps {
   id?: string;
   text?: string;
+  comment?: string;
   alternatives?: {
     id: string;
     text: string;
@@ -31,6 +32,7 @@ export function QuestionForm(props: QuestionFormProps) {
   const { menu, onFocus } = useMultipleEditors();
 
   const [text, setText] = useState(props.text ?? "");
+  const [comment, setComment] = useState(props.comment ?? "");
   const [alternatives, setAlternatives] = useState<
     { _uiId: string; text: string; id?: string }[]
   >(
@@ -65,6 +67,7 @@ export function QuestionForm(props: QuestionFormProps) {
           upsertQuestion({
             id: props.id,
             text,
+            comment,
             alternatives: alternatives.map((alt) => ({
               id: alt.id,
               text: alt.text,
@@ -180,6 +183,16 @@ export function QuestionForm(props: QuestionFormProps) {
               index,
               label: `Alternativa ${String.fromCharCode(65 + index)}`,
             }))}
+          />
+        </label>
+        <Divider />
+        <label>
+          <Styled.Label>Comentário</Styled.Label>
+          <TiptapEditor
+            placeholder="Comentário"
+            defaultValue={props?.comment ?? ""}
+            onFocus={onFocus}
+            onChange={setComment}
           />
         </label>
       </form>

@@ -17,3 +17,7 @@ body {
 .ant-dropdown-menu-item.this-dropdown-has-popconfirm {
   padding: 0 !important;
 }
+
+p {
+  margin: 0;
+}

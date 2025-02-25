@@ -24,3 +24,19 @@ export const Title = styled.h1`
   line-height: 40px;
   font-weight: bold;
 `;
+
+export const ListContainer = styled.div`
+  background-color: ${({ theme }) => theme.colorBgContainer};
+
+  border-radius: 6px;
+
+  padding: 6px 24px;
+`;
+
+export const QuestionPreview = styled.div`
+  &,
+  img {
+    max-width: 350px;
+    height: auto !important;
+  }
+`;

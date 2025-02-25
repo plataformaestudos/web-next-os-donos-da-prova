@@ -1,7 +1,7 @@
 "use client";
 
 import { EditOutlined, EyeOutlined } from "@ant-design/icons";
-import { Flex, Segmented, Space } from "antd";
+import { Flex, Segmented } from "antd";
 import {
   QuestionAlternativeModel,
   QuestionModel,
@@ -36,12 +36,14 @@ export function PreviewOrEditQuestion({
         <QuestionPreview
           id={question.id}
           text={question.text}
+          comment={question.comment}
           alternatives={question.alternatives}
         />
       ) : (
         <QuestionForm
           id={question?.id}
           text={question?.text}
+          comment={question?.comment}
           alternatives={question?.alternatives}
         />
       )}

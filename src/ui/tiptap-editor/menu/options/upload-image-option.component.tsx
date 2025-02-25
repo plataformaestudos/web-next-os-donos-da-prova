@@ -1,6 +1,6 @@
 import { FaRegFileImage } from "react-icons/fa6";
 import { Option } from "./option.component";
-import { uploadFile } from "../tiptap-editor.component";
+import { uploadFile } from "../../tiptap-editor.component";
 import { useCurrentEditor } from "@tiptap/react";
 
 export function UploadImageOption() {

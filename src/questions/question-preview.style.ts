@@ -2,6 +2,12 @@
 
 import styled from "styled-components";
 
+export const PreviewContainer = styled.div`
+  background-color: ${({ theme }) => theme.colorBgContainer};
+  border-radius: 6px;
+  padding: 18px 24px 24px;
+`;
+
 export const AlternativesContainer = styled.div`
   display: flex;
   flex-direction: column;

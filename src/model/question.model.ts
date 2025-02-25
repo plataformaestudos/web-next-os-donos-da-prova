@@ -1,6 +1,7 @@
 export interface QuestionModel {
   id: string;
   text: string;
+  comment?: string;
 }
 
 export interface QuestionAlternativeModel {

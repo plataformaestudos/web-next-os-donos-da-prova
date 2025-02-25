@@ -11,7 +11,7 @@ type QuestionPreviewProps = QuestionModel & {
 
 export function QuestionPreview({ text, alternatives }: QuestionPreviewProps) {
   return (
-    <div>
+    <Styled.PreviewContainer>
       <div dangerouslySetInnerHTML={{ __html: text }} />
       <Styled.AlternativesContainer>
         {alternatives.map(({ id, text, is_correct }, index) => {
@@ -25,6 +25,6 @@ export function QuestionPreview({ text, alternatives }: QuestionPreviewProps) {
           );
         })}
       </Styled.AlternativesContainer>
-    </div>
+    </Styled.PreviewContainer>
   );
 }
