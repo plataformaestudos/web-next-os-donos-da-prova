@@ -4,14 +4,14 @@ import { Button, Select, Spin } from "antd";
 import { LoadingOutlined, SearchOutlined } from "@ant-design/icons";
 
 import { DefaultOptionType } from "antd/es/select";
-import { queryModules } from "../load-modules.action";
+import { queryModules } from "../tree/load-modules.action";
 import { useDebouncedCallback } from "use-debounce";
 import { useState } from "react";
 
 interface SearchModulesProps {
   moduleId: string;
   onSelectModule: (moduleId: string) => void;
-  onClickCreateNew: () => void;
+  onClickCreateNew: (moduleName?: string) => void;
 }
 
 export function SearchModules({
@@ -54,7 +54,7 @@ export function SearchModules({
             Módulo não encontrado,{" "}
             <Button
               type="link"
-              onClick={onClickCreateNew}
+              onClick={() => onClickCreateNew(query)}
               style={{ padding: 0 }}
             >
               você pode criar um novo

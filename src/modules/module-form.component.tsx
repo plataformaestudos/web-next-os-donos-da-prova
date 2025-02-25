@@ -1,12 +1,12 @@
 "use client";
 
 import { Button, Flex, Input, Typography } from "antd";
-import { Module, ModulesTree } from "./modules-tree.component";
+import { Module, ModulesTree } from "./tree/modules-tree.component";
 
 import { FaFolderTree } from "react-icons/fa6";
 import { MODULE_FORM_ID } from "./module-form.constant";
 import Title from "antd/es/typography/Title";
-import { loadChildrenModules } from "./load-modules.action";
+import { loadChildrenModules } from "./tree/load-modules.action";
 import { useCreateModule } from "./create/create-module.context";
 import { useState } from "react";
 import { useUpdateModule } from "./update/update-module.context";

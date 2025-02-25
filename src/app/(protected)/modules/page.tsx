@@ -1,10 +1,10 @@
 import {
   loadChildrenModules,
   queryModules,
-} from "@/modules/load-modules.action";
+} from "@/modules/tree/load-modules.action";
 
 import { CreateModuleButton } from "@/modules/create/create-module-button.component";
-import { ModulesTree } from "@/modules/modules-tree.component";
+import { ModulesTree } from "@/modules/tree/modules-tree.component";
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { SearchModules } from "@/modules/search-modules.component";
 

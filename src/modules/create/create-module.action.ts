@@ -27,9 +27,7 @@ export async function createModule({
       method: "POST",
       body: JSON.stringify({
         name,
-        parentModuleId: parentModuleId
-          ? parentModuleId.split("|").pop()
-          : undefined,
+        parentModuleId,
       }),
     }
   );
@@ -39,7 +37,7 @@ export async function createModule({
   }
 
   if (parentModuleId) {
-    revalidatePath(`/modules/${parentModuleId.split("|").pop()}`);
+    revalidatePath(`/modules/${parentModuleId}`);
   }
 
   revalidatePath(`/modules/${data.id}`);
@@ -60,11 +58,11 @@ export async function assignModuleToParent({
   const supabase = await createClient();
 
   await supabase.from("modules_submodules").insert({
-    module_id: moduleId.split("|").pop(),
-    parent_module_id: parentModuleId.split("|").pop(),
+    module_id: moduleId,
+    parent_module_id: parentModuleId,
   });
 
-  revalidatePath(`/modules/${parentModuleId.split("|").pop()}`);
+  revalidatePath(`/modules/${parentModuleId}`);
 
   return { success: true, error: null };
 }

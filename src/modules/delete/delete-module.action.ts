@@ -6,12 +6,9 @@ import { revalidatePath } from "next/cache";
 export async function deleteModule(id: string) {
   const supabase = await createClient();
   try {
-    await supabase
-      .from("modules")
-      .delete()
-      .match({ id: id.split("|").pop() });
+    await supabase.from("modules").delete().match({ id });
 
-    revalidatePath(`/modules/${id}`);
+    revalidatePath(`/modules`);
   } catch {
     return false;
   }
@@ -20,15 +17,12 @@ export async function deleteModule(id: string) {
 export async function unlinkModule(id: string, parentModuleId: string) {
   const supabase = await createClient();
   try {
-    await supabase
-      .from("modules_submodules")
-      .delete()
-      .match({
-        module_id: id.split("|").pop(),
-        parent_module_id: parentModuleId.split("|").pop(),
-      });
+    await supabase.from("modules_submodules").delete().match({
+      module_id: id,
+      parent_module_id: parentModuleId,
+    });
 
-    revalidatePath(`/modules/${parentModuleId}`);
+    revalidatePath(`/modules`);
   } catch {
     return false;
   }

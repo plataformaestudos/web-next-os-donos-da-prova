@@ -5,11 +5,6 @@ import { ModuleModel, ModuleViewModel } from "@/model/module.model";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import { ResponseModel } from "@/model/common.model";
 
-function extractOriginalId(idWithPipes: string) {
-  const ids = idWithPipes.split("|");
-  return ids.pop();
-}
-
 function adapter(module: ModuleModel): ModuleViewModel {
   return {
     ...module,
@@ -20,7 +15,7 @@ function adapter(module: ModuleModel): ModuleViewModel {
 
 export async function loadChildrenModules(moduleId: string) {
   return HttpClient.fetch<ResponseModel<ModuleModel[]>>(
-    `/modules/${extractOriginalId(moduleId)}/child-modules`,
+    `/modules/${moduleId}/child-modules`,
     {
       method: "GET",
     }

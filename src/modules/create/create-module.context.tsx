@@ -149,7 +149,10 @@ export const CreateModuleProvider = ({ children }: PropsWithChildren) => {
             <SearchModules
               moduleId={parentModuleId as string}
               onSelectModule={(moduleId) => setSelectedModuleId(moduleId)}
-              onClickCreateNew={() => setShowSearch(false)}
+              onClickCreateNew={(name) => {
+                setShowSearch(false);
+                setName((oldName) => name ?? oldName);
+              }}
             />
           )}
           {!showSearch && (

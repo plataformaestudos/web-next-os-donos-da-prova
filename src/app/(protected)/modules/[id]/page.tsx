@@ -3,7 +3,7 @@ import { ModuleFormSubmitButton } from "@/modules/module-form-submit-button.comp
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { UpdateModuleProvider } from "@/modules/update/update-module.context";
 import { createClient } from "@/util/supabase/server";
-import { loadChildrenModules } from "@/modules/load-modules.action";
+import { loadChildrenModules } from "@/modules/tree/load-modules.action";
 
 export default async function EditModulePage({
   params,

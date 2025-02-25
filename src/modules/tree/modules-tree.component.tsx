@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { ModuleTitle } from "./module-title.component";
+import { ModuleTreeItemTitle } from "./module-tree-item-title.component";
 import { Tree } from "antd";
 
 export interface Module {
@@ -29,7 +29,7 @@ const updateTreeData = (
         ...node,
         children: children.map((child) => ({
           ...child,
-          key: `${key}|${child.key}`,
+          key: child.key,
         })),
       };
     }
@@ -62,16 +62,16 @@ export function ModulesTree(props: ModulesTreeProps) {
       blockNode
       selectable={false}
       treeData={tree}
-      loadData={async ({ key, children }) => {
-        if (children) {
-          return Promise.resolve();
-        } else {
-          const newChildren = await props.loadData(key);
-          setTree((origin) => updateTreeData(origin, key, newChildren));
-        }
+      loadData={async ({ key }) => {
+        const newChildren = await props.loadData(key);
+        setTree((origin) => updateTreeData(origin, key, newChildren));
       }}
       titleRender={({ key, title, parentModuleId }) => (
-        <ModuleTitle id={key} title={title} parentModuleId={parentModuleId} />
+        <ModuleTreeItemTitle
+          id={key}
+          title={title}
+          parentModuleId={parentModuleId}
+        />
       )}
     />
   );
