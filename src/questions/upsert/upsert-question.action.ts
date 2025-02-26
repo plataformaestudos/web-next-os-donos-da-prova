@@ -9,7 +9,7 @@ export async function upsertQuestionAndAlternatives(
   _: {
     error: string | null;
   },
-  { id, text, comment, alternatives }: UpsertQuestionDTO
+  { id, text, comment, alternatives, modules }: UpsertQuestionDTO
 ): Promise<{ error: string | null }> {
   if (!text) {
     return {
@@ -54,6 +54,16 @@ export async function upsertQuestionAndAlternatives(
       })),
       { defaultToNull: false }
     );
+
+    if (modules.length > 0) {
+      await supabase.from("modules_questions").delete().match({ question_id });
+      await supabase.from("modules_questions").insert(
+        modules.map((module_id) => ({
+          question_id,
+          module_id,
+        }))
+      );
+    }
 
     revalidatePath(`/questions/${question_id}`);
     redirect(`/questions/${question_id}`);

@@ -25,7 +25,9 @@ export function PageLayout(props: PropsWithChildren<PageLayoutProps>) {
             {props.title}
           </Title>
         </Flex>
-        <Flex gap={16}>{props.actions}</Flex>
+        <Flex gap={16} align="center">
+          {props.actions}
+        </Flex>
       </Flex>
       <Divider />
       <div>{props.children}</div>

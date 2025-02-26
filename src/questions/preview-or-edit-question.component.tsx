@@ -2,11 +2,8 @@
 
 import { EditOutlined, EyeOutlined } from "@ant-design/icons";
 import { Flex, Segmented } from "antd";
-import {
-  QuestionAlternativeModel,
-  QuestionModel,
-} from "@/model/question.model";
 
+import { FullQuestion } from "@/model/question.model";
 import { QuestionForm } from "./question-form.component";
 import { QuestionPreview } from "./question-preview.component";
 import { useState } from "react";
@@ -14,7 +11,7 @@ import { useState } from "react";
 export function PreviewOrEditQuestion({
   question,
 }: {
-  question?: QuestionModel & { alternatives: QuestionAlternativeModel[] };
+  question?: FullQuestion;
 }) {
   const [editing, setEditing] = useState(false);
 
@@ -45,6 +42,7 @@ export function PreviewOrEditQuestion({
           text={question?.text}
           comment={question?.comment}
           alternatives={question?.alternatives}
+          modules={question?.modules}
         />
       )}
     </Flex>

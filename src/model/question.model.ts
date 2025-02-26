@@ -10,6 +10,12 @@ export interface QuestionAlternativeModel {
   is_correct: boolean;
 }
 
-export interface QuestionWithAlternativesModel extends QuestionModel {
-  question_alternatives: QuestionAlternativeModel[];
+export interface QuestionModuleModel {
+  id: string;
+  name: string;
+}
+
+export interface FullQuestion extends QuestionModel {
+  alternatives: QuestionAlternativeModel[];
+  modules: QuestionModuleModel[];
 }

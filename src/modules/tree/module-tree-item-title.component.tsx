@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import { DeleteModuleButton } from "../delete/delete-module-button.component";
 import { ItemType } from "antd/es/menu/interface";
 import Link from "next/link";
+import { LuFileQuestion } from "react-icons/lu";
 import Title from "antd/es/typography/Title";
 import { UnlinkModuleButton } from "../delete/unlink-module-button.component";
 import { useCreateModule } from "../create/create-module.context";
@@ -37,6 +38,11 @@ export function ModuleTreeItemTitle({
         key: "edit",
         icon: <EditOutlined />,
         label: <Link href={`/modules/${id}`}>Editar</Link>,
+      },
+      {
+        key: "open-questions",
+        icon: <LuFileQuestion />,
+        label: <Link href={`/questions?modules=${id}`}>Questões</Link>,
       },
       {
         type: "divider",

@@ -1,7 +1,11 @@
-import { EditorContent } from "@tiptap/react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
-export const StyledEditorContent = styled(EditorContent)<{ $focused: boolean }>`
+import { EditorContent } from "@tiptap/react";
+
+export const StyledEditorContent = styled(EditorContent)<{
+  $focused: boolean;
+  $disabled: boolean;
+}>`
   padding: 4px;
   transition: border-color 300ms ease-in-out;
   border-radius: 6px;
@@ -11,4 +15,11 @@ export const StyledEditorContent = styled(EditorContent)<{ $focused: boolean }>`
 
   border-color: ${({ $focused, theme }) =>
     $focused ? theme.colorPrimaryBorderHover : theme.colorBorder};
+
+  ${({ $disabled }) =>
+    $disabled &&
+    css`
+      border: none;
+      padding: 0;
+    `}
 `;

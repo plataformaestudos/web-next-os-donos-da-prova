@@ -72,8 +72,8 @@ export function TiptapEditor({
   editable?: boolean;
   defaultValue?: string;
   placeholder?: string;
-  onFocus: (editor: Editor | null) => void;
-  onChange: (value: string) => void;
+  onFocus?: (editor: Editor | null) => void;
+  onChange?: (value: string) => void;
 }) {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -149,18 +149,24 @@ export function TiptapEditor({
     ],
     immediatelyRender: false,
     onFocus: () => {
-      onFocus(editor);
+      onFocus?.(editor);
       setIsFocused(true);
     },
     onBlur: () => {
       setIsFocused(false);
     },
     onUpdate: ({ editor }) =>
-      onChange(editor.getText() ? editor.getHTML() : ""),
+      onChange?.(editor.getText() ? editor.getHTML() : ""),
     onTransaction({ transaction }) {
       handleImageDeletes(transaction);
     },
   });
 
-  return <StyledEditorContent editor={editor} $focused={isFocused} />;
+  return (
+    <StyledEditorContent
+      editor={editor}
+      $focused={isFocused}
+      $disabled={!editable}
+    />
+  );
 }

@@ -25,7 +25,8 @@ export default async function EditQuestionPage({
       id,
       text,
       comment,
-      question_alternatives ( id, text, is_correct )
+      alternatives:question_alternatives ( id, text, is_correct ),
+      modules:modules_questions ( ...modules(id, name) )
     `
     )
     .eq("id", id);
@@ -54,7 +55,8 @@ export default async function EditQuestionPage({
             id: question.id,
             text: question.text,
             comment: question.comment,
-            alternatives: question.question_alternatives,
+            alternatives: question.alternatives,
+            modules: question.modules,
           }}
         />
       </Styled.QuestionContainer>

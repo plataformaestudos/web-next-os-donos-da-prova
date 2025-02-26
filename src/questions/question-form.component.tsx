@@ -8,6 +8,7 @@ import React, { useState } from "react";
 
 import { PlusOutlined } from "@ant-design/icons";
 import { QUESTION_FORM_ID } from "./question-form.constant";
+import { QuestionFormModulesSelection } from "./question-form-modules-selection.component";
 import { TiptapEditor } from "@/ui/tiptap-editor/tiptap-editor.component";
 import { useMultipleEditors } from "@/ui/tiptap-editor/use-multiple-editors.component";
 import { useUpsertQuestion } from "./upsert/upsert-question.context";
@@ -22,6 +23,10 @@ interface QuestionFormProps {
     id: string;
     text: string;
     is_correct: boolean;
+  }[];
+  modules?: {
+    id: string;
+    name: string;
   }[];
 }
 
@@ -44,6 +49,9 @@ export function QuestionForm(props: QuestionFormProps) {
   const [correctAlternative, setCorrectAlternative] = useState(
     props.alternatives?.find((alt) => alt.is_correct)?.id ??
       alternatives[0]._uiId
+  );
+  const [modules, setModules] = useState(
+    props.modules?.map(({ id }) => id) ?? []
   );
 
   function onChangeCorrectAlternative(id: string, index: number) {
@@ -73,6 +81,7 @@ export function QuestionForm(props: QuestionFormProps) {
               text: alt.text,
               is_correct: alt.id === correctAlternative,
             })),
+            modules,
           })
         }
       >
@@ -193,6 +202,20 @@ export function QuestionForm(props: QuestionFormProps) {
             defaultValue={props?.comment ?? ""}
             onFocus={onFocus}
             onChange={setComment}
+          />
+        </label>
+        <Divider />
+        <label>
+          <Styled.Label>Módulos</Styled.Label>
+          <QuestionFormModulesSelection
+            defaultOptions={
+              props.modules?.map(({ id, name }) => ({
+                value: id,
+                label: name,
+              })) ?? []
+            }
+            defaultValue={modules}
+            onSelectModules={setModules}
           />
         </label>
       </form>

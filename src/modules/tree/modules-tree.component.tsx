@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  FolderOpenOutlined,
+  FolderOutlined,
+  LoadingOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState } from "react";
 
 import { ModuleTreeItemTitle } from "./module-tree-item-title.component";
@@ -16,6 +21,35 @@ export interface Module {
 interface ModulesTreeProps {
   modules: Module[];
   loadData: (key: string) => Promise<Module[]>;
+}
+
+function SwitcherIcon({
+  expanded,
+  loading,
+  isLeaf,
+}: {
+  expanded?: boolean;
+  loading?: boolean;
+  isLeaf?: boolean;
+}) {
+  if (isLeaf) return null;
+  return loading ? (
+    <LoadingOutlined />
+  ) : expanded ? (
+    <FolderOpenOutlined />
+  ) : (
+    <FolderOutlined />
+  );
+}
+
+function mapTreeData(list: Module[]): Module[] {
+  return list.map((node) => {
+    return {
+      ...node,
+      switcherIcon: SwitcherIcon,
+      children: mapTreeData(node.children ?? []),
+    };
+  });
 }
 
 const updateTreeData = (
@@ -61,7 +95,7 @@ export function ModulesTree(props: ModulesTreeProps) {
       style={{ flex: 1 }}
       blockNode
       selectable={false}
-      treeData={tree}
+      treeData={mapTreeData(tree)}
       loadData={async ({ key }) => {
         const newChildren = await props.loadData(key);
         setTree((origin) => updateTreeData(origin, key, newChildren));

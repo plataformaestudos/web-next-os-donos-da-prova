@@ -1,11 +1,17 @@
 "use client";
 
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
-export const PreviewContainer = styled.div`
+export const PreviewContainer = styled.div<{ $compact: boolean }>`
   background-color: ${({ theme }) => theme.colorBgContainer};
   border-radius: 6px;
   padding: 18px 24px 24px;
+
+  ${({ $compact }) =>
+    $compact &&
+    css`
+      padding: 0;
+    `}
 `;
 
 export const AlternativesContainer = styled.div`
