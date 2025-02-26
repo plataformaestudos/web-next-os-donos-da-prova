@@ -105,13 +105,13 @@ export default async function QuestionsPage({
                       </Styled.QuestionPreview>
                     }
                   >
-                    <span style={{ cursor: "pointer" }}>
+                    <Link href={`/questions/${question.id}`}>
                       {question.text
                         .replace(/<[^>]+>/g, "")
                         .slice(0, 80)
                         .trim()}
                       ...
-                    </span>
+                    </Link>
                   </Popover>
                 }
                 description={question.id}
