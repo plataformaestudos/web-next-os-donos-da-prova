@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbProps, Button } from "antd";
+import { Breadcrumb, Button } from "antd";
 
 import { CreateFolderButton } from "@/question-books/create-folder/create-folder-button.component";
 import Link from "next/link";
@@ -52,8 +52,6 @@ export default async function QuestionBooks({
   }
 
   const { data: questionBooks } = await query;
-
-  console.log("questionBooks", questionBooks);
 
   return (
     <PageLayout

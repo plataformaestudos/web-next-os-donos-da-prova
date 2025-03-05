@@ -4,6 +4,7 @@
 import { QuestionBookDTO } from "./question-book.dto";
 // import { ResponseModel } from "@/model/common.model";
 import { createClient } from "@/util/supabase/server";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 export async function createQuestionBook(
@@ -44,14 +45,11 @@ export async function createQuestionBook(
   //     }),
   //   }
   // );
-  // console.log(name, folderId, modules, data, error);
 
   if (error) {
-    console.log(error);
     return { success: false, error: "Error" };
   }
 
   revalidatePath(`/question-books/${data.id}`);
-
-  return { success: true, error: null };
+  redirect(`/question-books/${data.id}`);
 }
