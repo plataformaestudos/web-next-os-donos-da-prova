@@ -11,9 +11,9 @@ const routeAlias: {
   "/questoes": "/questions",
   "/questoes/nova": "/questions/new",
   "/questoes/:id": "/questions/:id",
-  "/simulados": "/question-books",
-  "/simulados/novo": "/question-books/new",
-  "/simulados/:id": "/question-books/:id",
+  "/cadernos": "/question-books",
+  "/cadernos/novo": "/question-books/new",
+  "/cadernos/:id": "/question-books/:id",
   "/perfil": "/profile",
 };
 

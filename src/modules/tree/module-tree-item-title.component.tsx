@@ -18,10 +18,12 @@ export function ModuleTreeItemTitle({
   id,
   title,
   parentModuleId,
+  readonly,
 }: {
   id: string;
   title: string;
   parentModuleId?: string;
+  readonly?: boolean;
 }) {
   const { openCreateModal } = useCreateModule();
   const [menuOpened, setMenuOpened] = useState(false);
@@ -82,22 +84,24 @@ export function ModuleTreeItemTitle({
   }, [id, title, parentModuleId, openCreateModal]);
 
   return (
-    <Flex justify="space-between" align="center">
+    <Flex justify="space-between" align="center" style={{ minHeight: 32 }}>
       <Title level={5} style={{ margin: 0 }}>
         {title}
       </Title>
-      <Dropdown
-        open={menuOpened}
-        onOpenChange={setMenuOpened}
-        menu={{
-          items,
-        }}
-        trigger={["click"]}
-      >
-        <span>
-          <Button size="small" icon={<EllipsisOutlined />} />
-        </span>
-      </Dropdown>
+      {!readonly && (
+        <Dropdown
+          open={menuOpened}
+          onOpenChange={setMenuOpened}
+          menu={{
+            items,
+          }}
+          trigger={["click"]}
+        >
+          <span>
+            <Button size="small" icon={<EllipsisOutlined />} />
+          </span>
+        </Dropdown>
+      )}
     </Flex>
   );
 }

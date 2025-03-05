@@ -1,0 +1,193 @@
+"use client";
+
+import { Flex, Input, InputNumber, Select, Typography } from "antd";
+
+import { CREATE_QUESTION_BOOK_FORM_ID } from "./create-question-book-form.constant";
+import { FaChevronDown } from "react-icons/fa6";
+import { ModulesTree } from "@/modules/tree/modules-tree.component";
+import { QuestionBookDTO } from "./question-book.dto";
+import { plural } from "@/util/text.util";
+import styled from "styled-components";
+import { useCreateQuestionBook } from "./create-question-book.context";
+import { useState } from "react";
+
+interface Props {
+  questionBook?: QuestionBookDTO;
+  modules: {
+    loadData: (key: string) => Promise<
+      Array<{
+        key: string;
+        title: string;
+      }>
+    >;
+    data: Array<{
+      key: string;
+      title: string;
+    }>;
+  };
+  folders: Array<{
+    id: string;
+    name: string;
+  }>;
+}
+
+export function QuestionBookForm({ questionBook, modules, folders }: Props) {
+  const { createQuestionBook, error } = useCreateQuestionBook();
+
+  const [name, setName] = useState(questionBook?.name);
+  const [folderId, setFolderId] = useState(questionBook?.folderId);
+  const [modulesQuantities, setModulesQuantities] = useState(
+    new Map(
+      questionBook?.modules.map(({ moduleId, quantityQuestions }) => [
+        moduleId,
+        quantityQuestions,
+      ])
+    )
+  );
+  const [checkedModules, setCheckedModules] = useState<
+    { id: string; name: string }[]
+  >([]);
+
+  return (
+    <Container>
+      <form
+        id={CREATE_QUESTION_BOOK_FORM_ID}
+        action={() =>
+          createQuestionBook({
+            name: name as string,
+            folderId: folderId as string,
+            modules: Array.from(modulesQuantities.entries()).map(
+              ([moduleId, quantityQuestions]) => ({
+                moduleId,
+                quantityQuestions,
+              })
+            ),
+          })
+        }
+      >
+        <Flex vertical>
+          <p>Filtrar questões</p>
+          <GroupsContainer>
+            <Group>
+              <GroupTitle>Módulos</GroupTitle>
+              <GroupContent>
+                <ModulesTree
+                  modules={modules.data}
+                  loadData={modules.loadData}
+                  readonly
+                  checkable
+                  onCheck={setCheckedModules}
+                />
+              </GroupContent>
+            </Group>
+            <Group>
+              <GroupTitle>Filtros ativos</GroupTitle>
+              <GroupContent>
+                <Flex justify="space-between">
+                  <b>
+                    <span>Módulo</span>
+                  </b>
+                  <b>
+                    <span>Número de questões</span>
+                  </b>
+                </Flex>
+                <Flex vertical gap={8}>
+                  {checkedModules.map(({ id, name }) => (
+                    <Flex key={id} align="center" justify="space-between">
+                      <span>{name}</span>
+                      <InputNumber
+                        min={0}
+                        size="small"
+                        value={modulesQuantities.get(id)}
+                        onChange={(value) => {
+                          const newMap = new Map(modulesQuantities);
+                          if (value) {
+                            newMap.set(id, value);
+                          } else {
+                            newMap.delete(id);
+                          }
+                          setModulesQuantities(newMap);
+                        }}
+                      />
+                    </Flex>
+                  ))}
+                </Flex>
+                <Flex justify="end">
+                  <b>
+                    <span>
+                      {plural(
+                        "questão",
+                        "questões",
+                        modulesQuantities
+                          .values()
+                          .reduce((value, acc) => value + acc, 0)
+                      )}
+                    </span>
+                  </b>
+                </Flex>
+              </GroupContent>
+            </Group>
+          </GroupsContainer>
+        </Flex>
+        <Flex gap={8}>
+          <div style={{ flex: 2 }}>
+            <p>Nome do caderno</p>
+            <Input value={name} onChange={(ev) => setName(ev.target.value)} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <p>Pasta</p>
+            <Select
+              style={{ width: "100%" }}
+              suffixIcon={<FaChevronDown />}
+              placeholder="Pasta"
+              value={folderId}
+              onChange={(id) => setFolderId(id)}
+              options={folders.map((folder) => ({
+                value: folder.id,
+                label: folder.name,
+              }))}
+            />
+          </div>
+        </Flex>
+
+        {error && <Typography.Text type="danger">{error}</Typography.Text>}
+      </form>
+    </Container>
+  );
+}
+
+const Container = styled.div`
+  background-color: ${({ theme }) => theme.colorBgContainer};
+
+  padding: 12px 16px;
+  border-radius: 6px;
+`;
+
+const GroupsContainer = styled.div`
+  display: flex;
+  margin: 12px 0;
+  gap: 8px;
+`;
+
+const Group = styled.div`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colorBgContainerDisabled};
+  border: 1px solid ${({ theme }) => theme.colorBorder};
+  padding: 6px 8px;
+  border-radius: 6px;
+`;
+
+const GroupTitle = styled.div`
+  margin: -6px -8px 8px;
+  padding: 6px 8px;
+  border-radius: 6px 6px 0 0;
+  background-color: ${({ theme }) => theme.colorPrimaryBg};
+  border-bottom: 1px solid ${({ theme }) => theme.colorBorder};
+  font-weight: bold;
+`;
+
+const GroupContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;

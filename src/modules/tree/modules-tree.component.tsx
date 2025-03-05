@@ -21,6 +21,9 @@ export interface Module {
 interface ModulesTreeProps {
   modules: Module[];
   loadData: (key: string) => Promise<Module[]>;
+  readonly?: boolean;
+  checkable?: boolean;
+  onCheck?: (nodes: Array<{ id: string; name: string }>) => void;
 }
 
 function SwitcherIcon({
@@ -95,6 +98,21 @@ export function ModulesTree(props: ModulesTreeProps) {
       style={{ flex: 1 }}
       blockNode
       selectable={false}
+      checkable={props.checkable ?? false}
+      onCheck={(_, info) => {
+        props.onCheck?.(
+          info.checkedNodes
+            .filter((node) => !node.isLeaf && !node.parentModuleId)
+            .map((n) => ({ id: n.key, name: n.title }))
+            .concat(
+              ...info.checkedNodes
+                .filter((node) =>
+                  info.halfCheckedKeys?.includes(node.parentModuleId as string)
+                )
+                .map((n) => ({ id: n.key, name: n.title }))
+            )
+        );
+      }}
       treeData={mapTreeData(tree)}
       loadData={async ({ key }) => {
         const newChildren = await props.loadData(key);
@@ -105,6 +123,7 @@ export function ModulesTree(props: ModulesTreeProps) {
           id={key}
           title={title}
           parentModuleId={parentModuleId}
+          readonly={props.readonly}
         />
       )}
     />

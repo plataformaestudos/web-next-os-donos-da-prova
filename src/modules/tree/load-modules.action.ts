@@ -26,7 +26,7 @@ export async function loadChildrenModules(moduleId: string) {
   });
 }
 
-export async function queryModules(query: string, parentModuleId?: string) {
+export async function queryModules(query?: string, parentModuleId?: string) {
   let $queryPromise: Promise<ResponseModel<ModuleModel[]>>;
   if (!query) {
     $queryPromise = HttpClient.fetch<ResponseModel<ModuleModel[]>>(
