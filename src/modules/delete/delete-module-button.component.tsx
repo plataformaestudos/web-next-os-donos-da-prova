@@ -18,7 +18,7 @@ export function DeleteModuleButton({
   return (
     <Popconfirm
       placement="left"
-      title="Tem certeza que deseja deletar esse módulo?"
+      title="Tem certeza que deseja apagar esse módulo?"
       onConfirm={() => {
         startTransition(() => {
           deleteModule(moduleId).then(onDelete);
@@ -39,7 +39,7 @@ export function DeleteModuleButton({
           padding: "0 12px",
         }}
       >
-        Deletar
+        Apagar
       </Button>
     </Popconfirm>
   );

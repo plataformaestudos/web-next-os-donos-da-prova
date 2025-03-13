@@ -14,6 +14,7 @@ import {
 import { EditOutlined, EllipsisOutlined } from "@ant-design/icons";
 import { useState, useTransition } from "react";
 
+import { DeleteQuestionBookButton } from "../delete/delete-question-book.component";
 import Link from "next/link";
 import { LuBook } from "react-icons/lu";
 import Title from "antd/es/typography/Title";
@@ -39,6 +40,7 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
     id: string;
     name: string;
   } | null>(null);
+  const [dropdownOpened, setDropdownOpened] = useState<string | null>(null);
 
   const onClose = () => {
     setName("");
@@ -60,6 +62,8 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
             </Flex>
 
             <Dropdown
+              open={dropdownOpened === item.id}
+              onOpenChange={(open) => setDropdownOpened(open ? item.id : null)}
               menu={{
                 items: [
                   {
@@ -70,6 +74,22 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
                       setName(item.name);
                       setEditingQuestionBook(item);
                     },
+                  },
+                  {
+                    type: "divider",
+                  },
+                  {
+                    key: "delete",
+                    style: {
+                      padding: 0,
+                    },
+                    disabled: true,
+                    label: (
+                      <DeleteQuestionBookButton
+                        questionBookId={item.id}
+                        onDelete={() => setDropdownOpened(null)}
+                      />
+                    ),
                   },
                 ],
               }}

@@ -8,22 +8,15 @@ import {
 import { useEffect, useState } from "react";
 
 import { ModuleTreeItemTitle } from "./module-tree-item-title.component";
+import { ModuleViewModel } from "@/model/module.model";
 import { Tree } from "antd";
 
-export interface Module {
-  key: string;
-  title: string;
-  parentModuleId?: string;
-  isLeaf?: boolean;
-  children?: Module[];
-}
-
 interface ModulesTreeProps {
-  modules: Module[];
-  loadData: (key: string) => Promise<Module[]>;
+  modules: ModuleViewModel[];
+  loadData: (key: string) => Promise<ModuleViewModel[]>;
   readonly?: boolean;
   checkable?: boolean;
-  onCheck?: (nodes: Array<{ id: string; name: string }>) => void;
+  onCheck?: (nodes: Array<ModuleViewModel>) => void;
 }
 
 function SwitcherIcon({
@@ -45,7 +38,7 @@ function SwitcherIcon({
   );
 }
 
-function mapTreeData(list: Module[]): Module[] {
+function mapTreeData(list: ModuleViewModel[]): ModuleViewModel[] {
   return list.map((node) => {
     return {
       ...node,
@@ -56,10 +49,10 @@ function mapTreeData(list: Module[]): Module[] {
 }
 
 const updateTreeData = (
-  list: Module[],
+  list: ModuleViewModel[],
   key: React.Key,
-  children: Module[]
-): Module[] =>
+  children: ModuleViewModel[]
+): ModuleViewModel[] =>
   list.map((node) => {
     if (node.key === key) {
       return {
@@ -100,22 +93,24 @@ export function ModulesTree(props: ModulesTreeProps) {
       selectable={false}
       checkable={props.checkable ?? false}
       onCheck={(_, info) => {
+        // Only send leaf modules or parent modules that are not yet loaded
+        const checkedParentKeys = Array.from(
+          new Set(
+            info.checkedNodes
+              .map((node) => node.parentModuleId)
+              .filter(Boolean) as string[]
+          )
+        );
         props.onCheck?.(
-          info.checkedNodes
-            .filter((node) => !node.isLeaf && !node.parentModuleId)
-            .map((n) => ({ id: n.key, name: n.title }))
-            .concat(
-              ...info.checkedNodes
-                .filter((node) =>
-                  info.halfCheckedKeys?.includes(node.parentModuleId as string)
-                )
-                .map((n) => ({ id: n.key, name: n.title }))
-            )
+          info.checkedNodes.filter(
+            (node) => !checkedParentKeys.includes(node.key)
+          )
         );
       }}
       treeData={mapTreeData(tree)}
       loadData={async ({ key }) => {
         const newChildren = await props.loadData(key);
+        console.log(newChildren);
         setTree((origin) => updateTreeData(origin, key, newChildren));
       }}
       titleRender={({ key, title, parentModuleId }) => (

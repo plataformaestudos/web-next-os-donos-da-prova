@@ -13,7 +13,6 @@ export default async function NewQuestionBook() {
   const supabase = await createClient();
 
   const rootModules = await queryModules();
-
   const { data: folders } = await supabase
     .from("book_folders")
     .select("id, name, questionBooks:question_books(id, name)");

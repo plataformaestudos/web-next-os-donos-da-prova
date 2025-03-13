@@ -12,7 +12,7 @@ export function DeleteQuestionButton({ questionId }: { questionId: string }) {
   return (
     <Popconfirm
       placement="left"
-      title="Tem certeza que deseja deletar essa questão?"
+      title="Tem certeza que deseja apagar essa questão?"
       onConfirm={() => {
         startTransition(() => {
           deleteQuestion(questionId);
@@ -28,7 +28,7 @@ export function DeleteQuestionButton({ questionId }: { questionId: string }) {
         loading={isPending}
         icon={<FaTrash />}
       >
-        Deletar
+        Apagar
       </Button>
     </Popconfirm>
   );

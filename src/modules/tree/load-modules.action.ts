@@ -10,6 +10,7 @@ function adapter(module: ModuleModel): ModuleViewModel {
     ...module,
     key: module.id,
     title: module.name,
+    children: module.children?.map(adapter),
   };
 }
 

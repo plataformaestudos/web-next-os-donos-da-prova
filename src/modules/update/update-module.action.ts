@@ -31,6 +31,7 @@ export async function updateModule(
     };
   }
 
+  revalidatePath(`/modules`);
   revalidatePath(`/modules/${id}`);
 
   return { error: null };

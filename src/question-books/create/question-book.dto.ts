@@ -4,6 +4,7 @@ export interface QuestionBookDTO {
   folderId: string;
   modules: Array<{
     moduleId: string;
+    treeCode: string;
     quantityQuestions: number;
   }>;
 }

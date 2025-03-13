@@ -1,29 +1,22 @@
 "use client";
 
 import { Flex, Input, InputNumber, Select, Typography } from "antd";
+import { useMemo, useState } from "react";
 
 import { CREATE_QUESTION_BOOK_FORM_ID } from "./create-question-book-form.constant";
 import { FaChevronDown } from "react-icons/fa6";
+import { ModuleViewModel } from "@/model/module.model";
 import { ModulesTree } from "@/modules/tree/modules-tree.component";
 import { QuestionBookDTO } from "./question-book.dto";
 import { plural } from "@/util/text.util";
 import styled from "styled-components";
 import { useCreateQuestionBook } from "./create-question-book.context";
-import { useState } from "react";
 
 interface Props {
   questionBook?: QuestionBookDTO;
   modules: {
-    loadData: (key: string) => Promise<
-      Array<{
-        key: string;
-        title: string;
-      }>
-    >;
-    data: Array<{
-      key: string;
-      title: string;
-    }>;
+    loadData: (key: string) => Promise<Array<ModuleViewModel>>;
+    data: Array<ModuleViewModel>;
   };
   folders: Array<{
     id: string;
@@ -44,9 +37,11 @@ export function QuestionBookForm({ questionBook, modules, folders }: Props) {
       ])
     )
   );
-  const [checkedModules, setCheckedModules] = useState<
-    { id: string; name: string }[]
-  >([]);
+  const [checkedModules, setCheckedModules] = useState<ModuleViewModel[]>([]);
+  const checkedModulesIds = useMemo(
+    () => checkedModules.map(({ id }) => id),
+    [checkedModules]
+  );
 
   return (
     <Container>
@@ -59,6 +54,8 @@ export function QuestionBookForm({ questionBook, modules, folders }: Props) {
             modules: Array.from(modulesQuantities.entries()).map(
               ([moduleId, quantityQuestions]) => ({
                 moduleId,
+                treeCode: checkedModules.find(({ id }) => id === moduleId)
+                  ?.treeCode as string,
                 quantityQuestions,
               })
             ),
@@ -76,27 +73,51 @@ export function QuestionBookForm({ questionBook, modules, folders }: Props) {
                   loadData={modules.loadData}
                   readonly
                   checkable
-                  onCheck={setCheckedModules}
+                  onCheck={(modules) => {
+                    modules.map((module) => {
+                      if (!modulesQuantities.has(module.id)) {
+                        modulesQuantities.set(
+                          module.id,
+                          module.numberQuestions
+                        );
+                      }
+                    });
+                    setCheckedModules(modules);
+                  }}
                 />
               </GroupContent>
             </Group>
             <Group>
               <GroupTitle>Filtros ativos</GroupTitle>
               <GroupContent>
-                <Flex justify="space-between">
-                  <b>
+                <Flex justify="space-between" gap={8}>
+                  <b style={{ width: "75%" }}>
                     <span>Módulo</span>
                   </b>
-                  <b>
-                    <span>Número de questões</span>
+                  <b
+                    style={{
+                      flex: 1,
+                      textAlign: "right",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <span>Questões no caderno</span>
                   </b>
                 </Flex>
                 <Flex vertical gap={8}>
-                  {checkedModules.map(({ id, name }) => (
-                    <Flex key={id} align="center" justify="space-between">
-                      <span>{name}</span>
+                  {checkedModules.map(({ id, name, numberQuestions }) => (
+                    <Flex
+                      key={id}
+                      align="center"
+                      justify="space-between"
+                      gap={8}
+                    >
+                      <Typography.Text ellipsis style={{ width: "75%" }}>
+                        {name}
+                      </Typography.Text>
                       <InputNumber
                         min={0}
+                        max={numberQuestions}
                         size="small"
                         value={modulesQuantities.get(id)}
                         onChange={(value) => {
@@ -119,7 +140,9 @@ export function QuestionBookForm({ questionBook, modules, folders }: Props) {
                         "questão",
                         "questões",
                         modulesQuantities
-                          .values()
+                          .entries()
+                          .filter(([key]) => checkedModulesIds.includes(key))
+                          .map(([, value]) => value)
                           .reduce((value, acc) => value + acc, 0)
                       )}
                     </span>
@@ -170,7 +193,7 @@ const GroupsContainer = styled.div`
 `;
 
 const Group = styled.div`
-  flex: 1;
+  width: 50%;
   background-color: ${({ theme }) => theme.colorBgContainerDisabled};
   border: 1px solid ${({ theme }) => theme.colorBorder};
   padding: 6px 8px;

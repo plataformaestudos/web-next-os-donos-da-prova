@@ -1,10 +1,11 @@
 "use client";
 
 import { Button, Flex, Input, Typography } from "antd";
-import { Module, ModulesTree } from "./tree/modules-tree.component";
 
 import { FaFolderTree } from "react-icons/fa6";
 import { MODULE_FORM_ID } from "./module-form.constant";
+import { ModuleViewModel } from "@/model/module.model";
+import { ModulesTree } from "./tree/modules-tree.component";
 import Title from "antd/es/typography/Title";
 import { loadChildrenModules } from "./tree/load-modules.action";
 import { useCreateModule } from "./create/create-module.context";
@@ -14,7 +15,7 @@ import { useUpdateModule } from "./update/update-module.context";
 export interface ModuleFormProps {
   id: string;
   name: string;
-  childModules: Module[];
+  childModules: ModuleViewModel[];
 }
 
 export function ModuleForm(props: ModuleFormProps) {
