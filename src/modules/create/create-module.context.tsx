@@ -1,22 +1,17 @@
 "use client";
 
-import { App, Divider, Flex, Input, Modal, Segmented, Typography } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { App, Divider, Flex, Input, Modal, Typography } from "antd";
 import {
   PropsWithChildren,
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useState,
   useTransition,
 } from "react";
-import { assignModuleToParent, createModule } from "./create-module.action";
 
-import { SearchModules } from "./search-modules.component";
 import Title from "antd/es/typography/Title";
-
-// const { Text } = Typography;
+import { createModule } from "./create-module.action";
 
 const CreateModuleContext = createContext(
   {} as {
@@ -53,16 +48,7 @@ export const CreateModuleProvider = ({ children }: PropsWithChildren) => {
     setError(null);
     setParentModuleId(null);
     setParentModuleName(null);
-    setShowSearch(false);
   };
-
-  const [showSearch, setShowSearch] = useState(!!parentModuleId);
-
-  useEffect(() => {
-    setShowSearch(!!parentModuleId);
-  }, [parentModuleId]);
-
-  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
 
   return (
     <CreateModuleContext.Provider value={{ openCreateModal }}>
@@ -89,35 +75,21 @@ export const CreateModuleProvider = ({ children }: PropsWithChildren) => {
         open={isOpen}
         okButtonProps={{
           loading: isPending,
-          disabled: (!name && !selectedModuleId) || isPending,
+          disabled: !name || isPending,
         }}
         onOk={() => {
           startTransition(() => {
-            if (parentModuleId && selectedModuleId) {
-              assignModuleToParent({
-                moduleId: selectedModuleId,
-                parentModuleId,
-              }).then(({ error }) => {
-                if (error) {
-                  setError(error);
-                } else {
-                  message.success("Módulo vinculado com sucesso!");
-                  resetState();
-                }
-              });
-            } else {
-              createModule({
-                parentModuleId,
-                name,
-              }).then(({ error }) => {
-                if (error) {
-                  setError(error);
-                } else {
-                  message.success("Módulo criado com sucesso!");
-                  resetState();
-                }
-              });
-            }
+            createModule({
+              parentModuleId,
+              name,
+            }).then(({ error }) => {
+              if (error) {
+                setError(error);
+              } else {
+                message.success("Módulo criado com sucesso!");
+                resetState();
+              }
+            });
           });
         }}
         onCancel={() => {
@@ -126,47 +98,14 @@ export const CreateModuleProvider = ({ children }: PropsWithChildren) => {
       >
         <Divider style={{ margin: "12px 0" }} />
         <Flex vertical gap={12}>
-          {!!parentModuleId && (
-            <Segmented
-              style={{ alignSelf: "flex-start" }}
-              value={showSearch}
-              options={[
-                {
-                  label: "Buscar um módulo existente",
-                  value: true,
-                  icon: <SearchOutlined />,
-                },
-                {
-                  label: "Criar um novo módulo",
-                  value: false,
-                  icon: <PlusOutlined />,
-                },
-              ]}
-              onChange={setShowSearch}
-            />
-          )}
-          {showSearch && (
-            <SearchModules
-              moduleId={parentModuleId as string}
-              onSelectModule={(moduleId) => setSelectedModuleId(moduleId)}
-              onClickCreateNew={(name) => {
-                setShowSearch(false);
-                setName((oldName) => name ?? oldName);
-              }}
-            />
-          )}
-          {!showSearch && (
-            <>
-              <Title level={5} style={{ margin: 0 }}>
-                Nome
-              </Title>
-              <Input
-                placeholder="Módulo"
-                value={name}
-                onChange={(ev) => setName(ev.target.value)}
-              />
-            </>
-          )}
+          <Title level={5} style={{ margin: 0 }}>
+            Nome
+          </Title>
+          <Input
+            placeholder="Módulo"
+            value={name}
+            onChange={(ev) => setName(ev.target.value)}
+          />
         </Flex>
         {error && <Typography.Text type="danger">{error}</Typography.Text>}
       </Modal>
