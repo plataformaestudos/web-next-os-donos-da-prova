@@ -13,7 +13,7 @@ import styled from "styled-components";
 import { useCreateQuestionBook } from "./create-question-book.context";
 
 interface Props {
-  questionBook?: QuestionBookDTO;
+  questionBook?: Partial<QuestionBookDTO>;
   modules: {
     loadData: (key: string) => Promise<Array<ModuleViewModel>>;
     data: Array<ModuleViewModel>;
@@ -31,10 +31,10 @@ export function QuestionBookForm({ questionBook, modules, folders }: Props) {
   const [folderId, setFolderId] = useState(questionBook?.folderId);
   const [modulesQuantities, setModulesQuantities] = useState(
     new Map(
-      questionBook?.modules.map(({ moduleId, quantityQuestions }) => [
+      questionBook?.modules?.map(({ moduleId, quantityQuestions }) => [
         moduleId,
         quantityQuestions,
-      ])
+      ]) ?? []
     )
   );
   const [checkedModules, setCheckedModules] = useState<ModuleViewModel[]>([]);

@@ -27,10 +27,11 @@ export default async function QuestionsPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    modules: string;
+    modulos: string;
   }>;
 }) {
-  const { modules } = await searchParams;
+  let newQuestionURL = "/questions/new";
+  const { modulos: modules } = await searchParams;
   const supabase = await createClient();
 
   const query = supabase
@@ -39,6 +40,7 @@ export default async function QuestionsPage({
 
   let defaultOptions: { value: string; label: string }[] = [];
   if (modules) {
+    newQuestionURL += `?modulos=${modules}`;
     query.in("modules_questions.module_id", modules.split(","));
 
     const { data } = await supabase
@@ -65,13 +67,13 @@ export default async function QuestionsPage({
             "use server";
 
             if (modules.length > 0) {
-              redirect(`/questions?modules=${modules.join(",")}`);
+              redirect(`/questions?modulos=${modules.join(",")}`);
             } else {
               redirect("/questions");
             }
           }}
         />,
-        <Link key="create" href="/questions/new">
+        <Link key="create" href={newQuestionURL}>
           <Button type="primary" size="large">
             Criar questão
           </Button>

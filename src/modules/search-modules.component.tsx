@@ -14,9 +14,9 @@ export const SearchModules = () => {
   const handleSearch = useDebouncedCallback((query: string) => {
     const params = new URLSearchParams(searchParams);
     if (query) {
-      params.set("query", query);
+      params.set("nome", query);
     } else {
-      params.delete("query");
+      params.delete("nome");
     }
     replace(`${pathname}?${params.toString()}`);
   }, 500);
@@ -32,7 +32,7 @@ export const SearchModules = () => {
         minWidth: 300,
       }}
       onChange={(ev) => handleSearch(ev.target.value)}
-      defaultValue={searchParams.get("query")?.toString()}
+      defaultValue={searchParams.get("nome")?.toString()}
     />
   );
 };

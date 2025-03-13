@@ -15,6 +15,7 @@ export default async function QuestionBooks({
     pasta: string;
   }>;
 }) {
+  let newQuestionBookURL = "/question-books/new";
   const { pasta: folderId } = await searchParams;
 
   const supabase = await createClient();
@@ -40,6 +41,7 @@ export default async function QuestionBooks({
   const query = supabase.from("question_books").select("id, name, folder_id");
 
   if (folderId && folders) {
+    newQuestionBookURL += `?pasta=${folderId}`;
     const folderName = folders.find((folder) => folder.id === folderId)?.name;
 
     if (folderName) {
@@ -58,7 +60,7 @@ export default async function QuestionBooks({
       title="Cadernos de questões"
       actions={[
         <CreateFolderButton key="create-folder" />,
-        <Link key="create-book" href="/question-books/new">
+        <Link key="create-book" href={newQuestionBookURL}>
           <Button type="primary" size="large" icon={<LuBook />}>
             Criar caderno
           </Button>

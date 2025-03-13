@@ -12,11 +12,13 @@ export default async function ModulesPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    query: string;
+    nome: string;
   }>;
 }) {
-  const { query } = await searchParams;
+  const { nome: query } = await searchParams;
   const rootModules = await queryModules(query);
+
+  console.log(rootModules);
 
   return (
     <PageLayout

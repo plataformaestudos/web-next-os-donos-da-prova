@@ -29,7 +29,7 @@ export async function createQuestionBook(
   );
 
   if (error) {
-    return { success: false, error };
+    return { success: false, error: "err" };
   }
 
   revalidatePath(`/question-books/${data.id}`);

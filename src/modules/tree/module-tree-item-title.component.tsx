@@ -44,7 +44,7 @@ export function ModuleTreeItemTitle({
       {
         key: "open-questions",
         icon: <LuFileQuestion />,
-        label: <Link href={`/questions?modules=${id}`}>Questões</Link>,
+        label: <Link href={`/questions?modulos=${id}`}>Questões</Link>,
       },
       {
         type: "divider",

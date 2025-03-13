@@ -9,7 +9,18 @@ import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { QuestionBookForm } from "@/question-books/create/question-book-form.component";
 import { createClient } from "@/util/supabase/server";
 
-export default async function NewQuestionBook() {
+export default async function NewQuestionBook({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    pasta: string;
+  }>;
+}) {
+  let backHref = "/question-books";
+  const { pasta: folderId } = await searchParams;
+  if (folderId) {
+    backHref += `?pasta=${folderId}`;
+  }
   const supabase = await createClient();
 
   const rootModules = await queryModules();
@@ -21,11 +32,12 @@ export default async function NewQuestionBook() {
     <CreateQuestionProvider>
       <PageLayout
         title="Novo caderno"
-        backHref="/question-books"
+        backHref={backHref}
         actions={[<CreateQuestionBookSubmitButton key="save" />]}
       >
         {folders && (
           <QuestionBookForm
+            questionBook={{ folderId }}
             folders={folders}
             modules={{ data: rootModules, loadData: loadChildrenModules }}
           />
