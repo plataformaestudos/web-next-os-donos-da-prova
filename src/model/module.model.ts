@@ -3,9 +3,9 @@ export interface ModuleModel {
   name: string;
   numberQuestions: number;
   treeCode: string;
-  parentModuleId?: string;
+  parentModuleId: string | null;
   isLeaf?: boolean;
-  children?: ModuleModel[];
+  childModules?: ModuleModel[];
 }
 
 export interface ModuleViewModel extends ModuleModel {

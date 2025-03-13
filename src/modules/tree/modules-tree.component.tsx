@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { ModuleTreeItemTitle } from "./module-tree-item-title.component";
 import { ModuleViewModel } from "@/model/module.model";
 import { Tree } from "antd";
+import { useSearchParams } from "next/navigation";
 
 interface ModulesTreeProps {
   modules: ModuleViewModel[];
@@ -72,17 +73,65 @@ const updateTreeData = (
     return node;
   });
 
+// TODO: If /modules return full tree, we can use this to initially setup the tree
+// function setupTree(
+//   modules: ModuleViewModel[],
+//   parentModuleId: ModuleViewModel["parentModuleId"]
+// ): ModuleViewModel[] {
+//   return modules
+//     .filter((module) => module.parentModuleId === parentModuleId)
+//     .map((module) => {
+//       return {
+//         ...module,
+//         children: setupTree(modules, module.id),
+//       };
+//     });
+// }
+
+function setupTree(modules: ModuleViewModel[]): ModuleViewModel[] {
+  const modulesIds = modules.map(({ id }) => id);
+  const rootModules: ModuleViewModel[] = [];
+  const childModules: ModuleViewModel[] = [];
+
+  modules.forEach((module) => {
+    if (!module.parentModuleId || !modulesIds.includes(module.parentModuleId)) {
+      rootModules.push(module);
+    } else {
+      childModules.push(module);
+    }
+  });
+
+  return rootModules.map((module) => {
+    return {
+      ...module,
+      children: setupTree(childModules).filter(
+        (mod) => mod.parentModuleId === module.id
+      ),
+    };
+  });
+}
+
 export function ModulesTree(props: ModulesTreeProps) {
+  const searchParams = useSearchParams();
+  const hasSearch = searchParams.has("nome");
+
   const [loadedKeys, setLoadedKeys] = useState<string[]>([]);
-  const [tree, setTree] = useState(props.modules);
+  const [expandadedKeys, setExpandedKeys] = useState<string[]>(
+    hasSearch ? props.modules.map(({ id }) => id) : []
+  );
+  const [tree, setTree] = useState(setupTree(props.modules));
 
   useEffect(() => {
-    setTree(props.modules);
+    setTree(setupTree(props.modules));
+    setExpandedKeys(hasSearch ? props.modules.map(({ id }) => id) : []);
     setLoadedKeys([]);
-  }, [props.modules]);
+  }, [props.modules, hasSearch]);
 
   return (
     <Tree
+      autoExpandParent
+      expandedKeys={expandadedKeys}
+      onExpand={(keys) => setExpandedKeys(keys as string[])}
       loadedKeys={loadedKeys}
       onLoad={(lk) => setLoadedKeys(lk as string[])}
       rootStyle={{
@@ -110,13 +159,13 @@ export function ModulesTree(props: ModulesTreeProps) {
       treeData={mapTreeData(tree)}
       loadData={async ({ key }) => {
         const newChildren = await props.loadData(key);
-        console.log(newChildren);
         setTree((origin) => updateTreeData(origin, key, newChildren));
       }}
-      titleRender={({ key, title, parentModuleId }) => (
+      titleRender={({ key, title, parentModuleId, isLeaf }) => (
         <ModuleTreeItemTitle
           id={key}
           title={title}
+          isLeaf={isLeaf}
           parentModuleId={parentModuleId}
           readonly={props.readonly}
         />

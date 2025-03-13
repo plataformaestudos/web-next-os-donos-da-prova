@@ -10,7 +10,9 @@ function adapter(module: ModuleModel): ModuleViewModel {
     ...module,
     key: module.id,
     title: module.name,
-    children: module.children?.map(adapter),
+    parentModuleId: module.parentModuleId ?? null,
+    isLeaf: module.childModules?.length === 0,
+    children: module.childModules?.map(adapter),
   };
 }
 
@@ -21,7 +23,6 @@ export async function loadChildrenModules(moduleId: string) {
       method: "GET",
     }
   ).then((response) => {
-    console.log("loadChildrenModules", response.data);
     return response.data
       .map(adapter)
       .map((mod) => ({ ...mod, parentModuleId: moduleId }));
@@ -50,8 +51,5 @@ export async function queryModules(query?: string, parentModuleId?: string) {
       }
     );
   }
-  return $queryPromise.then((response) => {
-    console.log("querymodules", response);
-    return response.data.map(adapter);
-  });
+  return $queryPromise.then((response) => response.data.map(adapter));
 }

@@ -18,8 +18,6 @@ export default async function ModulesPage({
   const { nome: query } = await searchParams;
   const rootModules = await queryModules(query);
 
-  console.log(rootModules);
-
   return (
     <PageLayout
       title="Módulos"

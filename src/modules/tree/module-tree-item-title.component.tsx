@@ -18,11 +18,13 @@ export function ModuleTreeItemTitle({
   id,
   title,
   parentModuleId,
+  isLeaf,
   readonly,
 }: {
   id: string;
   title: string;
-  parentModuleId?: string;
+  parentModuleId: string | null;
+  isLeaf?: boolean;
   readonly?: boolean;
 }) {
   const { openCreateModal } = useCreateModule();
@@ -41,11 +43,34 @@ export function ModuleTreeItemTitle({
         icon: <EditOutlined />,
         label: <Link href={`/modules/${id}`}>Editar</Link>,
       },
-      {
+    ];
+
+    if (isLeaf) {
+      result.push({
         key: "open-questions",
         icon: <LuFileQuestion />,
         label: <Link href={`/questions?modulos=${id}`}>Questões</Link>,
-      },
+      });
+    }
+
+    if (parentModuleId) {
+      result.push({
+        key: "unlink",
+        style: {
+          padding: 0,
+        },
+        disabled: true,
+        label: (
+          <UnlinkModuleButton
+            moduleId={id}
+            parentModuleId={parentModuleId}
+            onUnlink={() => setMenuOpened(false)}
+          />
+        ),
+      });
+    }
+
+    result.push(
       {
         type: "divider",
       },
@@ -61,27 +86,10 @@ export function ModuleTreeItemTitle({
             onDelete={() => setMenuOpened(false)}
           />
         ),
-      },
-    ];
-
-    if (parentModuleId) {
-      result.splice(3, 0, {
-        key: "unlink",
-        style: {
-          padding: 0,
-        },
-        disabled: true,
-        label: (
-          <UnlinkModuleButton
-            moduleId={id}
-            parentModuleId={parentModuleId}
-            onUnlink={() => setMenuOpened(false)}
-          />
-        ),
-      });
-    }
+      }
+    );
     return result;
-  }, [id, title, parentModuleId, openCreateModal]);
+  }, [id, title, parentModuleId, isLeaf, openCreateModal]);
 
   return (
     <Flex justify="space-between" align="center" style={{ minHeight: 32 }}>

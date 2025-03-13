@@ -35,7 +35,9 @@ export function QuestionFormModulesSelection({
     queryModules(newQuery)
       .then((modules) => {
         setOptions(
-          modules?.map(({ key, title }) => ({ value: key, label: title })) ?? []
+          modules
+            ?.filter((mod) => mod.isLeaf)
+            ?.map(({ key, title }) => ({ value: key, label: title })) ?? []
         );
       })
       .finally(() => {
