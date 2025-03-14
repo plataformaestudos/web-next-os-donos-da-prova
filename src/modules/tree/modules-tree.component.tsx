@@ -17,7 +17,12 @@ interface ModulesTreeProps {
   loadData: (key: string) => Promise<ModuleViewModel[]>;
   readonly?: boolean;
   checkable?: boolean;
-  onCheck?: (nodes: Array<ModuleViewModel>) => void;
+  defaultCheckedKeys?: string[];
+  onCheck?: (checked: {
+    checkedLeaves: Array<ModuleViewModel>;
+    checkedRoots: Array<ModuleViewModel>;
+    allChecked: Array<ModuleViewModel>;
+  }) => void;
 }
 
 function SwitcherIcon({
@@ -130,6 +135,7 @@ export function ModulesTree(props: ModulesTreeProps) {
   return (
     <Tree
       autoExpandParent
+      defaultCheckedKeys={props.defaultCheckedKeys}
       expandedKeys={expandadedKeys}
       onExpand={(keys) => setExpandedKeys(keys as string[])}
       loadedKeys={loadedKeys}
@@ -142,7 +148,14 @@ export function ModulesTree(props: ModulesTreeProps) {
       selectable={false}
       checkable={props.checkable ?? false}
       onCheck={(_, info) => {
-        // Only send leaf modules or parent modules that are not yet loaded
+        const checkedRoots = info.checkedNodes
+          .filter((node) => !node.isLeaf && !node.parentModuleId)
+          .concat(
+            ...info.checkedNodes.filter((node) =>
+              info.halfCheckedKeys?.includes(node.parentModuleId as string)
+            )
+          );
+
         const checkedParentKeys = Array.from(
           new Set(
             info.checkedNodes
@@ -150,11 +163,15 @@ export function ModulesTree(props: ModulesTreeProps) {
               .filter(Boolean) as string[]
           )
         );
-        props.onCheck?.(
-          info.checkedNodes.filter(
-            (node) => !checkedParentKeys.includes(node.key)
-          )
+        const checkedLeaves = info.checkedNodes.filter(
+          (node) => !checkedParentKeys.includes(node.key)
         );
+
+        props.onCheck?.({
+          checkedLeaves,
+          checkedRoots,
+          allChecked: info.checkedNodes,
+        });
       }}
       treeData={mapTreeData(tree)}
       loadData={async ({ key }) => {

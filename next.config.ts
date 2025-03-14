@@ -14,6 +14,9 @@ const routeAlias: {
   "/cadernos": "/question-books",
   "/cadernos/novo": "/question-books/new",
   "/cadernos/:id": "/question-books/:id",
+  "/planos": "/plans",
+  "/planos/novo": "/plans/new",
+  "/planos/:id": "/plans/:id",
   "/perfil": "/profile",
 };
 

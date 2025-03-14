@@ -6,6 +6,7 @@ import { Button, Skeleton, Tooltip } from "antd";
 import {
   LuBook,
   LuBookCheck,
+  LuCircleDollarSign,
   LuFileQuestion,
   LuFolders,
   LuHouse,
@@ -28,6 +29,7 @@ const icons = {
   question: <LuFileQuestion color="#fff" size={24} />,
   profile: <CgProfile color="#fff" size={24} />,
   module: <LuFolders color="#fff" size={24} />,
+  plan: <LuCircleDollarSign color="#fff" size={24} />,
 };
 
 export function Navbar() {

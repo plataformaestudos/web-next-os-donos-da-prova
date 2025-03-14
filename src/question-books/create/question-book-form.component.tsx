@@ -73,7 +73,7 @@ export function QuestionBookForm({ questionBook, modules, folders }: Props) {
                   loadData={modules.loadData}
                   readonly
                   checkable
-                  onCheck={(modules) => {
+                  onCheck={({ checkedLeaves: modules }) => {
                     modules.map((module) => {
                       if (!modulesQuantities.has(module.id)) {
                         modulesQuantities.set(
