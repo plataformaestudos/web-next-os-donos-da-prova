@@ -3,7 +3,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const customFetch = <T>(
   token: string | undefined,
   resource: string,
-  opts: RequestInit
+  opts: RequestInit = {}
 ) => {
   const url = baseUrl ? `${baseUrl}${resource}` : resource;
   return fetch(url, {

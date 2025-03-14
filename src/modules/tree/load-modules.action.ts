@@ -1,20 +1,9 @@
 "use server";
 
-import { ModuleModel, ModuleViewModel } from "@/model/module.model";
-
 import HttpClient from "@/util/http-client/fetch-server.util";
+import { ModuleModel } from "@/model/module.model";
 import { ResponseModel } from "@/model/common.model";
-
-function adapter(module: ModuleModel): ModuleViewModel {
-  return {
-    ...module,
-    key: module.id,
-    title: module.name,
-    parentModuleId: module.parentModuleId ?? null,
-    isLeaf: module.childModules?.length === 0,
-    children: module.childModules?.map(adapter),
-  };
-}
+import { moduleModelToViewModelAdapter } from "../modules.util";
 
 export async function loadChildrenModules(moduleId: string) {
   return HttpClient.fetch<ResponseModel<ModuleModel[]>>(
@@ -24,7 +13,7 @@ export async function loadChildrenModules(moduleId: string) {
     }
   ).then((response) => {
     return response.data
-      .map(adapter)
+      .map(moduleModelToViewModelAdapter)
       .map((mod) => ({ ...mod, parentModuleId: moduleId }));
   });
 }
@@ -51,5 +40,7 @@ export async function queryModules(query?: string, parentModuleId?: string) {
       }
     );
   }
-  return $queryPromise.then((response) => response.data.map(adapter));
+  return $queryPromise.then((response) =>
+    response.data.map(moduleModelToViewModelAdapter)
+  );
 }

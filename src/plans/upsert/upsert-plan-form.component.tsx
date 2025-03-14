@@ -85,6 +85,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
           loadData={modules.loadData}
           readonly
           checkable
+          autoExpand
           defaultCheckedKeys={plan?.modules}
           onCheck={({ checkedRoots: modules }) => {
             setSelectedModules(modules.map((module) => module.id));

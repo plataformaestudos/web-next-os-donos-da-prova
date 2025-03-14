@@ -1,10 +1,17 @@
+import { ModuleModel, ModuleViewModel } from "@/model/module.model";
 import {
   loadChildrenModules,
   queryModules,
 } from "@/modules/tree/load-modules.action";
+import {
+  mergeModulesTree,
+  moduleModelToViewModelAdapter,
+} from "@/modules/modules.util";
 
+import HttpClient from "@/util/http-client/fetch-server.util";
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
+import { ResponseModel } from "@/model/common.model";
 import { UpsertPlanDTO } from "@/plans/upsert/upsert-plan.dto";
 import { UpsertPlanForm } from "@/plans/upsert/upsert-plan-form.component";
 import { UpsertPlanFormSubmitButton } from "@/plans/upsert/upsert-plan-form-submit-button.component";
@@ -46,6 +53,16 @@ export default async function EditQuestionPage({
     return null;
   }
 
+  let planModules: ModuleViewModel[] = [];
+
+  if (plan.modules.length > 0) {
+    planModules = await HttpClient.fetch<ResponseModel<ModuleModel[]>>(
+      `/modules/tree_by_ids?ids=${plan.modules.join(
+        ","
+      )}&show_tree_parents=true`
+    ).then((r) => r.data?.map(moduleModelToViewModelAdapter) ?? []);
+  }
+
   return (
     <UpsertPlanProvider>
       <PageLayout
@@ -55,7 +72,10 @@ export default async function EditQuestionPage({
       >
         <UpsertPlanForm
           plan={plan}
-          modules={{ data: rootModules, loadData: loadChildrenModules }}
+          modules={{
+            data: mergeModulesTree(rootModules, planModules),
+            loadData: loadChildrenModules,
+          }}
         />
       </PageLayout>
     </UpsertPlanProvider>

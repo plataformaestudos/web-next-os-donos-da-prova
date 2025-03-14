@@ -23,6 +23,7 @@ interface ModulesTreeProps {
     checkedRoots: Array<ModuleViewModel>;
     allChecked: Array<ModuleViewModel>;
   }) => void;
+  autoExpand?: boolean;
 }
 
 function SwitcherIcon({
@@ -93,7 +94,11 @@ const updateTreeData = (
 //     });
 // }
 
-function setupTree(modules: ModuleViewModel[]): ModuleViewModel[] {
+function setupTree(
+  modules: ModuleViewModel[],
+  skip = false
+): ModuleViewModel[] {
+  if (skip) return modules;
   const modulesIds = modules.map(({ id }) => id);
   const rootModules: ModuleViewModel[] = [];
   const childModules: ModuleViewModel[] = [];
@@ -118,19 +123,25 @@ function setupTree(modules: ModuleViewModel[]): ModuleViewModel[] {
 
 export function ModulesTree(props: ModulesTreeProps) {
   const searchParams = useSearchParams();
-  const hasSearch = searchParams.has("nome");
+  const autoExpand = searchParams.has("nome") || props.autoExpand;
 
   const [loadedKeys, setLoadedKeys] = useState<string[]>([]);
   const [expandadedKeys, setExpandedKeys] = useState<string[]>(
-    hasSearch ? props.modules.map(({ id }) => id) : []
+    autoExpand
+      ? props.defaultCheckedKeys ?? props.modules.map(({ id }) => id)
+      : []
   );
-  const [tree, setTree] = useState(setupTree(props.modules));
+  const [tree, setTree] = useState(setupTree(props.modules, props.autoExpand));
 
   useEffect(() => {
-    setTree(setupTree(props.modules));
-    setExpandedKeys(hasSearch ? props.modules.map(({ id }) => id) : []);
+    setTree(setupTree(props.modules, props.autoExpand));
+    setExpandedKeys(
+      autoExpand
+        ? props.defaultCheckedKeys ?? props.modules.map(({ id }) => id)
+        : []
+    );
     setLoadedKeys([]);
-  }, [props.modules, hasSearch]);
+  }, [props.modules, autoExpand, props.autoExpand, props.defaultCheckedKeys]);
 
   return (
     <Tree
@@ -180,6 +191,13 @@ export function ModulesTree(props: ModulesTreeProps) {
       }}
       titleRender={({ key, title, parentModuleId, isLeaf }) => (
         <ModuleTreeItemTitle
+          onClick={() =>
+            setExpandedKeys(
+              expandadedKeys.includes(key)
+                ? expandadedKeys.filter((key) => key !== key)
+                : expandadedKeys.concat(key)
+            )
+          }
           id={key}
           title={title}
           isLeaf={isLeaf}

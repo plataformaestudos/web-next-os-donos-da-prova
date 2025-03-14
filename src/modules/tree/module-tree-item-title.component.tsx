@@ -20,12 +20,14 @@ export function ModuleTreeItemTitle({
   parentModuleId,
   isLeaf,
   readonly,
+  onClick,
 }: {
   id: string;
   title: string;
   parentModuleId: string | null;
   isLeaf?: boolean;
   readonly?: boolean;
+  onClick?: () => void;
 }) {
   const { openCreateModal } = useCreateModule();
   const [menuOpened, setMenuOpened] = useState(false);
@@ -92,7 +94,12 @@ export function ModuleTreeItemTitle({
   }, [id, title, parentModuleId, isLeaf, openCreateModal]);
 
   return (
-    <Flex justify="space-between" align="center" style={{ minHeight: 32 }}>
+    <Flex
+      justify="space-between"
+      align="center"
+      style={{ minHeight: 32, cursor: "pointer" }}
+      onClick={onClick}
+    >
       <Title level={5} style={{ margin: 0 }}>
         {title}
       </Title>
@@ -105,7 +112,7 @@ export function ModuleTreeItemTitle({
           }}
           trigger={["click"]}
         >
-          <span>
+          <span onClick={(ev) => ev.stopPropagation()}>
             <Button size="small" icon={<EllipsisOutlined />} />
           </span>
         </Dropdown>
