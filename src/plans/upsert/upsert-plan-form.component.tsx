@@ -42,6 +42,21 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
           })
         }
       >
+        {plan?.id && (
+          <Flex vertical style={{ opacity: 0.6 }}>
+            <Label htmlFor="name">ID</Label>
+            <Typography.Text
+              style={{ cursor: "default" }}
+              copyable={{
+                text: plan.id,
+                tooltips: ["Copiar ID", "ID copiado!"],
+              }}
+            >
+              {plan.id}
+            </Typography.Text>
+            <Divider />
+          </Flex>
+        )}
         <Label htmlFor="name">Nome</Label>
         <Input
           id="name"

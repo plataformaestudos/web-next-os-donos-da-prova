@@ -49,7 +49,7 @@ export default async function EditQuestionPage({
   return (
     <UpsertPlanProvider>
       <PageLayout
-        title="Plano"
+        title="Editar plano"
         backHref="/plans"
         actions={[<UpsertPlanFormSubmitButton key="save" />]}
       >
