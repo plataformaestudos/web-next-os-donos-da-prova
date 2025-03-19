@@ -55,6 +55,9 @@ export default async function QuestionBooks({
 
   const { data: questionBooks } = await query;
 
+  const folderlessQuestionBooks =
+    questionBooks?.filter((qb) => qb.folder_id === null) ?? [];
+
   return (
     <PageLayout
       title="Cadernos de questões"
@@ -71,6 +74,23 @@ export default async function QuestionBooks({
       {folders && !folderId && <ListFolders folders={folders} />}
       {questionBooks && folderId && (
         <ListQuestionBooks questionBooks={questionBooks} />
+      )}
+      {folderlessQuestionBooks?.length > 0 && (
+        <>
+          <Breadcrumb
+            style={{ margin: "24px 0" }}
+            items={[
+              {
+                title: (<Link href="/question-books">Meus cadernos</Link>) as
+                  | React.JSX.Element
+                  | string,
+              },
+            ]}
+          />
+          {folderlessQuestionBooks && (
+            <ListQuestionBooks questionBooks={folderlessQuestionBooks} />
+          )}
+        </>
       )}
     </PageLayout>
   );

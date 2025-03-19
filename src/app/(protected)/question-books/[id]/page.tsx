@@ -30,9 +30,12 @@ export default async function QuestionBookPage({
   if (questionBook) {
     const breadcrumbItems = [
       {
-        title: <Link href="/question-books">Minhas pastas</Link>,
+        title: <Link href="/question-books">Meus cadernos</Link>,
       },
-      {
+    ];
+
+    if (asSingle(questionBook.folder)?.id) {
+      breadcrumbItems.push({
         title: (
           <Link
             href={`/question-books?pasta=${asSingle(questionBook.folder).id}`}
@@ -40,11 +43,12 @@ export default async function QuestionBookPage({
             {asSingle(questionBook.folder).name}
           </Link>
         ),
-      },
-      {
-        title: questionBook.name,
-      },
-    ];
+      });
+    }
+
+    breadcrumbItems.push({
+      title: questionBook.name,
+    });
 
     return (
       <div style={{ padding: "16px 32px", flex: 1 }}>
