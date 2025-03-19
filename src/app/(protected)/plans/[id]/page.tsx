@@ -34,7 +34,8 @@ export default async function EditQuestionPage({
       `
       id,
       name,
-      price,
+      description,
+      price:month_value,
       modules:plans_modules(module_id)
     `
     )

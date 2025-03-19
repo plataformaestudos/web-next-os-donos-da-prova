@@ -9,7 +9,7 @@ export async function upsertPlan(
   _: {
     error: string | null;
   },
-  { id, name, price, modules }: UpsertPlanDTO
+  { id, name, description, price, modules }: UpsertPlanDTO
 ): Promise<{ error: string | null }> {
   if (!name || isNaN(parseFloat(price as unknown as string))) {
     return {
@@ -19,12 +19,13 @@ export async function upsertPlan(
 
   const supabase = await createClient();
 
-  const { data: plan } = await supabase
+  const { data: plan, error } = await supabase
     .from("subscription_plans")
     .upsert({
       id,
       name,
-      price,
+      description,
+      month_value: price,
     })
     .select()
     .single();
@@ -37,9 +38,11 @@ export async function upsertPlan(
         module_id: module,
       }))
     );
-  }
 
-  revalidatePath("/plans");
-  revalidatePath(`/plans/${plan.id}`);
-  redirect(`/plans/${plan.id}`);
+    revalidatePath("/plans");
+    revalidatePath(`/plans/${plan.id}`);
+    redirect(`/plans/${plan.id}`);
+  } else {
+    return { error: error?.message ?? null };
+  }
 }

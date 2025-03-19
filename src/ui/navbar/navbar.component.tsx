@@ -25,7 +25,6 @@ import { usePathname } from "next/navigation";
 const icons = {
   home: <LuHouse color="#fff" size={24} />,
   book: <LuBook color="#fff" size={24} />,
-  bookCheck: <LuBookCheck color="#fff" size={24} />,
   question: <LuFileQuestion color="#fff" size={24} />,
   profile: <CgProfile color="#fff" size={24} />,
   module: <LuFolders color="#fff" size={24} />,

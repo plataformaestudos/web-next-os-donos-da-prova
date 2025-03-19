@@ -47,7 +47,7 @@ export default async function PlansPage() {
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
-                }).format(plan.price)}
+                }).format(plan.month_value)}
               </div>
             </Item>
           ))}

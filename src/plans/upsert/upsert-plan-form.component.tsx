@@ -13,6 +13,7 @@ interface UpsertPlanFormProps {
   plan?: {
     id?: string;
     name?: string;
+    description?: string;
     price?: number;
     modules?: string[];
   } | null;
@@ -26,6 +27,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
   const { upsertPlan, error } = useUpsertPlan();
 
   const [name, setName] = useState(plan?.name ?? "");
+  const [description, setDescription] = useState(plan?.description ?? "");
   const [price, setPrice] = useState(plan?.price ?? 0);
   const [selectedModules, setSelectedModules] = useState(plan?.modules ?? []);
 
@@ -37,6 +39,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
           upsertPlan({
             id: plan?.id,
             name,
+            description,
             price,
             modules: selectedModules,
           })
@@ -63,6 +66,14 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
           name="name"
           value={name}
           onChange={(event) => setName(event.target.value)}
+        />
+        <Divider />
+        <Label htmlFor="description">Descrição</Label>
+        <Input
+          id="description"
+          name="description"
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
         />
         <Divider />
         <Flex vertical>
