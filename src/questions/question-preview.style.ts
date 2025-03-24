@@ -61,6 +61,9 @@ export const AlternativeLetter = styled.span<{ $correct: boolean }>`
 
   border-radius: 12px;
 
+  border: 1px solid;
+  border-color: ${(props) =>
+    props.$correct ? props.theme.colorPrimary : props.theme.colorBorder};
   background-color: ${(props) =>
     props.$correct ? props.theme.colorPrimary : props.theme.colorBgContainer};
   color: ${(props) => props.$correct && props.theme.colorTextLightSolid};

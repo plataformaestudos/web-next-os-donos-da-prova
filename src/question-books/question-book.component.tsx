@@ -1,10 +1,22 @@
 "use client";
 
+import { AnswerQuestion } from "./answer-question/answer-question.component";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { Tabs } from "antd";
 import styled from "styled-components";
 
-export function QuestionBook() {
+interface QuestionBookProps {
+  nextQuestion: {
+    id: string;
+    text: string;
+    alternatives: {
+      id: string;
+      text: string;
+    }[];
+  };
+}
+
+export function QuestionBook({ nextQuestion }: QuestionBookProps) {
   return (
     <Container>
       <Tabs
@@ -13,7 +25,7 @@ export function QuestionBook() {
             key: "1",
             label: "Questões",
             icon: <QuestionCircleOutlined />,
-            children: "Content of Tab Pane 1",
+            children: <AnswerQuestion {...nextQuestion} />,
           },
         ]}
       />
