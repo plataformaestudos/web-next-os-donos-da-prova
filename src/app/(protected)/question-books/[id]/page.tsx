@@ -6,7 +6,6 @@ import Link from "next/link";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { ResponseModel } from "@/model/common.model";
 import { TabContainer } from "./page.style";
-import Text from "antd/es/Typography/Text";
 import { createClient } from "@/util/supabase/server";
 
 function asSingle<T>(array: T[]) {
@@ -173,7 +172,7 @@ export default async function QuestionBookPage({
                     lastSeq={nextQuestion.lastSeq}
                   />
                 ) : (
-                  <Text>Nenhuma questão encontrada!</Text>
+                  <p>Nenhuma questão encontrada!</p>
                 ),
               },
             ]}
