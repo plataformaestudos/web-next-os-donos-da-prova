@@ -1,6 +1,8 @@
 import "./styles.css";
 import "katex/dist/katex.min.css";
 
+import { useEffect, useState } from "react";
+
 import { Editor } from "@tiptap/core";
 import FileHandler from "@tiptap-pro/extension-file-handler";
 import { FontSize } from "./extensions/font-size.tiptap-extension";
@@ -16,7 +18,6 @@ import { Transaction } from "@tiptap/pm/state";
 import Underline from "@tiptap/extension-underline";
 import { createClient } from "@/util/supabase/client";
 import { useEditor } from "@tiptap/react";
-import { useState } from "react";
 import { v4 as uuid } from "uuid";
 
 export async function uploadFile(file: File) {
@@ -161,6 +162,10 @@ export function TiptapEditor({
       handleImageDeletes(transaction);
     },
   });
+
+  useEffect(() => {
+    editor?.commands.setContent(defaultValue ?? "");
+  }, [defaultValue, editor?.commands]);
 
   return (
     <StyledEditorContent

@@ -11,12 +11,16 @@ export async function signup(dto: SignupDTO): Promise<{
   error: string | null;
 }> {
   const supabase = await createClient();
-  const response = await HttpClient.fetch<any>("/subscription/new-user", {
+  const response = await HttpClient.fetch<{
+    success: boolean;
+    statusCode: number;
+    message: string;
+  }>("/subscription/new-user", {
     method: "POST",
     body: JSON.stringify(dto),
   });
 
-  if ((response as { success: boolean }).success) {
+  if (response.success) {
     await supabase.auth.signInWithPassword({
       email: dto.userInfo.email,
       password: dto.userInfo.password,

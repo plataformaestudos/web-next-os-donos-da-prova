@@ -3,10 +3,10 @@ import { Breadcrumb, BreadcrumbProps, Tabs } from "antd";
 import { AnswerQuestion } from "@/question-books/answer-question/answer-question.component";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import Link from "next/link";
-import { QuestionBook } from "@/question-books/question-book.component";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { ResponseModel } from "@/model/common.model";
 import { TabContainer } from "./page.style";
+import Text from "antd/es/Typography/Text";
 import { createClient } from "@/util/supabase/server";
 
 function asSingle<T>(array: T[]) {
@@ -31,8 +31,11 @@ interface QuestionBookNextQuestionModel {
         isCorrect: boolean;
       }
     ];
+    seq: number;
+    questionOrder: number;
   };
   finished: boolean;
+  lastSeq: number;
 }
 
 interface QuestionBook {
@@ -45,16 +48,37 @@ interface QuestionBook {
 }
 
 function getQuestionBookNextQuestion(
-  id: string
+  id: string,
+  seq?: string
 ): Promise<QuestionBookNextQuestionModel | null> {
-  return HttpClient.fetch<ResponseModel<QuestionBookNextQuestionModel>>(
-    `/question-books/${id}/next-question`
-  )
-    .then((r) => r.data)
+  const params = new URLSearchParams({
+    onlyNotAnswered: seq ? "false" : "true",
+  });
+  if (seq !== undefined) {
+    params.set("seq", seq);
+  }
+  return HttpClient.fetch<
+    ResponseModel<{
+      finished: boolean;
+      lastSeq: number;
+      question: QuestionBookNextQuestionModel;
+    }>
+  >(`/question-books/${id}/next-question?${params}`)
+    .then((r) => {
+      return {
+        ...r.data.question,
+        seq: r.data.question.question.questionOrder,
+        finished: r.data.finished,
+        lastSeq: r.data.lastSeq,
+      } as QuestionBookNextQuestionModel;
+    })
     .catch(() => null);
 }
 
-async function getQuestionBook(id: string): Promise<{
+async function getQuestionBook(
+  id: string,
+  seq?: string
+): Promise<{
   questionBook: QuestionBook | null;
   nextQuestion: QuestionBookNextQuestionModel | null;
 }> {
@@ -81,7 +105,7 @@ async function getQuestionBook(id: string): Promise<{
           return null;
         }
       }),
-    getQuestionBookNextQuestion(id),
+    getQuestionBookNextQuestion(id, seq),
   ]);
   return { questionBook, nextQuestion };
 }
@@ -92,15 +116,15 @@ export default async function QuestionBookPage({
 }: {
   params: Promise<{ id: string }>;
   searchParams: Promise<{
-    pagina: string;
+    seq: string;
   }>;
 }) {
-  const { pagina: page = "0" } = await searchParams;
+  const { seq = "1" } = await searchParams;
   const { id } = await params;
 
-  const { questionBook, nextQuestion } = await getQuestionBook(id);
+  const { questionBook, nextQuestion } = await getQuestionBook(id, seq);
 
-  if (questionBook && nextQuestion) {
+  if (questionBook) {
     const breadcrumbItems: BreadcrumbProps["items"] = [
       {
         title: (
@@ -135,7 +159,7 @@ export default async function QuestionBookPage({
                 key: "1",
                 label: "Questões",
                 icon: <QuestionCircleOutlined />,
-                children: (
+                children: nextQuestion ? (
                   <AnswerQuestion
                     questionBookId={questionBook.id}
                     questionId={nextQuestion.question.id}
@@ -144,7 +168,12 @@ export default async function QuestionBookPage({
                     alternatives={nextQuestion.question.questionAlternatives.map(
                       ({ id, text }) => ({ id, text })
                     )}
+                    finished={nextQuestion.finished}
+                    seq={nextQuestion.question.seq}
+                    lastSeq={nextQuestion.lastSeq}
                   />
+                ) : (
+                  <Text>Nenhuma questão encontrada!</Text>
                 ),
               },
             ]}

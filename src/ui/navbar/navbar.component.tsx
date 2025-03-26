@@ -5,7 +5,6 @@ import * as Styled from "./navbar.style";
 import { Button, Skeleton, Tooltip } from "antd";
 import {
   LuBook,
-  LuBookCheck,
   LuCircleDollarSign,
   LuFileQuestion,
   LuFolders,

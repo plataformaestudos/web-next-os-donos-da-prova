@@ -30,7 +30,7 @@ export function ChoosePlanFirstStep({
 
   const filteredPlans = useMemo(() => {
     return plans.filter((plan) => plan.name.toLowerCase().includes(query));
-  }, [query]);
+  }, [query, plans]);
 
   return (
     <>

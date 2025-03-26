@@ -8,18 +8,19 @@ import {
   QuestionContainer,
 } from "./answer-question.style";
 import {
+  ArrowLeftOutlined,
   ArrowRightOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
   StrikethroughOutlined,
 } from "@ant-design/icons";
 import { Button, Flex, Space, Tooltip, Typography } from "antd";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
-import { FaArrowRightArrowLeft } from "react-icons/fa6";
 import Link from "next/link";
 import { TiptapEditor } from "@/ui/tiptap-editor/tiptap-editor.component";
 import { answerQuestion } from "./answer-question.action";
+import { useSearchParams } from "next/navigation";
 
 interface AnswerQuestionProps {
   questionBookId: string;
@@ -30,6 +31,9 @@ interface AnswerQuestionProps {
     id: string;
     text: string;
   }[];
+  seq: number;
+  lastSeq: number;
+  finished: boolean;
 }
 
 export function AnswerQuestion({
@@ -38,6 +42,7 @@ export function AnswerQuestion({
   text,
   comment,
   alternatives,
+  lastSeq,
 }: AnswerQuestionProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<boolean>(false);
@@ -62,7 +67,11 @@ export function AnswerQuestion({
     setDiscardedAlternatives(new Set(discardedAlternatives));
   }
 
+  const params = useSearchParams();
   const isAlternativesDisabled = correctAlternative !== null;
+  const currentSeq = parseInt(params.get("seq") ?? "1");
+  const shouldShowPrev = currentSeq > 1;
+  const shouldShowNext = currentSeq < lastSeq;
 
   return (
     <Container>
@@ -174,23 +183,36 @@ export function AnswerQuestion({
           {comment && showComment && (
             <TiptapEditor editable={false} defaultValue={comment} />
           )}
-          {correctAlternative !== null && (
-            <Link
-              style={{ alignSelf: "flex-end" }}
-              href={`/question-books/${questionBookId}?pagina=${
-                parseInt(
-                  new URLSearchParams(location.search).get("pagina") ?? "0"
-                ) + 1
-              }`}
-            >
-              <Space>
-                Próxima questão
-                <ArrowRightOutlined />
-              </Space>
-            </Link>
-          )}
         </Flex>
       )}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          margin: "0 -15px",
+        }}
+      >
+        <Button type="link" disabled={!shouldShowPrev}>
+          <Link
+            href={`/question-books/${questionBookId}?seq=${currentSeq - 1}`}
+          >
+            <Space>
+              <ArrowLeftOutlined />
+              Questão anterior
+            </Space>
+          </Link>
+        </Button>
+        <Button type="link" disabled={!shouldShowNext}>
+          <Link
+            href={`/question-books/${questionBookId}?seq=${currentSeq + 1}`}
+          >
+            <Space>
+              Próxima questão
+              <ArrowRightOutlined />
+            </Space>
+          </Link>
+        </Button>
+      </div>
     </Container>
   );
 }
