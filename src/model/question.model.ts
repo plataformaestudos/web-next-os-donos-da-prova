@@ -1,6 +1,12 @@
+export enum QuestionType {
+  MULTIPLE_CHOICE = "MULTIPLE_CHOICE",
+  RIGHT_OR_WRONG = "RIGHT_OR_WRONG",
+}
+
 export interface QuestionModel {
   id: string;
   text: string;
+  type: QuestionType;
   comment?: string;
 }
 

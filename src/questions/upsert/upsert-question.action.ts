@@ -1,16 +1,22 @@
 "use server";
 
+import { QuestionType } from "@/model/question.model";
 import { UpsertQuestionDTO } from "../question.dto";
 import { createClient } from "@/util/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 export async function upsertQuestionAndAlternatives(
-  _: {
-    error: string | null;
-  },
-  { id, text, comment, alternatives, modules }: UpsertQuestionDTO
-): Promise<{ error: string | null }> {
+  _: { error: string | null },
+  {
+    id,
+    text,
+    type = QuestionType.MULTIPLE_CHOICE,
+    comment,
+    alternatives,
+    modules,
+  }: UpsertQuestionDTO
+) {
   if (!text) {
     return {
       error: "A pergunta não pode ser vazia",
@@ -30,6 +36,7 @@ export async function upsertQuestionAndAlternatives(
     .upsert({
       id,
       text,
+      type,
       comment,
     })
     .select();
@@ -67,5 +74,9 @@ export async function upsertQuestionAndAlternatives(
 
     revalidatePath(`/questions/${question_id}`);
     redirect(`/questions/${question_id}`);
+
+    return {
+      error: null,
+    };
   }
 }

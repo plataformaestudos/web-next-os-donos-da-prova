@@ -68,6 +68,7 @@ export default async function QuestionBookPage({
       questionBook.nextQuestion;
   }
 
+  console.log(question);
   if (questionBook) {
     const breadcrumbItems: BreadcrumbProps["items"] = [
       {

@@ -24,6 +24,7 @@ export default async function EditQuestionPage({
       `
       id,
       text,
+      type,
       comment,
       alternatives:question_alternatives ( id, text, is_correct ),
       modules:modules_questions ( ...modules(id, name) )
@@ -53,6 +54,7 @@ export default async function EditQuestionPage({
         <PreviewOrEditQuestion
           question={{
             id: question.id,
+            type: question.type,
             text: question.text,
             comment: question.comment,
             alternatives: question.alternatives,

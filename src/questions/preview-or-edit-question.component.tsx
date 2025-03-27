@@ -32,6 +32,7 @@ export function PreviewOrEditQuestion({
       {!editing && question ? (
         <QuestionPreview
           id={question.id}
+          type={question.type}
           text={question.text}
           comment={question.comment}
           alternatives={question.alternatives}
@@ -39,6 +40,7 @@ export function PreviewOrEditQuestion({
       ) : (
         <QuestionForm
           id={question?.id}
+          type={question?.type}
           text={question?.text}
           comment={question?.comment}
           alternatives={question?.alternatives}

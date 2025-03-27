@@ -98,6 +98,7 @@ export default async function QuestionsPage({
                       <Styled.QuestionPreview>
                         <QuestionPreview
                           id={question.id}
+                          type={question.type}
                           text={question.text}
                           alternatives={[]}
                           compact={true}

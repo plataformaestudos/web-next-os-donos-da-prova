@@ -2,13 +2,22 @@
 
 import * as Styled from "./question-form.style";
 
-import { App, Button, Divider, Popconfirm, Select, Typography } from "antd";
+import {
+  App,
+  Button,
+  Divider,
+  Popconfirm,
+  Segmented,
+  Select,
+  Typography,
+} from "antd";
 import { FaChevronDown, FaX } from "react-icons/fa6";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { PlusOutlined } from "@ant-design/icons";
 import { QUESTION_FORM_ID } from "./question-form.constant";
 import { QuestionFormModulesSelection } from "./question-form-modules-selection.component";
+import { QuestionType } from "@/model/question.model";
 import { TiptapEditor } from "@/ui/tiptap-editor/tiptap-editor.component";
 import { useMultipleEditors } from "@/ui/tiptap-editor/use-multiple-editors.component";
 import { useUpsertQuestion } from "./upsert/upsert-question.context";
@@ -18,6 +27,7 @@ const { Text } = Typography;
 interface QuestionFormProps {
   id?: string;
   text?: string;
+  type?: QuestionType;
   comment?: string;
   alternatives?: {
     id: string;
@@ -38,6 +48,7 @@ export function QuestionForm(props: QuestionFormProps) {
 
   const [text, setText] = useState(props.text ?? "");
   const [comment, setComment] = useState(props.comment ?? "");
+  const [type, setType] = useState(props.type ?? QuestionType.MULTIPLE_CHOICE);
   const [alternatives, setAlternatives] = useState<
     { _uiId: string; text: string; id?: string }[]
   >(
@@ -47,8 +58,7 @@ export function QuestionForm(props: QuestionFormProps) {
     ]
   );
   const [correctAlternative, setCorrectAlternative] = useState(
-    props.alternatives?.find((alt) => alt.is_correct)?.id ??
-      alternatives[0]._uiId
+    props.alternatives?.find((alt) => alt.is_correct)?.id ?? null
   );
   const [modules, setModules] = useState(
     props.modules?.map(({ id }) => id) ?? []
@@ -75,11 +85,12 @@ export function QuestionForm(props: QuestionFormProps) {
           upsertQuestion({
             id: props.id,
             text,
+            type,
             comment,
             alternatives: alternatives.map((alt) => ({
               id: alt.id,
               text: alt.text,
-              is_correct: alt.id === correctAlternative,
+              is_correct: alt._uiId === correctAlternative,
             })),
             modules,
           })
@@ -97,6 +108,36 @@ export function QuestionForm(props: QuestionFormProps) {
         <Divider />
         <label htmlFor="alternatives">
           <Styled.Label>Alternativas</Styled.Label>
+          <Segmented
+            style={{ marginBottom: 16 }}
+            value={type}
+            onChange={(value) => {
+              setType(value);
+              if (value === QuestionType.RIGHT_OR_WRONG) {
+                setCorrectAlternative("right");
+                setAlternatives([
+                  {
+                    _uiId: "right",
+                    text: "Certo",
+                  },
+                  {
+                    _uiId: "wrong",
+                    text: "Errado",
+                  },
+                ]);
+              }
+            }}
+            options={[
+              {
+                label: "Múltipla escolha",
+                value: QuestionType.MULTIPLE_CHOICE,
+              },
+              {
+                label: "Certo ou errado",
+                value: QuestionType.RIGHT_OR_WRONG,
+              },
+            ]}
+          />
           {alternatives.map(({ _uiId, text }, index) => (
             <Styled.Alternative key={_uiId}>
               <Button
@@ -153,20 +194,22 @@ export function QuestionForm(props: QuestionFormProps) {
             </Styled.Alternative>
           ))}
         </label>
-        <Button
-          icon={<PlusOutlined />}
-          type="text"
-          onClick={() =>
-            setAlternatives(
-              alternatives.concat({
-                _uiId: Math.random().toString(),
-                text: "",
-              })
-            )
-          }
-        >
-          Adicionar alternativa
-        </Button>
+        {type === QuestionType.MULTIPLE_CHOICE && (
+          <Button
+            icon={<PlusOutlined />}
+            type="text"
+            onClick={() =>
+              setAlternatives(
+                alternatives.concat({
+                  _uiId: Math.random().toString(),
+                  text: "",
+                })
+              )
+            }
+          >
+            Adicionar alternativa
+          </Button>
+        )}
         <Divider />
         <label>
           <Styled.Label>Alternativa correta</Styled.Label>
@@ -208,6 +251,7 @@ export function QuestionForm(props: QuestionFormProps) {
         <label>
           <Styled.Label>Módulos</Styled.Label>
           <QuestionFormModulesSelection
+            multiple={false}
             defaultOptions={
               props.modules?.map(({ id, name }) => ({
                 value: id,
@@ -215,7 +259,7 @@ export function QuestionForm(props: QuestionFormProps) {
               })) ?? []
             }
             defaultValue={modules}
-            onSelectModules={setModules}
+            onSelectModules={(v) => setModules([v as string])}
           />
         </label>
       </form>

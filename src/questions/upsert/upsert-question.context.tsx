@@ -19,14 +19,18 @@ const UpserQuestionContext = createContext(
 );
 
 export const UpserQuestionProvider = ({ children }: PropsWithChildren) => {
-  const [{ error }, formAction, isPending] = useActionState(
+  const [response, formAction, isPending] = useActionState(
     upsertQuestionAndAlternatives,
     { error: null }
   );
 
   return (
     <UpserQuestionContext.Provider
-      value={{ upsertQuestion: formAction, isPending, error }}
+      value={{
+        upsertQuestion: formAction,
+        isPending,
+        error: response?.error ?? null,
+      }}
     >
       {children}
     </UpserQuestionContext.Provider>

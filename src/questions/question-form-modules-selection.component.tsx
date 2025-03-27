@@ -13,13 +13,16 @@ interface SearchModulesProps {
     value: string;
     label: string;
   }[];
-  defaultValue: string[];
-  onSelectModules: (modulesIds: string[]) => void;
+  defaultValue: string | string[];
+  onSelectModules: (modulesIds: string | string[]) => void;
+
+  multiple?: boolean;
 }
 
 export function QuestionFormModulesSelection({
   defaultValue,
   defaultOptions,
+  multiple = true,
   onSelectModules,
 }: SearchModulesProps) {
   const [options, setOptions] = useState<DefaultOptionType[]>(
@@ -46,10 +49,10 @@ export function QuestionFormModulesSelection({
   }, 500);
 
   return (
-    <Select<string[]>
+    <Select
       defaultValue={defaultValue}
       suffixIcon={<SearchOutlined />}
-      mode="multiple"
+      mode={multiple ? "multiple" : undefined}
       filterOption={false}
       options={options}
       onChange={(v) => onSelectModules(v)}
