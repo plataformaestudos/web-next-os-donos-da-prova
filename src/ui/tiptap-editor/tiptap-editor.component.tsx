@@ -165,7 +165,8 @@ export function TiptapEditor({
 
   useEffect(() => {
     editor?.commands.setContent(defaultValue ?? "");
-  }, [defaultValue, editor?.commands]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultValue]);
 
   return (
     <StyledEditorContent

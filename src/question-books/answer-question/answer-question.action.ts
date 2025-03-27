@@ -4,12 +4,10 @@ import HttpClient from "@/util/http-client/fetch-server.util";
 import { ResponseModel } from "@/model/common.model";
 
 export async function answerQuestion({
-  questionId,
-  questionBookId,
+  questionBookQuestionId,
   alternativeId,
 }: {
-  questionId: string;
-  questionBookId: string;
+  questionBookQuestionId: string;
   alternativeId: string;
 }) {
   return HttpClient.fetch<
@@ -17,8 +15,7 @@ export async function answerQuestion({
   >("/user-answers", {
     method: "POST",
     body: JSON.stringify({
-      questionId,
-      questionBookId,
+      questionBookQuestionId,
       alternativeId,
     }),
   }).then((response) => {

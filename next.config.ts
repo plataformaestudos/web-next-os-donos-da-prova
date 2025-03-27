@@ -1,5 +1,3 @@
-import type { NextConfig } from "next";
-
 const routeAlias: {
   [routeInPTBR: string]: string;
 } = {
@@ -20,7 +18,7 @@ const routeAlias: {
   "/perfil": "/profile",
 };
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   async rewrites() {
     return Object.entries(routeAlias).map(([routeName, folderName]) => ({
       source: routeName,
@@ -37,6 +35,7 @@ const nextConfig: NextConfig = {
   compiler: {
     styledComponents: true,
   },
+  output: "standalone",
 };
 
 export default nextConfig;

@@ -1,112 +1,50 @@
-import { Breadcrumb, BreadcrumbProps, Tabs } from "antd";
+import { BarChartOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import {
+  Breadcrumb,
+  BreadcrumbProps,
+  Divider,
+  Flex,
+  Progress,
+  Statistic,
+  Tabs,
+} from "antd";
+import {
+  QuestionBookModel,
+  QuestionBookNextQuestionModel,
+} from "@/question-books/question-book.model";
 
 import { AnswerQuestion } from "@/question-books/answer-question/answer-question.component";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import Link from "next/link";
-import { QuestionCircleOutlined } from "@ant-design/icons";
 import { ResponseModel } from "@/model/common.model";
 import { TabContainer } from "./page.style";
-import { createClient } from "@/util/supabase/server";
 
-function asSingle<T>(array: T[]) {
-  return array as T;
-}
-
-enum QuestionType {
-  MULTIPLE_CHOICE = "MULTIPLE_CHOICE",
-  RIGHT_OR_WRONG = "RIGHT_OR_WRONG",
-}
-
-interface QuestionBookNextQuestionModel {
-  question: {
-    id: string;
-    text: string;
-    comment: string | null;
-    type: QuestionType | null;
-    questionAlternatives: [
-      {
-        id: string;
-        text: string;
-        isCorrect: boolean;
-      }
-    ];
-    seq: number;
-    questionOrder: number;
-  };
-  finished: boolean;
-  lastSeq: number;
-}
-
-interface QuestionBook {
-  id: string;
-  name: string;
-  folder: {
-    id: string;
-    name: string;
-  };
-}
-
-function getQuestionBookNextQuestion(
+function getQuestionBookQuestion(
   id: string,
-  seq?: string
-): Promise<QuestionBookNextQuestionModel | null> {
-  const params = new URLSearchParams({
-    onlyNotAnswered: seq ? "false" : "true",
-  });
+  seq: string,
+  onlyNotAnswered: boolean
+) {
+  const params = new URLSearchParams();
+
   if (seq !== undefined) {
     params.set("seq", seq);
   }
-  return HttpClient.fetch<
-    ResponseModel<{
-      finished: boolean;
-      lastSeq: number;
-      question: QuestionBookNextQuestionModel;
-    }>
-  >(`/question-books/${id}/next-question?${params}`)
-    .then((r) => {
-      return {
-        ...r.data.question,
-        seq: r.data.question.question.questionOrder,
-        finished: r.data.finished,
-        lastSeq: r.data.lastSeq,
-      } as QuestionBookNextQuestionModel;
-    })
+
+  if (onlyNotAnswered !== undefined) {
+    params.set("onlyNotAnswered", onlyNotAnswered.toString());
+  }
+
+  return HttpClient.fetch<ResponseModel<QuestionBookNextQuestionModel>>(
+    `/question-books/${id}/next-question?${params}`
+  )
+    .then((response) => response.data)
     .catch(() => null);
 }
 
-async function getQuestionBook(
-  id: string,
-  seq?: string
-): Promise<{
-  questionBook: QuestionBook | null;
-  nextQuestion: QuestionBookNextQuestionModel | null;
-}> {
-  const supabase = await createClient();
-  const [questionBook, nextQuestion] = await Promise.all([
-    await supabase
-      .from("question_books")
-      .select(
-        `
-    id,
-    name,
-    folder:book_folders(id, name)
-  `
-      )
-      .eq("id", id)
-      .single()
-      .then((response) => {
-        if (response.data) {
-          return {
-            ...response.data,
-            folder: asSingle(response.data.folder),
-          };
-        } else {
-          return null;
-        }
-      }),
-    getQuestionBookNextQuestion(id, seq),
-  ]);
-  return { questionBook, nextQuestion };
+function getQuestionBook(id: string) {
+  return HttpClient.fetch<ResponseModel<QuestionBookModel>>(
+    `/question-books/${id}`
+  ).then((response) => response.data);
 }
 
 export default async function QuestionBookPage({
@@ -118,10 +56,17 @@ export default async function QuestionBookPage({
     seq: string;
   }>;
 }) {
-  const { seq = "1" } = await searchParams;
   const { id } = await params;
+  const { seq } = await searchParams;
+  const questionBook = await getQuestionBook(id);
 
-  const { questionBook, nextQuestion } = await getQuestionBook(id, seq);
+  let question = questionBook.nextQuestion;
+
+  if (seq && parseInt(seq) !== question.orderDetails.questionOrder) {
+    question =
+      (await getQuestionBookQuestion(id, seq, false)) ??
+      questionBook.nextQuestion;
+  }
 
   if (questionBook) {
     const breadcrumbItems: BreadcrumbProps["items"] = [
@@ -158,21 +103,77 @@ export default async function QuestionBookPage({
                 key: "1",
                 label: "Questões",
                 icon: <QuestionCircleOutlined />,
-                children: nextQuestion ? (
+                children: question ? (
                   <AnswerQuestion
+                    key={question.id}
                     questionBookId={questionBook.id}
-                    questionId={nextQuestion.question.id}
-                    comment={nextQuestion.question.comment}
-                    text={nextQuestion.question.text}
-                    alternatives={nextQuestion.question.questionAlternatives.map(
-                      ({ id, text }) => ({ id, text })
-                    )}
-                    finished={nextQuestion.finished}
-                    seq={nextQuestion.question.seq}
-                    lastSeq={nextQuestion.lastSeq}
+                    questionBookQuestionId={question.id}
+                    comment={question.comment}
+                    text={question.text}
+                    alternatives={question.alternatives}
+                    orderDetails={question.orderDetails}
+                    userAnswer={question.userAnswer}
                   />
                 ) : (
                   <p>Nenhuma questão encontrada!</p>
+                ),
+              },
+              {
+                key: "2",
+                label: "Estatísticas",
+                icon: <BarChartOutlined />,
+                children: questionBook.questionBookStats ? (
+                  <Flex gap={48} align="center">
+                    <Flex align="center" gap={24}>
+                      <Flex vertical>
+                        <Statistic
+                          title="Total de questões respondidas"
+                          value={questionBook.questionBookStats.totalAnswers}
+                        />
+                        <Statistic
+                          title="Total de questões no caderno"
+                          value={questionBook.questionBookStats.totalQuestions}
+                        />
+                      </Flex>
+                      <Progress
+                        type="circle"
+                        percent={Math.round(
+                          (questionBook.questionBookStats.totalAnswers /
+                            questionBook.questionBookStats.totalQuestions) *
+                            100
+                        )}
+                        size="small"
+                      />
+                    </Flex>
+                    <Divider
+                      type="vertical"
+                      orientation="center"
+                      style={{ height: 100 }}
+                    />
+                    <Flex align="center" gap={24}>
+                      <Flex vertical>
+                        <Statistic
+                          title="Total de questões no acertadas"
+                          value={questionBook.questionBookStats.correctAnswers}
+                        />
+                        <Statistic
+                          title="Total de questões respondidas"
+                          value={questionBook.questionBookStats.totalAnswers}
+                        />
+                      </Flex>
+                      <Progress
+                        type="circle"
+                        percent={Math.round(
+                          (questionBook.questionBookStats.correctAnswers /
+                            questionBook.questionBookStats.totalAnswers) *
+                            100
+                        )}
+                        size="small"
+                      />
+                    </Flex>
+                  </Flex>
+                ) : (
+                  <p>Nenhuma estatística encontrada!</p>
                 ),
               },
             ]}

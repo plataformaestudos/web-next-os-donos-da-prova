@@ -7,52 +7,57 @@ import {
   Container,
   QuestionContainer,
 } from "./answer-question.style";
+import { Button, Flex, Tooltip, Typography } from "antd";
 import {
-  ArrowLeftOutlined,
-  ArrowRightOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
   StrikethroughOutlined,
 } from "@ant-design/icons";
-import { Button, Flex, Space, Tooltip, Typography } from "antd";
+import {
+  TbArrowNarrowLeft,
+  TbArrowNarrowRight,
+  TbArrowNarrowRightDashed,
+  TbQuestionMark,
+} from "react-icons/tb";
 import { useState, useTransition } from "react";
 
 import Link from "next/link";
+import { QuestionBookNextQuestionModel } from "../question-book.model";
 import { TiptapEditor } from "@/ui/tiptap-editor/tiptap-editor.component";
 import { answerQuestion } from "./answer-question.action";
-import { useSearchParams } from "next/navigation";
 
 interface AnswerQuestionProps {
   questionBookId: string;
-  questionId: string;
+  questionBookQuestionId: string;
   text: string;
   comment: string | null;
   alternatives: {
     id: string;
     text: string;
+    isCorrect: boolean;
   }[];
-  seq: number;
-  lastSeq: number;
-  finished: boolean;
+  orderDetails: QuestionBookNextQuestionModel["orderDetails"];
+  userAnswer: QuestionBookNextQuestionModel["userAnswer"];
 }
 
 export function AnswerQuestion({
   questionBookId,
-  questionId,
+  questionBookQuestionId,
   text,
   comment,
   alternatives,
-  lastSeq,
+  userAnswer,
+  orderDetails,
 }: AnswerQuestionProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<boolean>(false);
   const [correctAlternative, setCorrectAlternative] = useState<string | null>(
-    null
+    (userAnswer && alternatives.find(({ isCorrect }) => isCorrect)?.id) ?? null
   );
   const [showComment, setShowComment] = useState<boolean>(false);
 
   const [selectedAlternative, setSelectedAlternative] = useState<string | null>(
-    null
+    userAnswer?.alternativeId ?? null
   );
   const [discardedAlternatives, setDiscardedAlternatives] = useState<
     Set<string>
@@ -67,11 +72,11 @@ export function AnswerQuestion({
     setDiscardedAlternatives(new Set(discardedAlternatives));
   }
 
-  const params = useSearchParams();
   const isAlternativesDisabled = correctAlternative !== null;
-  const currentSeq = parseInt(params.get("seq") ?? "1");
-  const shouldShowPrev = currentSeq > 1;
-  const shouldShowNext = currentSeq < lastSeq;
+
+  const shouldShowPrev = orderDetails.previousOrder !== null;
+  const shouldShowNext = orderDetails.nextOrder !== null;
+  const shouldShowNextUnanswered = orderDetails.nextUnansweredOrder !== null;
 
   return (
     <Container>
@@ -125,9 +130,8 @@ export function AnswerQuestion({
           setError(false);
           startTransition(() => {
             answerQuestion({
-              questionId,
+              questionBookQuestionId,
               alternativeId: selectedAlternative as string,
-              questionBookId,
             })
               .then((r) => r.data)
               .then(({ correctAlternativeId }) => {
@@ -189,29 +193,47 @@ export function AnswerQuestion({
         style={{
           display: "flex",
           justifyContent: "space-between",
-          margin: "0 -15px",
+          margin: "16px 0 0",
         }}
       >
-        <Button type="link" disabled={!shouldShowPrev}>
-          <Link
-            href={`/question-books/${questionBookId}?seq=${currentSeq - 1}`}
-          >
-            <Space>
-              <ArrowLeftOutlined />
-              Questão anterior
-            </Space>
-          </Link>
-        </Button>
-        <Button type="link" disabled={!shouldShowNext}>
-          <Link
-            href={`/question-books/${questionBookId}?seq=${currentSeq + 1}`}
-          >
-            <Space>
-              Próxima questão
-              <ArrowRightOutlined />
-            </Space>
-          </Link>
-        </Button>
+        <Tooltip title="Questão anterior">
+          <Button disabled={!shouldShowPrev}>
+            <Link
+              href={`/question-books/${questionBookId}?seq=${orderDetails.previousOrder}`}
+            >
+              <Flex gap={4}>
+                <TbArrowNarrowLeft size={20} />
+                <TbQuestionMark size={20} />
+              </Flex>
+            </Link>
+          </Button>
+        </Tooltip>
+        <Flex gap={8}>
+          <Tooltip title="Próxima não resolvida">
+            <Button disabled={!shouldShowNextUnanswered}>
+              <Link
+                href={`/question-books/${questionBookId}?seq=${orderDetails.nextUnansweredOrder}`}
+              >
+                <Flex gap={4}>
+                  <TbQuestionMark size={20} />
+                  <TbArrowNarrowRightDashed size={20} />
+                </Flex>
+              </Link>
+            </Button>
+          </Tooltip>
+          <Tooltip title="Próxima questão">
+            <Button disabled={!shouldShowNext}>
+              <Link
+                href={`/question-books/${questionBookId}?seq=${orderDetails.nextOrder}`}
+              >
+                <Flex gap={4}>
+                  <TbQuestionMark size={20} />
+                  <TbArrowNarrowRight size={20} />
+                </Flex>
+              </Link>
+            </Button>
+          </Tooltip>
+        </Flex>
       </div>
     </Container>
   );
