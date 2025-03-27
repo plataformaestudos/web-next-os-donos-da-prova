@@ -153,7 +153,7 @@ export default async function QuestionBookPage({
                     <Flex align="center" gap={24}>
                       <Flex vertical>
                         <Statistic
-                          title="Total de questões no acertadas"
+                          title="Total de questões acertadas"
                           value={questionBook.questionBookStats.correctAnswers}
                         />
                         <Statistic
