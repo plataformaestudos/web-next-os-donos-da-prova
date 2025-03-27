@@ -34,9 +34,6 @@ const nextConfig: NextConfig = {
       permanent: true,
     }));
   },
-  experimental: {
-    ppr: "incremental",
-  },
   compiler: {
     styledComponents: true,
   },
