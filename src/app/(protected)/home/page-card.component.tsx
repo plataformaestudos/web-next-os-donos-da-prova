@@ -4,6 +4,7 @@ import styled from "styled-components";
 
 export const CardsContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
 
   margin-top: 24px;

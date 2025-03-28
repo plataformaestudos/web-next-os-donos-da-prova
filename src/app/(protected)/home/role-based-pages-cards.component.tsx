@@ -35,8 +35,6 @@ export async function RoleBasedPagesCards() {
       ) as Array<MenuModel>
   );
 
-  console.log(menus);
-
   return (
     <CardsContainer>
       {menus
