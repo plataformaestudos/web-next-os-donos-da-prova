@@ -6,7 +6,3 @@ export function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 }
-
-export async function getAccessTokenClient() {
-  return (await createClient().auth.getSession()).data.session?.access_token;
-}

@@ -69,6 +69,10 @@ const defaultTheme: ThemeConfig = {
       indentSize: 12,
       titleHeight: 32,
     },
+    Skeleton: {
+      paragraphLiHeight: 24,
+      titleHeight: 40,
+    },
   },
 };
 

@@ -23,12 +23,12 @@ const ROLES_IDS = {
 
 export async function verify(roles: Roles[]) {
   const supabase = await createClient();
-  const session = (await supabase.auth.getSession())?.data.session;
-  if (session?.user?.id) {
+  const user = (await supabase.auth.getUser())?.data?.user;
+  if (user?.id) {
     const userProfile = await supabase
       .from("profiles")
       .select("role_id")
-      .match({ user_id: session.user.id })
+      .match({ user_id: user.id })
       .single();
 
     return roles.some((role) => userProfile.data?.role_id === ROLES_IDS[role]);

@@ -27,8 +27,3 @@ export async function createClient() {
     }
   );
 }
-
-export async function getAccessTokenServer() {
-  return (await (await createClient()).auth.getSession()).data.session
-    ?.access_token;
-}

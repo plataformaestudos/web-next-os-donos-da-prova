@@ -67,7 +67,7 @@ export default async function QuestionsPage({
             "use server";
 
             if (modules.length > 0) {
-              redirect(`/questions?modulos=${modules.join(",")}`);
+              redirect(`/questions?modulos=${(modules as string[]).join(",")}`);
             } else {
               redirect("/questions");
             }

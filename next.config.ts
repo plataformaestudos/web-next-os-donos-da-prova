@@ -35,7 +35,7 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
-  output: "standalone",
+  // output: "standalone",
 };
 
 export default nextConfig;
