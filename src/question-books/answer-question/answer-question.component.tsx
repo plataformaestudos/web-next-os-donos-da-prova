@@ -23,12 +23,14 @@ import { useState, useTransition } from "react";
 
 import Link from "next/link";
 import { QuestionBookNextQuestionModel } from "../question-book.model";
+import { QuestionType } from "@/model/question.model";
 import { TiptapEditor } from "@/ui/tiptap-editor/tiptap-editor.component";
 import { answerQuestion } from "./answer-question.action";
 
 interface AnswerQuestionProps {
   questionBookId: string;
   questionBookQuestionId: string;
+  type: QuestionType;
   text: string;
   comment: string | null;
   alternatives: {
@@ -38,16 +40,19 @@ interface AnswerQuestionProps {
   }[];
   orderDetails: QuestionBookNextQuestionModel["orderDetails"];
   userAnswer: QuestionBookNextQuestionModel["userAnswer"];
+  module: QuestionBookNextQuestionModel["module"];
 }
 
 export function AnswerQuestion({
   questionBookId,
   questionBookQuestionId,
   text,
+  type,
   comment,
   alternatives,
   userAnswer,
   orderDetails,
+  module,
 }: AnswerQuestionProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<boolean>(false);
@@ -81,6 +86,14 @@ export function AnswerQuestion({
   return (
     <Container>
       <QuestionContainer>
+        {module && (
+          <Typography.Paragraph
+            style={{ marginBottom: 4, fontSize: 12 }}
+            type="secondary"
+          >
+            Módulo: {module.name}
+          </Typography.Paragraph>
+        )}
         <TiptapEditor editable={false} defaultValue={text} />
         {alternatives.length > 0 && (
           <AlternativesContainer>
@@ -101,21 +114,24 @@ export function AnswerQuestion({
                   }}
                 >
                   <AlternativeLetter $selected={selectedAlternative === id}>
-                    {String.fromCharCode(65 + index)}
+                    {type === QuestionType.MULTIPLE_CHOICE &&
+                      String.fromCharCode(65 + index)}
                   </AlternativeLetter>
                   <TiptapEditor editable={false} defaultValue={text} />
-                  <Tooltip title="Descartar questão" placement="left">
-                    <Button
-                      type="link"
-                      icon={<StrikethroughOutlined />}
-                      onClick={(ev) => {
-                        ev.stopPropagation();
-                        if (!isAlternativesDisabled) {
-                          toggleDiscard(id);
-                        }
-                      }}
-                    />
-                  </Tooltip>
+                  {type === QuestionType.MULTIPLE_CHOICE && (
+                    <Tooltip title="Descartar questão" placement="left">
+                      <Button
+                        type="link"
+                        icon={<StrikethroughOutlined />}
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          if (!isAlternativesDisabled) {
+                            toggleDiscard(id);
+                          }
+                        }}
+                      />
+                    </Tooltip>
+                  )}
                 </Alternative>
               );
             })}

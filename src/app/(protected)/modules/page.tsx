@@ -1,3 +1,4 @@
+import { Roles, verify } from "@/util/roles";
 import {
   loadChildrenModules,
   queryModules,
@@ -7,6 +8,7 @@ import { CreateModuleButton } from "@/modules/create/create-module-button.compon
 import { ModulesTree } from "@/modules/tree/modules-tree.component";
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { SearchModules } from "@/modules/search-modules.component";
+import { redirect } from "next/navigation";
 
 export default async function ModulesPage({
   searchParams,
@@ -15,6 +17,10 @@ export default async function ModulesPage({
     nome: string;
   }>;
 }) {
+  if (!(await verify([Roles.ADMIN, Roles.COLLABORATOR]))) {
+    return redirect("/");
+  }
+
   const { nome: query } = await searchParams;
   const rootModules = await queryModules(query);
 

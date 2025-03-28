@@ -1,3 +1,4 @@
+import { Roles, verify } from "@/util/roles";
 import {
   loadChildrenModules,
   queryModules,
@@ -8,6 +9,7 @@ import { CreateQuestionProvider } from "@/question-books/create/create-question-
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { QuestionBookForm } from "@/question-books/create/question-book-form.component";
 import { createClient } from "@/util/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function NewQuestionBook({
   searchParams,
@@ -16,6 +18,10 @@ export default async function NewQuestionBook({
     pasta: string;
   }>;
 }) {
+  if (!(await verify([Roles.ADMIN, Roles.STUDENT]))) {
+    return redirect("/");
+  }
+
   let backHref = "/question-books";
   const { pasta: folderId } = await searchParams;
   if (folderId) {

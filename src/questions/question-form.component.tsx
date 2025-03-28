@@ -12,7 +12,7 @@ import {
   Typography,
 } from "antd";
 import { FaChevronDown, FaX } from "react-icons/fa6";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { PlusOutlined } from "@ant-design/icons";
 import { QUESTION_FORM_ID } from "./question-form.constant";
@@ -145,9 +145,11 @@ export function QuestionForm(props: QuestionFormProps) {
                 onClick={() => onChangeCorrectAlternative(_uiId, index)}
                 type={correctAlternative === _uiId ? "primary" : "default"}
               >
-                {String.fromCharCode(65 + index)}
+                {type === QuestionType.MULTIPLE_CHOICE &&
+                  String.fromCharCode(65 + index)}
               </Button>
               <TiptapEditor
+                editable={type !== QuestionType.RIGHT_OR_WRONG}
                 placeholder="Alternativa"
                 defaultValue={text}
                 onFocus={onFocus}
@@ -230,10 +232,13 @@ export function QuestionForm(props: QuestionFormProps) {
                 ).index
               )
             }
-            options={alternatives.map(({ _uiId }, index) => ({
+            options={alternatives.map(({ _uiId, text }, index) => ({
               value: _uiId,
               index,
-              label: `Alternativa ${String.fromCharCode(65 + index)}`,
+              label:
+                type === QuestionType.RIGHT_OR_WRONG
+                  ? text
+                  : `Alternativa ${String.fromCharCode(65 + index)}`,
             }))}
           />
         </label>

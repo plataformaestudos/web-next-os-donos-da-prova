@@ -1,4 +1,5 @@
 import { ModuleModel, ModuleViewModel } from "@/model/module.model";
+import { Roles, verify } from "@/util/roles";
 import {
   loadChildrenModules,
   queryModules,
@@ -17,12 +18,17 @@ import { UpsertPlanForm } from "@/plans/upsert/upsert-plan-form.component";
 import { UpsertPlanFormSubmitButton } from "@/plans/upsert/upsert-plan-form-submit-button.component";
 import { UpsertPlanProvider } from "@/plans/upsert/upsert-plan.context";
 import { createClient } from "@/util/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function EditQuestionPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  if (!(await verify([Roles.ADMIN]))) {
+    return redirect("/");
+  }
+
   const supabase = await createClient();
   const { id } = await params;
 

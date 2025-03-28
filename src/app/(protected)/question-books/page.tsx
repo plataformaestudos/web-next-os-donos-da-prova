@@ -1,4 +1,5 @@
 import { Breadcrumb, Button } from "antd";
+import { Roles, verify } from "@/util/roles";
 
 import { CreateFolderButton } from "@/question-books/create-folder/create-folder-button.component";
 import Link from "next/link";
@@ -7,6 +8,7 @@ import { ListQuestionBooks } from "@/question-books/list/list-question-books.com
 import { LuBook } from "react-icons/lu";
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { createClient } from "@/util/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function QuestionBooks({
   searchParams,
@@ -15,6 +17,10 @@ export default async function QuestionBooks({
     pasta: string;
   }>;
 }) {
+  if (!(await verify([Roles.ADMIN, Roles.STUDENT]))) {
+    return redirect("/");
+  }
+
   let newQuestionBookURL = "/question-books/new";
   const { pasta: folderId } = await searchParams;
 

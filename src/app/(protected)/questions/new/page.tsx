@@ -1,6 +1,7 @@
 import * as Styled from "./page.style";
 
 import { Button, Divider } from "antd";
+import { Roles, verify } from "@/util/roles";
 
 import Link from "next/link";
 import { LuArrowLeft } from "react-icons/lu";
@@ -8,6 +9,7 @@ import { QuestionForm } from "@/questions/question-form.component";
 import { QuestionFormSubmitButton } from "@/questions/question-form-submit-button.component";
 import { UpserQuestionProvider } from "@/questions/upsert/upsert-question.context";
 import { createClient } from "@/util/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function NewQuestionPage({
   searchParams,
@@ -16,6 +18,10 @@ export default async function NewQuestionPage({
     modulos: string;
   }>;
 }) {
+  if (!(await verify([Roles.ADMIN, Roles.COLLABORATOR]))) {
+    return redirect("/");
+  }
+
   const supabase = await createClient();
   const { modulos: modules } = await searchParams;
 

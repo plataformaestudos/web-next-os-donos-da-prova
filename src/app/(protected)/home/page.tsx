@@ -1,3 +1,4 @@
+import { RoleBasedPagesCards } from "./role-based-pages-cards.component";
 import { createClient } from "@/util/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -8,9 +9,17 @@ export default async function HomePage() {
   if (error || !data?.user) {
     redirect("/login");
   }
+
+  const userProfile = await supabase
+    .from("profiles")
+    .select("*")
+    .match({ user_id: data.user.id })
+    .single();
+
   return (
-    <main>
-      <p>Hello {data.user.email}</p>
+    <main style={{ padding: 24 }}>
+      <p>Seja bem vindo {userProfile.data?.name}!</p>
+      <RoleBasedPagesCards />
     </main>
   );
 }

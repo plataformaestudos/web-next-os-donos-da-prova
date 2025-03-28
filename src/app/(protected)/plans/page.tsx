@@ -2,14 +2,20 @@ import * as Styled from "./page.style";
 
 import { Button, Flex, List } from "antd";
 import Item, { Meta } from "antd/es/list/Item";
+import { Roles, verify } from "@/util/roles";
 
 import { DeletePlanButton } from "@/plans/delete/delete-plan-button.component";
 import { FaPencil } from "react-icons/fa6";
 import Link from "next/link";
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { createClient } from "@/util/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function PlansPage() {
+  if (!(await verify([Roles.ADMIN]))) {
+    return redirect("/");
+  }
+
   const supabase = await createClient();
 
   const { data: plans } = await supabase.from("subscription_plans").select("*");

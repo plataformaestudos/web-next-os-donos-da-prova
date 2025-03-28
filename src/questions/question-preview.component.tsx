@@ -5,6 +5,7 @@ import * as Styled from "./question-preview.style";
 import {
   QuestionAlternativeModel,
   QuestionModel,
+  QuestionType,
 } from "@/model/question.model";
 
 import { TiptapEditor } from "@/ui/tiptap-editor/tiptap-editor.component";
@@ -15,6 +16,7 @@ type QuestionPreviewProps = QuestionModel & {
 };
 
 export function QuestionPreview({
+  type,
   text,
   alternatives,
   compact = false,
@@ -28,7 +30,8 @@ export function QuestionPreview({
             return (
               <Styled.Alternative key={id}>
                 <Styled.AlternativeLetter $correct={is_correct}>
-                  {String.fromCharCode(65 + index)}
+                  {type === QuestionType.MULTIPLE_CHOICE &&
+                    String.fromCharCode(65 + index)}
                 </Styled.AlternativeLetter>
                 <TiptapEditor editable={false} defaultValue={text} />
               </Styled.Alternative>

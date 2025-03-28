@@ -12,12 +12,14 @@ import {
   QuestionBookModel,
   QuestionBookNextQuestionModel,
 } from "@/question-books/question-book.model";
+import { Roles, verify } from "@/util/roles";
 
 import { AnswerQuestion } from "@/question-books/answer-question/answer-question.component";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import Link from "next/link";
 import { ResponseModel } from "@/model/common.model";
 import { TabContainer } from "./page.style";
+import { redirect } from "next/navigation";
 
 function getQuestionBookQuestion(
   id: string,
@@ -56,20 +58,23 @@ export default async function QuestionBookPage({
     seq: string;
   }>;
 }) {
+  if (!(await verify([Roles.ADMIN, Roles.STUDENT]))) {
+    return redirect("/");
+  }
+
   const { id } = await params;
   const { seq } = await searchParams;
   const questionBook = await getQuestionBook(id);
 
-  let question = questionBook.nextQuestion;
-
-  if (seq && parseInt(seq) !== question.orderDetails.questionOrder) {
-    question =
-      (await getQuestionBookQuestion(id, seq, false)) ??
-      questionBook.nextQuestion;
-  }
-
-  console.log(question);
   if (questionBook) {
+    let question = questionBook.nextQuestion;
+
+    if (seq && parseInt(seq) !== question.orderDetails.questionOrder) {
+      question =
+        (await getQuestionBookQuestion(id, seq, false)) ??
+        questionBook.nextQuestion;
+    }
+
     const breadcrumbItems: BreadcrumbProps["items"] = [
       {
         title: (
@@ -110,10 +115,12 @@ export default async function QuestionBookPage({
                     questionBookId={questionBook.id}
                     questionBookQuestionId={question.id}
                     comment={question.comment}
+                    type={question.type}
                     text={question.text}
                     alternatives={question.alternatives}
                     orderDetails={question.orderDetails}
                     userAnswer={question.userAnswer}
+                    module={question.module}
                   />
                 ) : (
                   <p>Nenhuma questão encontrada!</p>

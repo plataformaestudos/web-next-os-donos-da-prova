@@ -1,6 +1,7 @@
 import * as Styled from "./page.style";
 
 import { Button, Divider } from "antd";
+import { Roles, verify } from "@/util/roles";
 
 import Link from "next/link";
 import { LuArrowLeft } from "react-icons/lu";
@@ -9,12 +10,17 @@ import { QuestionFormSubmitButton } from "@/questions/question-form-submit-butto
 import { QuestionTitle } from "@/questions/question-title.component";
 import { UpserQuestionProvider } from "@/questions/upsert/upsert-question.context";
 import { createClient } from "@/util/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function EditQuestionPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  if (!(await verify([Roles.ADMIN, Roles.COLLABORATOR]))) {
+    return redirect("/");
+  }
+
   const supabase = await createClient();
   const { id } = await params;
 
