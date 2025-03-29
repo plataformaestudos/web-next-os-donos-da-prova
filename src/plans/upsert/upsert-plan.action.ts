@@ -1,9 +1,11 @@
 "use server";
 
+import { revalidatePath, revalidateTag } from "next/cache";
+
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { UpsertPlanDTO } from "./upsert-plan.dto";
 import { createClient } from "@/util/supabase/server";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 
 export async function upsertPlan(
   _: {
@@ -39,6 +41,7 @@ export async function upsertPlan(
       }))
     );
 
+    revalidateTag(CACHE_TAGS.PLANS);
     revalidatePath("/plans");
     revalidatePath(`/plans/${plan.id}`);
     redirect(`/plans/${plan.id}`);

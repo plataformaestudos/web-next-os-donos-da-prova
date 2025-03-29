@@ -1,7 +1,9 @@
 "use server";
 
+import { revalidatePath, revalidateTag } from "next/cache";
+
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { createClient } from "@/util/supabase/server";
-import { revalidatePath } from "next/cache";
 
 export async function updateModule(
   _: {
@@ -31,7 +33,8 @@ export async function updateModule(
     };
   }
 
-  revalidatePath(`/modules`);
+  revalidateTag(CACHE_TAGS.MODULES);
+  revalidatePath("/modules");
   revalidatePath(`/modules/${id}`);
 
   return { error: null };

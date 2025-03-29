@@ -1,5 +1,6 @@
 "use server";
 
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import { ModuleModel } from "@/model/module.model";
 import { ResponseModel } from "@/model/common.model";
@@ -10,6 +11,9 @@ export async function loadChildrenModules(moduleId: string) {
     `/modules/${moduleId}/child-modules`,
     {
       method: "GET",
+      next: {
+        tags: [CACHE_TAGS.MODULES],
+      },
     }
   ).then((response) => {
     return response.data
@@ -25,6 +29,9 @@ export async function queryModules(query?: string, parentModuleId?: string) {
       "/modules/root-modules",
       {
         method: "GET",
+        next: {
+          tags: [CACHE_TAGS.MODULES],
+        },
       }
     );
   } else {
@@ -37,6 +44,9 @@ export async function queryModules(query?: string, parentModuleId?: string) {
       `/modules?${queryParams.toString()}`,
       {
         method: "GET",
+        next: {
+          tags: [CACHE_TAGS.MODULES],
+        },
       }
     );
   }

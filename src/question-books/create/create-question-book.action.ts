@@ -1,10 +1,12 @@
 "use server";
 
+import { revalidatePath, revalidateTag } from "next/cache";
+
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import { QuestionBookDTO } from "./question-book.dto";
 import { ResponseModel } from "@/model/common.model";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 
 export async function createQuestionBook(
   _: {
@@ -32,6 +34,7 @@ export async function createQuestionBook(
     return { success: false, error: "err" };
   }
 
+  revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
   revalidatePath(`/question-books/${data.id}`);
   redirect(`/question-books/${data.id}`);
 }

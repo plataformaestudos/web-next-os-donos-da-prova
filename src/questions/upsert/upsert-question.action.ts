@@ -1,10 +1,12 @@
 "use server";
 
+import { revalidatePath, revalidateTag } from "next/cache";
+
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { QuestionType } from "@/model/question.model";
 import { UpsertQuestionDTO } from "../question.dto";
 import { createClient } from "@/util/supabase/server";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 
 export async function upsertQuestionAndAlternatives(
   _: { error: string | null },
@@ -72,6 +74,7 @@ export async function upsertQuestionAndAlternatives(
       );
     }
 
+    revalidateTag(CACHE_TAGS.QUESTIONS);
     revalidatePath(`/questions/${question_id}`);
     redirect(`/questions/${question_id}`);
 

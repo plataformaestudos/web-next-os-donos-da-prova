@@ -1,14 +1,17 @@
 "use server";
 
+import { revalidatePath, revalidateTag } from "next/cache";
+
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { createClient } from "@/util/supabase/server";
-import { revalidatePath } from "next/cache";
 
 export async function deleteModule(id: string) {
   const supabase = await createClient();
   try {
     await supabase.from("modules").delete().match({ id });
 
-    revalidatePath(`/modules`);
+    revalidateTag(CACHE_TAGS.MODULES);
+    revalidatePath("/modules");
   } catch {
     return false;
   }
@@ -22,7 +25,8 @@ export async function unlinkModule(id: string, parentModuleId: string) {
       parent_module_id: parentModuleId,
     });
 
-    revalidatePath(`/modules`);
+    revalidateTag(CACHE_TAGS.MODULES);
+    revalidatePath("/modules");
   } catch {
     return false;
   }

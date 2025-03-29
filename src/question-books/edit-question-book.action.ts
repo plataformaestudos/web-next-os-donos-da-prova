@@ -1,7 +1,9 @@
 "use server";
 
+import { revalidatePath, revalidateTag } from "next/cache";
+
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { createClient } from "@/util/supabase/server";
-import { revalidatePath } from "next/cache";
 
 export async function editQuestionBook({
   id,
@@ -35,6 +37,7 @@ export async function editQuestionBook({
     return { success: true, error: error.message };
   }
 
+  revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
   revalidatePath(`/question-books`);
   revalidatePath(`/question-books/${data.id}`);
 

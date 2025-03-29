@@ -9,6 +9,7 @@ import {
   moduleModelToViewModelAdapter,
 } from "@/modules/modules.util";
 
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
@@ -66,7 +67,13 @@ export default async function EditQuestionPage({
     planModules = await HttpClient.fetch<ResponseModel<ModuleModel[]>>(
       `/modules/tree_by_ids?ids=${plan.modules.join(
         ","
-      )}&show_tree_parents=true`
+      )}&show_tree_parents=true`,
+      {
+        method: "GET",
+        next: {
+          tags: [CACHE_TAGS.MODULES],
+        },
+      }
     ).then((r) => r.data?.map(moduleModelToViewModelAdapter) ?? []);
   }
 

@@ -1,10 +1,12 @@
 "use server";
 
+import { revalidatePath, revalidateTag } from "next/cache";
+
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { CreateModuleDTO } from "../module.dto";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import { ModuleModel } from "@/model/module.model";
 import { ResponseModel } from "@/model/common.model";
-import { revalidatePath } from "next/cache";
 
 export async function createModule({
   parentModuleId,
@@ -40,6 +42,7 @@ export async function createModule({
   }
 
   revalidatePath(`/modules/${data.id}`);
+  revalidateTag(CACHE_TAGS.MODULES);
 
   return { success: true, error: null };
 }

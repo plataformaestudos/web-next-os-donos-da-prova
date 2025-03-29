@@ -1,3 +1,4 @@
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import { MenuModel } from "@/model/menu.model";
 import { ResponseModel } from "@/model/common.model";
@@ -9,6 +10,9 @@ export function useMenus() {
     queryFn: async () =>
       HttpClient.fetch<ResponseModel<MenuModel[]>>("/menu/menus", {
         method: "GET",
+        next: {
+          tags: [CACHE_TAGS.MENUS],
+        },
       }).then(
         (response) =>
           response.data?.sort(

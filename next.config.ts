@@ -35,6 +35,11 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
+  experimental: {
+    staleTimes: {
+      dynamic: 30,
+    },
+  },
   // output: "standalone",
 };
 

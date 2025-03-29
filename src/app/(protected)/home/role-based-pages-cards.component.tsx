@@ -7,6 +7,7 @@ import {
   LuHouse,
 } from "react-icons/lu";
 
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { CgProfile } from "react-icons/cg";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import Link from "next/link";
@@ -27,6 +28,9 @@ export async function RoleBasedPagesCards() {
     "/menu/menus",
     {
       method: "GET",
+      next: {
+        tags: [CACHE_TAGS.MENUS],
+      },
     }
   ).then(
     (response) =>

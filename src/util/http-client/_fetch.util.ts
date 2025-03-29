@@ -7,6 +7,7 @@ export const customFetch = <T>(
 ) => {
   const url = baseUrl ? `${baseUrl}${resource}` : resource;
   return fetch(url, {
+    cache: "force-cache",
     headers: {
       ...opts.headers,
       Authorization: `Bearer ${token}`,

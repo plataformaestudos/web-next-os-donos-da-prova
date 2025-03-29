@@ -1,9 +1,11 @@
 "use server";
 
+import { revalidatePath, revalidateTag } from "next/cache";
+
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import { ModuleModel } from "@/model/module.model";
 import { ResponseModel } from "@/model/common.model";
-import { revalidatePath } from "next/cache";
 
 export async function createFolder({ name }: { name: string }): Promise<{
   success: boolean | null;
@@ -30,6 +32,7 @@ export async function createFolder({ name }: { name: string }): Promise<{
     return { success: true, error };
   }
 
+  revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
   revalidatePath(`/question-books`);
 
   return { success: true, error: null };

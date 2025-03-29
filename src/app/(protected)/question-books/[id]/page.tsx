@@ -15,6 +15,7 @@ import {
 import { Roles, verify } from "@/util/roles";
 
 import { AnswerQuestion } from "@/question-books/answer-question/answer-question.component";
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import Link from "next/link";
 import { ResponseModel } from "@/model/common.model";
@@ -37,7 +38,13 @@ function getQuestionBookQuestion(
   }
 
   return HttpClient.fetch<ResponseModel<QuestionBookNextQuestionModel>>(
-    `/question-books/${id}/next-question?${params}`
+    `/question-books/${id}/next-question?${params}`,
+    {
+      method: "GET",
+      next: {
+        tags: [CACHE_TAGS.QUESTION_BOOKS],
+      },
+    }
   )
     .then((response) => response.data)
     .catch(() => null);
@@ -45,7 +52,13 @@ function getQuestionBookQuestion(
 
 function getQuestionBook(id: string) {
   return HttpClient.fetch<ResponseModel<QuestionBookModel>>(
-    `/question-books/${id}`
+    `/question-books/${id}`,
+    {
+      method: "GET",
+      next: {
+        tags: [CACHE_TAGS.QUESTION_BOOKS],
+      },
+    }
   ).then((response) => response.data);
 }
 
