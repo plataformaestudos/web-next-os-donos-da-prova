@@ -1,4 +1,4 @@
-import { Card, CardsContainer } from "./page-card.component";
+import { Card, CardLink, CardsContainer } from "./page-card.component";
 import {
   LuBook,
   LuCircleDollarSign,
@@ -10,7 +10,6 @@ import {
 import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { CgProfile } from "react-icons/cg";
 import HttpClient from "@/util/http-client/fetch-server.util";
-import Link from "next/link";
 import { MenuModel } from "@/model/menu.model";
 import { ResponseModel } from "@/model/common.model";
 
@@ -44,12 +43,12 @@ export async function RoleBasedPagesCards() {
       {menus
         .filter((menu) => menu.link !== "/home")
         .map((menu) => (
-          <Link key={menu.id} href={menu.link}>
+          <CardLink key={menu.id} href={menu.link}>
             <Card>
               {icons[menu.icon as keyof typeof icons]}
               <h3>{menu.description}</h3>
             </Card>
-          </Link>
+          </CardLink>
         ))}
     </CardsContainer>
   );

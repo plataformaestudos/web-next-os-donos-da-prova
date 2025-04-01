@@ -1,4 +1,4 @@
-import { Flex, Form, FormInstance, Input, Typography } from "antd";
+import { Col, Flex, Form, FormInstance, Input, Row, Typography } from "antd";
 
 import { MaskedInput } from "@/ui/masked-input/masked-input.component";
 
@@ -54,30 +54,36 @@ export function PersonalInfoSecondStep({
           <Input />
         </Form.Item>
 
-        <Flex gap={12}>
-          <Form.Item
-            style={{ flex: 1 }}
-            label="Senha"
-            name="password"
-            rules={[{ required: true, message: "Por favor preencha a senha" }]}
-          >
-            <Input.Password />
-          </Form.Item>
+        <Row gutter={16}>
+          <Col span={24} md={12}>
+            <Form.Item
+              style={{ flex: 1 }}
+              label="Senha"
+              name="password"
+              rules={[
+                { required: true, message: "Por favor preencha a senha" },
+              ]}
+            >
+              <Input.Password />
+            </Form.Item>
+          </Col>
 
-          <Form.Item
-            style={{ flex: 1 }}
-            label="Confirmar a senha"
-            name="confirmPassword"
-            rules={[
-              {
-                required: true,
-                message: "Por favor preencha a confirmação da senha",
-              },
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
-        </Flex>
+          <Col span={24} md={12}>
+            <Form.Item
+              style={{ flex: 1 }}
+              label="Confirmar a senha"
+              name="confirmPassword"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor preencha a confirmação da senha",
+                },
+              ]}
+            >
+              <Input.Password />
+            </Form.Item>
+          </Col>
+        </Row>
       </Form>
     </>
   );

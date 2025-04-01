@@ -10,30 +10,20 @@ export const Container = styled.div`
 
 export const Card = styled.div`
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
   width: 100%;
-  max-width: 896px;
-  height: 500px;
+  max-width: 300px;
 
+  padding: 28px 16px 16px;
+  margin: 24px;
   border-radius: 6px;
-`;
 
-export const LogoContainer = styled.div`
-  width: 50%;
-  height: 100%;
-
-  img {
-    border-radius: 6px 0 0 6px;
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-  }
-`;
-
-export const FormContainer = styled.div`
-  width: 50%;
-  height: 100%;
-  padding: 32px;
   background-color: ${({ theme }) => theme.colorBgElevated};
-  border-radius: 0 6px 6px 0;
-  text-align: center;
+
+  h2 {
+    margin: 0;
+  }
 `;

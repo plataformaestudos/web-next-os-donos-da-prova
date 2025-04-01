@@ -12,10 +12,10 @@ export const Container = styled.div`
 `;
 
 export const Card = styled.div`
-  width: 100%;
-  width: 896px;
-  max-width: calc(100% - 100px);
-  height: calc(100% - 100px);
+  width: calc(100% - 24px);
+  height: calc(100% - 24px);
+  max-width: 896px;
+  max-height: 896px;
   padding: 24px;
 
   border-radius: 6px;
@@ -54,6 +54,10 @@ export const PlanCard = styled.div<{ $selected: boolean }>`
 
   flex-basis: calc(50% - 6px);
 
+  @media (max-width: 640px) {
+    flex-basis: 100%;
+  }
+
   &:hover {
     border-color: ${({ theme }) => theme.colorPrimaryActive};
   }
@@ -73,6 +77,10 @@ export const PlansContainer = styled.div`
   flex-wrap: wrap;
   gap: 12px;
   padding: 0 16px 16px 0;
+
+  @media (max-width: 640px) {
+    padding: 0;
+  }
 `;
 
 export const PlansModules = styled.div`

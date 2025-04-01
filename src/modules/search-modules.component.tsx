@@ -29,7 +29,7 @@ export const SearchModules = () => {
       size="large"
       allowClear
       style={{
-        minWidth: 300,
+        width: 300,
       }}
       onChange={(ev) => handleSearch(ev.target.value)}
       defaultValue={searchParams.get("nome")?.toString()}

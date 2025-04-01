@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import styled from "styled-components";
 
 export const CardsContainer = styled.div`
@@ -18,8 +19,14 @@ export const Card = styled.div`
   justify-content: center;
   gap: 12px;
 
-  width: 160px;
+  width: 100%;
   height: 160px;
+
+  @media (min-width: 640px) {
+    width: 160px;
+    height: 160px;
+  }
+
   padding: 18px 24px;
   background-color: ${({ theme }) => theme.colorFillContent};
   border-radius: 12px;
@@ -33,5 +40,13 @@ export const Card = styled.div`
 
   &:hover {
     background-color: ${({ theme }) => theme.colorFillContentHover};
+  }
+`;
+
+export const CardLink = styled(Link)`
+  flex-basis: calc(50% - 8px);
+
+  @media (min-width: 640px) {
+    flex-basis: auto;
   }
 `;

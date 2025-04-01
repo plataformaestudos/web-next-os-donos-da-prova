@@ -37,7 +37,6 @@ export function ChoosePlanFirstStep({
       <Typography.Paragraph>Escolha seu plano</Typography.Paragraph>
       <div
         style={{
-          paddingRight: 16,
           marginBottom: 12,
         }}
       >

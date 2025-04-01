@@ -188,12 +188,18 @@ const Container = styled.div`
 
 const GroupsContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   margin: 12px 0;
   gap: 8px;
 `;
 
 const Group = styled.div`
-  width: 50%;
+  width: 100%;
+
+  @media (min-width: 640px) {
+    width: 50%;
+  }
+
   background-color: ${({ theme }) => theme.colorBgContainerDisabled};
   border: 1px solid ${({ theme }) => theme.colorBorder};
   padding: 6px 8px;

@@ -5,7 +5,6 @@ import * as Styled from "./page.style";
 import { App, Button, Form, Input, Typography } from "antd";
 import { login, signup } from "./actions";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -48,61 +47,51 @@ export default function LoginPage() {
   return (
     <Styled.Container>
       <Styled.Card>
-        <Styled.LogoContainer>
-          <Image
-            width={448}
-            height={448}
-            src="/images/os-donos-logo.jpeg"
-            alt="Logo"
-          />
-        </Styled.LogoContainer>
-        <Styled.FormContainer>
-          <Title level={2}>Login</Title>
-          <Form form={form} layout="vertical">
-            <Form.Item
-              label={<span>Email</span>}
-              name="email"
-              rules={[
-                { required: true, message: "Por favor, insira seu email!" },
-                { type: "email", message: "Email inválido!" },
-              ]}
+        <Title level={2}>Login</Title>
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label={<span>Email</span>}
+            name="email"
+            rules={[
+              { required: true, message: "Por favor, insira seu email!" },
+              { type: "email", message: "Email inválido!" },
+            ]}
+          >
+            <Input type="email" placeholder="Digite seu email" size="large" />
+          </Form.Item>
+
+          <Form.Item
+            label={<span>Senha</span>}
+            name="password"
+            rules={[
+              { required: true, message: "Por favor, insira sua senha!" },
+            ]}
+          >
+            <Input.Password placeholder="Digite sua senha" size="large" />
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              type="primary"
+              block
+              loading={loading}
+              onClick={() => onFinish(form.getFieldsValue(), "login")}
             >
-              <Input type="email" placeholder="Digite seu email" size="large" />
-            </Form.Item>
+              Entrar
+            </Button>
+          </Form.Item>
 
-            <Form.Item
-              label={<span>Senha</span>}
-              name="password"
-              rules={[
-                { required: true, message: "Por favor, insira sua senha!" },
-              ]}
+          <div>
+            <span>Não tem uma conta? </span>
+            <Button
+              type="link"
+              onClick={() => router.push("/signup")}
+              style={{ padding: 0 }}
             >
-              <Input.Password placeholder="Digite sua senha" size="large" />
-            </Form.Item>
-
-            <Form.Item>
-              <Button
-                type="primary"
-                block
-                loading={loading}
-                onClick={() => onFinish(form.getFieldsValue(), "login")}
-              >
-                Entrar
-              </Button>
-            </Form.Item>
-
-            <div>
-              <span>Não tem uma conta? </span>
-              <Button
-                type="link"
-                onClick={() => router.push("/signup")}
-                style={{ padding: 0 }}
-              >
-                Cadastre-se
-              </Button>
-            </div>
-          </Form>
-        </Styled.FormContainer>
+              Cadastre-se
+            </Button>
+          </div>
+        </Form>
       </Styled.Card>
     </Styled.Container>
   );
