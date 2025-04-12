@@ -131,6 +131,7 @@ export function ModulesTree(props: ModulesTreeProps) {
       ? props.defaultCheckedKeys ?? props.modules.map(({ id }) => id)
       : []
   );
+  const [autoExpandParent, setAutoExpandParent] = useState(true);
   const [tree, setTree] = useState(setupTree(props.modules, props.autoExpand));
 
   useEffect(() => {
@@ -146,10 +147,13 @@ export function ModulesTree(props: ModulesTreeProps) {
   return (
     <Tree
       showLine={true}
-      autoExpandParent
+      autoExpandParent={autoExpandParent}
       defaultCheckedKeys={props.defaultCheckedKeys}
       expandedKeys={expandadedKeys}
-      onExpand={(keys) => setExpandedKeys(keys as string[])}
+      onExpand={(keys) => {
+        setExpandedKeys(keys as string[]);
+        setAutoExpandParent(false);
+      }}
       loadedKeys={loadedKeys}
       onLoad={(lk) => setLoadedKeys(lk as string[])}
       rootStyle={{
