@@ -27,8 +27,8 @@ export const Card = styled.div`
 
 export const Header = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
 `;
 
 export const Footer = styled.div`
@@ -119,7 +119,8 @@ export const Content = styled.div`
 
   margin-bottom: 24px;
 
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   &::-webkit-scrollbar {
     height: 6px;

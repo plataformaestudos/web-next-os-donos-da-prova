@@ -37,11 +37,11 @@ function SwitcherIcon({
 }) {
   if (isLeaf) return null;
   return loading ? (
-    <LoadingOutlined />
+    <LoadingOutlined style={{ fontSize: 16 }} />
   ) : expanded ? (
-    <FolderOpenOutlined />
+    <FolderOpenOutlined style={{ fontSize: 16 }} />
   ) : (
-    <FolderOutlined />
+    <FolderOutlined style={{ fontSize: 16 }} />
   );
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
-import { Button, Divider, Form, Typography } from "antd";
+import { Button, Divider, Form, Steps, Typography } from "antd";
 import { Card, Container, Content, Footer, Header } from "./signup.style";
 import { PaymentInfo, PaymentInfoThirdStep } from "./payment-info.component";
 import {
@@ -11,9 +11,9 @@ import {
 import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { ChoosePlanFirstStep } from "./choose-plan.component";
-import Image from "next/image";
 import Title from "antd/es/typography/Title";
 import { signup } from "./signup.action";
+import { useIsMobile } from "@/util/use-media-query.hook";
 
 const useForm = <T,>() => {
   const [isValid, setIsFormValid] = useState<boolean | null>(null);
@@ -47,6 +47,8 @@ export default function SignupSteps({
     }[];
   }[];
 }) {
+  const isMobile = useIsMobile();
+
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -76,19 +78,38 @@ export default function SignupSteps({
     <Container>
       <Card>
         <Header>
-          <Image
-            width={56}
-            height={56}
-            style={{ borderRadius: 8 }}
-            src="/images/os-donos-logo.jpeg"
-            alt="Logo"
-          />
-          <Title level={2} style={{ margin: 0 }}>
+          <Title level={2} style={{ marginBottom: 24, marginTop: 0 }}>
             Cadastro
           </Title>
-          <Typography.Text style={{ fontSize: 12, color: "inherit" }}>
-            passo {currentStep}/3
-          </Typography.Text>
+          {isMobile !== null && (
+            <Steps
+              responsive={false}
+              type={isMobile ? "inline" : "default"}
+              current={currentStep - 1}
+              onChange={(step) => {
+                if (
+                  (step === 1 && !selectedPlan) ||
+                  (step === 2 && !personalInfoFormValid)
+                ) {
+                  return;
+                }
+                setCurrentStep(step + 1);
+              }}
+              items={[
+                {
+                  title: "Plano",
+                },
+                {
+                  title: "Dados pessoais",
+                  disabled: !selectedPlan,
+                },
+                {
+                  title: "Pagamento",
+                  disabled: !personalInfoFormValid,
+                },
+              ]}
+            />
+          )}
         </Header>
         <Divider />
         <Content>

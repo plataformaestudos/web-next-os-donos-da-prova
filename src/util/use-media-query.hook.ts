@@ -8,7 +8,7 @@ export const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 type UseMediaQueryOptions = {
-  defaultValue?: boolean;
+  defaultValue?: boolean | null;
   initializeWithValue?: boolean;
 };
 
@@ -18,12 +18,12 @@ export function useMediaQuery(
     defaultValue = false,
     initializeWithValue = true,
   }: UseMediaQueryOptions = {}
-): boolean {
+): boolean | null {
   const getMatches = (query: string): boolean => {
     return window.matchMedia(query).matches;
   };
 
-  const [matches, setMatches] = useState<boolean>(() => {
+  const [matches, setMatches] = useState<boolean | null>(() => {
     if (initializeWithValue) {
       return getMatches(query);
     }
@@ -62,7 +62,7 @@ export function useMediaQuery(
 
 export function useIsMobile() {
   return useMediaQuery("(max-width: 640px)", {
-    defaultValue: false,
+    defaultValue: null,
     initializeWithValue: false,
   });
 }
