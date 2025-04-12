@@ -167,32 +167,34 @@ export function QuestionForm(props: QuestionFormProps) {
                   );
                 }}
               />
-              <Popconfirm
-                okText="Remover"
-                cancelText="Cancelar"
-                disabled={!text}
-                placement="left"
-                title="Você tem certeza que quer remover essa alternativa?"
-                onConfirm={() =>
-                  setAlternatives(
-                    alternatives.filter((alt) => alt._uiId !== _uiId)
-                  )
-                }
-              >
-                <Button
-                  icon={<FaX size={10} />}
-                  size="small"
-                  type="text"
-                  onClick={
-                    !text
-                      ? () =>
-                          setAlternatives(
-                            alternatives.filter((alt) => alt._uiId !== _uiId)
-                          )
-                      : undefined
+              {type === QuestionType.MULTIPLE_CHOICE && (
+                <Popconfirm
+                  okText="Remover"
+                  cancelText="Cancelar"
+                  disabled={!text}
+                  placement="left"
+                  title="Você tem certeza que quer remover essa alternativa?"
+                  onConfirm={() =>
+                    setAlternatives(
+                      alternatives.filter((alt) => alt._uiId !== _uiId)
+                    )
                   }
-                />
-              </Popconfirm>
+                >
+                  <Button
+                    icon={<FaX size={10} />}
+                    size="small"
+                    type="text"
+                    onClick={
+                      !text
+                        ? () =>
+                            setAlternatives(
+                              alternatives.filter((alt) => alt._uiId !== _uiId)
+                            )
+                        : undefined
+                    }
+                  />
+                </Popconfirm>
+              )}
             </Styled.Alternative>
           ))}
         </label>
@@ -237,7 +239,7 @@ export function QuestionForm(props: QuestionFormProps) {
               index,
               label:
                 type === QuestionType.RIGHT_OR_WRONG
-                  ? text
+                  ? text?.replace(/<.*?>/g, "")
                   : `Alternativa ${String.fromCharCode(65 + index)}`,
             }))}
           />

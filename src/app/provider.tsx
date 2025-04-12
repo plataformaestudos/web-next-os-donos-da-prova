@@ -66,8 +66,8 @@ const defaultTheme: ThemeConfig = {
   },
   components: {
     Tree: {
-      indentSize: 12,
-      titleHeight: 32,
+      // indentSize: 12,
+      // titleHeight: 32,
     },
     Skeleton: {
       paragraphLiHeight: 24,

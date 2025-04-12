@@ -8,11 +8,11 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Acme Dashboard",
-    default: "Acme Dashboard",
+    template: "%s | Os Donos da Prova",
+    default: "Os Donos da Prova",
   },
-  description: "The official Next.js Learn Dashboard built with App Router.",
-  metadataBase: new URL("https://next-learn-dashboard.vercel.sh"),
+  description: "Os Donos da Prova concursos",
+  metadataBase: new URL("https://www.osdonosdaprova.com.br/"),
 };
 
 export default async function RootLayout({

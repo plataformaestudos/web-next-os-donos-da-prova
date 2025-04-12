@@ -30,7 +30,7 @@ export const ListContainer = styled.div`
 
   border-radius: 6px;
 
-  padding: 6px 24px;
+  padding: 6px 24px 16px;
 `;
 
 export const QuestionPreview = styled.div`

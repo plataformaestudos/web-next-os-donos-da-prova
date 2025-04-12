@@ -145,6 +145,7 @@ export function ModulesTree(props: ModulesTreeProps) {
 
   return (
     <Tree
+      showLine={true}
       autoExpandParent
       defaultCheckedKeys={props.defaultCheckedKeys}
       expandedKeys={expandadedKeys}
@@ -191,13 +192,13 @@ export function ModulesTree(props: ModulesTreeProps) {
       }}
       titleRender={({ key, title, parentModuleId, isLeaf }) => (
         <ModuleTreeItemTitle
-          onClick={() =>
+          onClick={() => {
             setExpandedKeys(
               expandadedKeys.includes(key)
-                ? expandadedKeys.filter((key) => key !== key)
+                ? expandadedKeys.filter((expandedKey) => expandedKey !== key)
                 : expandadedKeys.concat(key)
-            )
-          }
+            );
+          }}
           id={key}
           title={title}
           isLeaf={isLeaf}

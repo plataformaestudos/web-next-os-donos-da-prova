@@ -31,12 +31,14 @@ export async function RoleBasedPagesCards() {
         tags: [CACHE_TAGS.MENUS],
       },
     }
-  ).then(
-    (response) =>
-      response.data?.sort(
-        ({ order: orderA }, { order: orderB }) => orderA - orderB
-      ) as Array<MenuModel>
-  );
+  )
+    .then(
+      (response) =>
+        response.data?.sort(
+          ({ order: orderA }, { order: orderB }) => orderA - orderB
+        ) as Array<MenuModel>
+    )
+    .catch(() => []);
 
   return (
     <CardsContainer>

@@ -1,15 +1,18 @@
 import * as Styled from "./page.style";
 
-import { Button, Divider, Flex, List, Popover } from "antd";
+import { Button, Divider, Flex, List, Pagination, Popover } from "antd";
 import Item, { Meta } from "antd/es/list/Item";
 
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { DeleteQuestionButton } from "@/questions/delete/delete-question-button.component";
 import { FaPencil } from "react-icons/fa6";
+import HttpClient from "@/util/http-client/fetch-server.util";
 import Link from "next/link";
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { QuestionFormModulesSelection } from "@/questions/question-form-modules-selection.component";
+import { QuestionModel } from "@/model/question.model";
 import { QuestionPreview } from "@/questions/question-preview.component";
-import { createClient } from "@/util/supabase/server";
+import { ResponseModel } from "@/model/common.model";
 import { redirect } from "next/navigation";
 
 function EditQuestionButton({ id }: { id: string }) {
@@ -27,33 +30,43 @@ export default async function QuestionsPage({
   searchParams,
 }: {
   searchParams: Promise<{
+    pagina: string;
     modulos: string;
   }>;
 }) {
+  let total = 0;
   let newQuestionURL = "/questions/new";
-  const { modulos: modules } = await searchParams;
-  const supabase = await createClient();
+  const { pagina: page, modulos: modulesIds } = await searchParams;
 
-  const query = supabase
-    .from("questions")
-    .select("*, modules_questions!inner(module_id)");
+  const search = new URLSearchParams();
 
-  let defaultOptions: { value: string; label: string }[] = [];
-  if (modules) {
-    newQuestionURL += `?modulos=${modules}`;
-    query.in("modules_questions.module_id", modules.split(","));
-
-    const { data } = await supabase
-      .from("modules")
-      .select("value:id, label:name")
-      .in("id", modules.split(","));
-
-    if (data) {
-      defaultOptions = data;
-    }
+  if (modulesIds) {
+    newQuestionURL += `?modulos=${modulesIds}`;
+    search.set("modulesIds", modulesIds);
   }
 
-  const { data: questions } = await query;
+  if (page) {
+    search.set("page", page);
+  }
+
+  const queryParams = search.toString() ? `?${search.toString()}` : "";
+
+  const { questions, modules } = await HttpClient.fetch<
+    ResponseModel<{
+      questions: QuestionModel[];
+      modules: { id: string; name: string }[];
+    }>
+  >(`/questions${queryParams}`, {
+    method: "GET",
+    next: {
+      tags: [CACHE_TAGS.QUESTIONS],
+    },
+  })
+    .then((r) => {
+      total = r.total ?? 0;
+      return r.data ?? { questions: [], modules: [] };
+    })
+    .catch(() => ({ questions: [], modules: [] }));
 
   return (
     <PageLayout
@@ -61,15 +74,20 @@ export default async function QuestionsPage({
       actions={[
         <QuestionFormModulesSelection
           key="filter-modules"
-          defaultOptions={defaultOptions}
-          defaultValue={modules?.split(",") ?? undefined}
+          defaultOptions={modules.map(({ id: value, name: label }) => ({
+            value,
+            label,
+          }))}
+          defaultValue={modulesIds?.split(",") ?? undefined}
           onSelectModules={async function changeQuery(modules) {
             "use server";
 
             if (modules.length > 0) {
-              redirect(`/questions?modulos=${(modules as string[]).join(",")}`);
+              redirect(
+                `/questions?modulos=${(modules as string[]).join(",")}&pagina=1`
+              );
             } else {
-              redirect("/questions");
+              redirect("/questions?pagina=1");
             }
           }}
         />,
@@ -122,6 +140,24 @@ export default async function QuestionsPage({
             </Item>
           ))}
         </List>
+        <Divider />
+        <Pagination
+          defaultCurrent={1}
+          current={parseInt(page ?? "1", 10)}
+          total={total}
+          onChange={async function changeQuery(page) {
+            "use server";
+
+            const newSearchParams = new URLSearchParams();
+            newSearchParams.set("pagina", page.toString());
+
+            if (modulesIds) {
+              newSearchParams.set("modulos", modulesIds);
+            }
+
+            redirect(`/questions?${newSearchParams.toString()}`);
+          }}
+        />
       </Styled.ListContainer>
     </PageLayout>
   );
