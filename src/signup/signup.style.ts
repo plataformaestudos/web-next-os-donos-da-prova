@@ -4,8 +4,10 @@ import styled, { css } from "styled-components";
 
 export const Container = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 8px;
   height: 100vh;
   width: 100vw;
   background-color: ${({ theme }) => theme.colorFillContent};
@@ -13,10 +15,10 @@ export const Container = styled.div`
 
 export const Card = styled.div`
   width: calc(100% - 24px);
-  height: calc(100% - 24px);
+  height: calc(100% - 54px);
   max-width: 896px;
   max-height: 896px;
-  padding: 24px;
+  padding: 24px 12px 12px;
 
   border-radius: 6px;
   background-color: ${({ theme }) => theme.colorBgContainer};

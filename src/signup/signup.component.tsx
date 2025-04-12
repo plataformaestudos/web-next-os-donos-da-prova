@@ -11,6 +11,7 @@ import {
 import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { ChoosePlanFirstStep } from "./choose-plan.component";
+import Link from "next/link";
 import Title from "antd/es/typography/Title";
 import { signup } from "./signup.action";
 import { useIsMobile } from "@/util/use-media-query.hook";
@@ -78,7 +79,7 @@ export default function SignupSteps({
     <Container>
       <Card>
         <Header>
-          <Title level={2} style={{ marginBottom: 24, marginTop: 0 }}>
+          <Title level={2} style={{ marginBottom: 24, marginTop: 8 }}>
             Cadastro
           </Title>
           {isMobile !== null && (
@@ -192,6 +193,10 @@ export default function SignupSteps({
           </Button>
         </Footer>
       </Card>
+
+      <Link href="/login">
+        <span>Já tenho uma conta</span>
+      </Link>
     </Container>
   );
 }
