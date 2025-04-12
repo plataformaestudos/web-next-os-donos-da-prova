@@ -188,9 +188,12 @@ const Container = styled.div`
 
 const GroupsContainer = styled.div`
   display: flex;
-  flex-wrap: wrap;
   margin: 12px 0;
   gap: 8px;
+
+  @media (max-width: 640px) {
+    flex-wrap: wrap;
+  }
 `;
 
 const Group = styled.div`
