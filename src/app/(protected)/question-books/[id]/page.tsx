@@ -2,9 +2,11 @@ import { BarChartOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import {
   Breadcrumb,
   BreadcrumbProps,
+  Col,
   Divider,
   Flex,
   Progress,
+  Row,
   Statistic,
   Tabs,
 } from "antd";
@@ -144,56 +146,114 @@ export default async function QuestionBookPage({
                 label: "Estatísticas",
                 icon: <BarChartOutlined />,
                 children: questionBook.questionBookStats ? (
-                  <Flex gap={48} align="center">
-                    <Flex align="center" gap={24}>
-                      <Flex vertical>
-                        <Statistic
-                          title="Total de questões respondidas"
-                          value={questionBook.questionBookStats.totalAnswers}
-                        />
-                        <Statistic
-                          title="Total de questões no caderno"
-                          value={questionBook.questionBookStats.totalQuestions}
-                        />
-                      </Flex>
-                      <Progress
-                        type="circle"
-                        percent={Math.round(
-                          (questionBook.questionBookStats.totalAnswers /
-                            questionBook.questionBookStats.totalQuestions) *
-                            100
-                        )}
-                        size="small"
-                      />
-                    </Flex>
-                    <Divider
-                      type="vertical"
-                      orientation="center"
-                      style={{ height: 100 }}
-                    />
-                    <Flex align="center" gap={24}>
-                      <Flex vertical>
-                        <Statistic
-                          title="Total de questões acertadas"
-                          value={questionBook.questionBookStats.correctAnswers}
-                        />
-                        <Statistic
-                          title="Total de questões respondidas"
-                          value={questionBook.questionBookStats.totalAnswers}
+                  <Row gutter={[16, 16]}>
+                    <Col span={24} sm={{ span: 10 }}>
+                      <Flex align="center" gap={24}>
+                        <Flex vertical>
+                          <Statistic
+                            title="Total de questões respondidas"
+                            value={questionBook.questionBookStats.totalAnswers}
+                          />
+                          <Statistic
+                            title="Total de questões no caderno"
+                            value={
+                              questionBook.questionBookStats.totalQuestions
+                            }
+                          />
+                        </Flex>
+                        <Progress
+                          type="circle"
+                          percent={Math.round(
+                            (questionBook.questionBookStats.totalAnswers /
+                              questionBook.questionBookStats.totalQuestions) *
+                              100
+                          )}
+                          size="small"
                         />
                       </Flex>
-                      <Progress
-                        type="circle"
-                        percent={Math.round(
-                          (questionBook.questionBookStats.correctAnswers /
-                            questionBook.questionBookStats.totalAnswers) *
-                            100
-                        )}
-                        size="small"
-                      />
-                    </Flex>
-                  </Flex>
+                    </Col>
+                    <Col span={0} sm={{ span: 2 }} offset={1}>
+                      <Divider type="vertical" />
+                    </Col>
+                    <Col span={24} sm={{ span: 0 }}>
+                      <Divider type="horizontal" />
+                    </Col>
+                    <Col span={24} sm={{ span: 10 }}>
+                      <Flex align="center" gap={24}>
+                        <Flex vertical>
+                          <Statistic
+                            title="Total de questões acertadas"
+                            value={
+                              questionBook.questionBookStats.correctAnswers
+                            }
+                          />
+                          <Statistic
+                            title="Total de questões respondidas"
+                            value={questionBook.questionBookStats.totalAnswers}
+                          />
+                        </Flex>
+                        <Progress
+                          type="circle"
+                          percent={Math.round(
+                            (questionBook.questionBookStats.correctAnswers /
+                              questionBook.questionBookStats.totalAnswers) *
+                              100
+                          )}
+                          size="small"
+                        />
+                      </Flex>
+                    </Col>
+                  </Row>
                 ) : (
+                  // <Flex gap={48} align="center">
+                  //   <Flex align="center" gap={24} wrap>
+                  //     <Flex vertical>
+                  //       <Statistic
+                  //         title="Total de questões respondidas"
+                  //         value={questionBook.questionBookStats.totalAnswers}
+                  //       />
+                  //       <Statistic
+                  //         title="Total de questões no caderno"
+                  //         value={questionBook.questionBookStats.totalQuestions}
+                  //       />
+                  //     </Flex>
+                  //     <Progress
+                  //       type="circle"
+                  //       percent={Math.round(
+                  //         (questionBook.questionBookStats.totalAnswers /
+                  //           questionBook.questionBookStats.totalQuestions) *
+                  //           100
+                  //       )}
+                  //       size="small"
+                  //     />
+                  //   </Flex>
+                  //   <Divider
+                  //     type="vertical"
+                  //     orientation="center"
+                  //     style={{ height: 100 }}
+                  //   />
+                  //   <Flex align="center" gap={24}>
+                  //     <Flex vertical>
+                  //       <Statistic
+                  //         title="Total de questões acertadas"
+                  //         value={questionBook.questionBookStats.correctAnswers}
+                  //       />
+                  //       <Statistic
+                  //         title="Total de questões respondidas"
+                  //         value={questionBook.questionBookStats.totalAnswers}
+                  //       />
+                  //     </Flex>
+                  //     <Progress
+                  //       type="circle"
+                  //       percent={Math.round(
+                  //         (questionBook.questionBookStats.correctAnswers /
+                  //           questionBook.questionBookStats.totalAnswers) *
+                  //           100
+                  //       )}
+                  //       size="small"
+                  //     />
+                  //   </Flex>
+                  // </Flex>
                   <p>Nenhuma estatística encontrada!</p>
                 ),
               },

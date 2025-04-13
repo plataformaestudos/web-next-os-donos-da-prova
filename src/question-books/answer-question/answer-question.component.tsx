@@ -140,10 +140,15 @@ export function AnswerQuestion({
       </QuestionContainer>
       <Button
         disabled={!selectedAlternative || isPending || isAlternativesDisabled}
-        loading={isPending}
         type="primary"
         onClick={() => {
           setError(false);
+
+          // Optimistic update
+          setCorrectAlternative(
+            alternatives.find(({ isCorrect }) => isCorrect)?.id ?? null
+          );
+
           startTransition(() => {
             answerQuestion({
               questionBookQuestionId,

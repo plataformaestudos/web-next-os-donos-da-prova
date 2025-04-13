@@ -43,6 +43,10 @@ export function QuestionBookForm({ questionBook, modules, folders }: Props) {
     [checkedModules]
   );
 
+  const filteredModules = useMemo(() => {
+    return modules.data.filter((module) => module.numberQuestions > 0);
+  }, [modules.data]);
+
   return (
     <Container>
       <form
@@ -69,8 +73,14 @@ export function QuestionBookForm({ questionBook, modules, folders }: Props) {
               <GroupTitle>Módulos</GroupTitle>
               <GroupContent>
                 <ModulesTree
-                  modules={modules.data}
-                  loadData={modules.loadData}
+                  modules={filteredModules}
+                  loadData={(key) =>
+                    modules.loadData(key).then((tree) => {
+                      return tree.filter(
+                        (module) => module.numberQuestions > 0
+                      );
+                    })
+                  }
                   readonly
                   checkable
                   onCheck={({ checkedLeaves: modules }) => {

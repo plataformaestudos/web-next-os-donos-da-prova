@@ -122,8 +122,7 @@ function setupTree(
 }
 
 export function ModulesTree(props: ModulesTreeProps) {
-  const searchParams = useSearchParams();
-  const autoExpand = searchParams.has("nome") || props.autoExpand;
+  const autoExpand = props.autoExpand;
 
   const [loadedKeys, setLoadedKeys] = useState<string[]>([]);
   const [expandadedKeys, setExpandedKeys] = useState<string[]>(
