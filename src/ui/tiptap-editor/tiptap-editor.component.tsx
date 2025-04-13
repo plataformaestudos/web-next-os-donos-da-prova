@@ -146,7 +146,14 @@ export function TiptapEditor({
           });
         },
       }),
-      Mathematics,
+      Mathematics.configure({
+        shouldRender: (state, pos, node) => {
+          if (!node.text) return false;
+          const regex = /(?<![R\\])\$(.*?)(?<![R\\])\$/g;
+          const matches = node.text?.match(regex);
+          return matches && matches.length > 0 ? true : false;
+        }
+      })
     ],
     immediatelyRender: false,
     onFocus: () => {
