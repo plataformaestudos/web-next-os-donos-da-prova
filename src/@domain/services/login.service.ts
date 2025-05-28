@@ -26,7 +26,7 @@ export class LoginService extends Login {
       );
 
       const rawCookie = response.headers["set-cookie"]?.find((cookie) =>
-        cookie.startsWith("jwt=")
+        cookie.startsWith("access_token=")
       );
 
       if (rawCookie) {

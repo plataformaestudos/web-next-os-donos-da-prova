@@ -36,6 +36,7 @@ const nextConfig = {
     styledComponents: true,
   },
   experimental: {
+    appDir: true,
     staleTimes: {
       dynamic: 180,
     },

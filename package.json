@@ -51,6 +51,7 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.4",
     "@types/node": "22.13.1",
     "@types/quill": "^2.0.14",
     "@types/react": "19.0.8",

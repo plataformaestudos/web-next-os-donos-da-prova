@@ -1,15 +1,37 @@
-import { createClient } from "../supabase/server";
-import { customFetch } from "./_fetch.util";
+import { cookies } from "next/headers";
+
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const HttpClient = Object.freeze({
   async fetch<T>(resource: string, opts?: RequestInit) {
-    const supabase = await createClient();
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    const url = baseUrl ? `${baseUrl}${resource}` : resource;
 
-    return customFetch<T>(token, resource, {
+    const cookieStore = cookies();
+    const cookieHeader = cookieStore.toString();
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(opts?.headers as Record<string, string>),
+    };
+
+    if (cookieHeader) {
+      headers["cookie"] = cookieHeader;
+    }
+
+    const response = await fetch(url, {
       ...opts,
-      credentials: "include",
+      headers,
+      credentials: opts?.credentials || "include",
+      next: {
+        revalidate: 180,
+      },
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return (await response.json()) as T;
   },
 });
 
