@@ -6,7 +6,10 @@ const HttpClient = Object.freeze({
     const supabase = await createClient();
     const token = (await supabase.auth.getSession()).data.session?.access_token;
 
-    return customFetch<T>(token, resource, opts);
+    return customFetch<T>(token, resource, {
+      ...opts,
+      credentials: "include",
+    });
   },
 });
 

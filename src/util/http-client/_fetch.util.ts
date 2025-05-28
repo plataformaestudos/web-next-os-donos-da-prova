@@ -7,6 +7,7 @@ export const customFetch = <T>(
 ) => {
   const url = baseUrl ? `${baseUrl}${resource}` : resource;
   return fetch(url, {
+    credentials: opts.credentials || "include",
     next: {
       ...opts.next,
       revalidate: 180,
