@@ -42,7 +42,8 @@ export class LoginService extends Login {
       }
 
       throw new Error("Token JWT não encontrado na resposta.");
-    } catch (error) {
+    } catch (err) {
+      console.error("Erro ao fazer login:", err);
       throw new Error("Erro ao fazer login. Tente novamente mais tarde.");
     }
   }

@@ -11,12 +11,32 @@ export const Container = styled.div`
   flex-direction: column;
 `;
 
+export const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
+export const HeaderAction = styled.span`
+  font-size: 14px;
+  font-weight: 400;
+  color: #3398da;
+  white-space: nowrap;
+  padding: 4px 10px;
+  background-color: ${({ theme }) => theme.colorBgFilter};
+
+  &:hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+`;
+
 export const FilterContainer = styled.div`
   display: flex;
   width: 100%;
-  background-color: #edeff0;
+  background-color: ${({ theme }) => theme.colorBgFilter};
   padding: 4px 10px;
   justify-content: flex-end;
+  flex-wrap: wrap;
 `;
 
 export const FilterTitle = styled.span`
@@ -74,10 +94,21 @@ export const Post = styled.div`
   }
 `;
 
+export const Child = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+  padding: 24px 48px;
+  background-color: ${({ theme }) => theme.colorBgFilter};
+`;
+
 export const PostHeader = styled.div`
   width: 100%;
   display: flex;
   justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 `;
 
 export const PostInfoHeader = styled.div`
@@ -89,6 +120,7 @@ export const PostVotes = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-right: 8px;
 
   svg {
     width: 20px;
@@ -112,18 +144,23 @@ export const PostVotes = styled.div`
 export const PostVoteCount = styled.span`
   font-size: 20px;
   font-weight: 700;
-  color: #434747;
+  color: ${({ theme }) => theme.colorTextPrimary};
   text-align: center;
 `;
 
-export const Avatar = styled.img`
+export const PostAvatar = styled.span`
   min-width: 56px;
   width: 56px;
   min-height: 56px;
   height: 56px;
   border-radius: 50%;
   border: 1px solid #cbcdcf;
-  margin: 0 8px 0 16px;
+  margin-right: 8px;
+  color: ${({ theme }) => theme.colorTextPrimary};
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 export const PostInfoUser = styled.div`
@@ -135,7 +172,7 @@ export const PostInfoUser = styled.div`
 export const PostUserName = styled.span`
   font-size: 14px;
   font-weight: 700;
-  color: #333333;
+  color: ${({ theme }) => theme.colorTextPrimary};
 `;
 
 export const PostUserRating = styled.span`
@@ -175,6 +212,10 @@ export const PostAction = styled.span`
   font-weight: 400;
   color: #3398da;
   cursor: pointer;
+
+  span {
+    color: #ff4d4f;
+  }
 `;
 
 export const PostContent = styled.div`
@@ -182,6 +223,19 @@ export const PostContent = styled.div`
   margin-top: 16px;
   font-weight: 500;
   color: #83828b;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  svg {
+    margin-left: auto;
+    margin-top: 4px;
+
+    &:hover {
+      cursor: pointer;
+      filter: brightness(0.7);
+    }
+  }
 `;
 
 export const SilencedPostContainer = styled.div`
@@ -203,5 +257,43 @@ export const ShowPost = styled.button`
 
   &:hover {
     text-decoration: underline;
+  }
+`;
+
+export const NewPostContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: ${({ theme }) => theme.colorBgFilter};
+  border-radius: 8px;
+  gap: 30px;
+  padding: 10px;
+`;
+
+export const EditorContainer = styled.div`
+  padding-left: 17px;
+  padding-right: 17px;
+  padding-top: 10px;
+`;
+
+export const NewPostButton = styled.button`
+  width: fit-content;
+  padding: 8px 16px;
+  background-color: #1677ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: -20px;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+
+  &:disabled {
+    background-color: #cbcdcf;
+    cursor: not-allowed;
   }
 `;

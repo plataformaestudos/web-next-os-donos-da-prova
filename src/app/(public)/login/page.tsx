@@ -6,11 +6,14 @@ import { App, Button, Form, Input, Typography } from "antd";
 import { login, signup } from "./actions";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/util/supabase/client";
 
 const { Title } = Typography;
 
 export default function LoginPage() {
+  const supabase = createClient();
+
   const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
@@ -44,11 +47,31 @@ export default function LoginPage() {
     }
   };
 
+  useEffect(() => {
+    const handleUnauthorized = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("unauthorized") === "true") {
+        try {
+          await supabase.auth.signOut();
+          message.error("Você foi deslogado, tente fazer login novamente");
+        } catch (error) {
+          console.error("Erro ao deslogar:", error);
+        }
+      }
+    };
+
+    handleUnauthorized();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <Styled.Container>
       <Styled.Card>
         <Title level={2}>Login</Title>
-        <Form form={form} layout="vertical">
+        <Form
+          form={form}
+          layout="vertical"
+        >
           <Form.Item
             label={<span>Email</span>}
             name="email"
@@ -57,7 +80,11 @@ export default function LoginPage() {
               { type: "email", message: "Email inválido!" },
             ]}
           >
-            <Input type="email" placeholder="Digite seu email" size="large" />
+            <Input
+              type="email"
+              placeholder="Digite seu email"
+              size="large"
+            />
           </Form.Item>
 
           <Form.Item
@@ -67,7 +94,10 @@ export default function LoginPage() {
               { required: true, message: "Por favor, insira sua senha!" },
             ]}
           >
-            <Input.Password placeholder="Digite sua senha" size="large" />
+            <Input.Password
+              placeholder="Digite sua senha"
+              size="large"
+            />
           </Form.Item>
 
           <Form.Item>

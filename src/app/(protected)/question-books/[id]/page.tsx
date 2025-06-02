@@ -3,7 +3,11 @@ import {
   QuestionBookNextQuestionModel,
 } from "@/question-books/question-book.model";
 import { Roles, verify } from "@/util/roles";
-import { BarChartOutlined, QuestionCircleOutlined, WechatOutlined } from "@ant-design/icons";
+import {
+  BarChartOutlined,
+  QuestionCircleOutlined,
+  WechatOutlined,
+} from "@ant-design/icons";
 import {
   Breadcrumb,
   BreadcrumbProps,
@@ -24,6 +28,7 @@ import HttpClient from "@/util/http-client/fetch-server.util";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Container, TabContainer } from "./page.style";
+import { createClient } from "@/util/supabase/server";
 
 function getQuestionBookQuestion(
   id: string,
@@ -114,6 +119,19 @@ export default async function QuestionBookPage({
     breadcrumbItems.push({
       title: questionBook.name,
     });
+
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data?.user) {
+      redirect("/login");
+    }
+
+    const userProfile = await supabase
+      .from("profiles")
+      .select("*")
+      .match({ user_id: data.user.id })
+      .single();
 
     return (
       <Container>
@@ -281,7 +299,12 @@ export default async function QuestionBookPage({
                 key: "3",
                 label: "Fórum de discussão",
                 icon: <WechatOutlined />,
-                children: <AppForum />
+                children: (
+                  <AppForum
+                    questionId={question?.questionId || ""}
+                    userId={userProfile.data?.user_id || ""}
+                  />
+                ),
               },
             ]}
           />

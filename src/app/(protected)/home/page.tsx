@@ -20,9 +20,6 @@ export default async function HomePage() {
     .match({ user_id: data.user.id })
     .single();
 
-
-
-
   const menus = await HttpClient.fetch<ResponseModel<MenuModel[]>>(
     "/menu/menus",
     {
@@ -32,8 +29,7 @@ export default async function HomePage() {
       },
     }
   )
-    .then((response) => {
-      console.log("Dados recebidos1:", response);
+    .then((response) => {;
       return response.data?.sort(
         ({ order: orderA }, { order: orderB }) => orderA - orderB
       ) as Array<MenuModel>;

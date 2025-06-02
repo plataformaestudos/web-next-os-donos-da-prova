@@ -1,5 +1,8 @@
-import { ForumOrderBy, ForumPostModel, ForumVoteType } from "@/model/forum.model";
+import { ForumOrderBy, ForumPostModel } from "@/model/forum.model";
 import { Forum } from "../entities/forum.entity";
+import HttpClient from "@/util/http-client/fetch-client.util";
+import { ResponseModel } from "@/model/common.model";
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 
 export class ForumService extends Forum {
   constructor(service: ForumPostModel) {
@@ -10,38 +13,29 @@ export class ForumService extends Forum {
     page: number;
     limit: number;
     orderBy: ForumOrderBy;
-  }): Promise<ForumPostModel[]> {
-    const { page, limit, orderBy } = params;
+    questionId?: string;
+  }): Promise<ResponseModel<ForumPostModel[]>> {
+    const { page, limit, orderBy, questionId } = params;
 
     try {
-      const response = await new Promise<ForumPostModel[]>((resolve) =>
-        setTimeout(() => {
-          resolve([
-            {
-              id: "1",
-              postVotes: 106,
-              userName: "Pedro Moutinho",
-              userVotes: 3722,
-              isUserSilenced: false,
-              isUserBlocked: false,
-              postMessage:
-                'A filiação passou despercebida e fui quente na E achando que tivesse alguma jurisprudência (confesso que fui emocionado ao ignorar o comando "Considerando o que dispõe o Código Civil")."',
-              postDateTime: "19/10/2022 16:30",
-            },
-            {
-              id: "2",
-              postVotes: 20,
-              userName: "Thiago Nogueira",
-              userVotes: 293,
-              isUserSilenced: false,
-              isUserBlocked: false,
-              postMessage:
-                'A filiação passou despercebida e fui quente na E achando que tivesse alguma jurisprudência (confesso que fui emocionado ao ignorar o comando "Considerando o que dispõe o Código Civil").',
-              postDateTime: "20/10/2022 16:30",
-            },
-          ]);
-        }, 1500)
-      );
+      const response = await HttpClient.fetch<ResponseModel<ForumPostModel[]>>(
+        `/comments/by-question/${questionId}?page=${page}&itemsPerPage=${limit}&sortBy=${orderBy}&sortOrder=DESC`,
+        {
+          method: "GET",
+          next: {
+            tags: [CACHE_TAGS.MENUS],
+          },
+        }
+      )
+        .then((response) => {
+          return response;
+        })
+        .catch((err) => {
+          console.error(err);
+          throw new Error(
+            "Erro ao buscar as discussões. Tente novamente mais tarde."
+          );
+        });
 
       return response;
     } catch (error) {
@@ -53,8 +47,28 @@ export class ForumService extends Forum {
   }
 
   async votePost(): Promise<void> {
+    const { id, userVote } = this;
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await HttpClient.fetch<ResponseModel<void>>(`/comments_votes`, {
+        method: "POST",
+        next: {
+          tags: [CACHE_TAGS.MENUS],
+        },
+        body: JSON.stringify({
+          commentId: id,
+          value: userVote,
+        }),
+      })
+        .then(() => {
+          return;
+        })
+        .catch((err) => {
+          console.error(err);
+          throw new Error(
+            "Erro ao votar na discussão. Tente novamente mais tarde."
+          );
+        });
       return;
     } catch (error) {
       console.error("Erro ao votar na discussão:", error);
@@ -62,28 +76,145 @@ export class ForumService extends Forum {
         "Erro ao votar na discussão. Tente novamente mais tarde."
       );
     }
-  };
-
-  async muteUser(): Promise<void> {
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return;
-    } catch (error) {
-      console.error("Erro ao silenciar o usuário:", error);
-      throw new Error(
-        "Erro ao silenciar o usuário. Tente novamente mais tarde."
-      );
-    }
   }
 
-  async blockUser(): Promise<void> {
+  async muteUser(params: {
+    targetUserId: string;
+    userId: string;
+  }): Promise<void> {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const { targetUserId, userId } = params;
+
+      await HttpClient.fetch<ResponseModel<void>>(`/user_restrictions`, {
+        method: "POST",
+        next: {
+          tags: [CACHE_TAGS.MENUS],
+        },
+        body: JSON.stringify({
+          targetUserId,
+          userId,
+          type: "block",
+        }),
+      })
+        .then(() => {
+          return;
+        })
+        .catch((err) => {
+          console.error(err);
+          throw new Error(
+            "Erro ao bloquear o usuário. Tente novamente mais tarde."
+          );
+        });
       return;
     } catch (error) {
       console.error("Erro ao bloquear o usuário:", error);
       throw new Error(
         "Erro ao bloquear o usuário. Tente novamente mais tarde."
+      );
+    }
+  }
+
+  async blockUser(params: {
+    targetUserId: string;
+    userId: string;
+  }): Promise<void> {
+    try {
+      const { targetUserId, userId } = params;
+
+      await HttpClient.fetch<ResponseModel<void>>(`/user_restrictions`, {
+        method: "POST",
+        next: {
+          tags: [CACHE_TAGS.MENUS],
+        },
+        body: JSON.stringify({
+          targetUserId,
+          userId,
+          type: "block",
+        }),
+      })
+        .then(() => {
+          return;
+        })
+        .catch((err) => {
+          console.error(err);
+          throw new Error(
+            "Erro ao bloquear o usuário. Tente novamente mais tarde."
+          );
+        });
+      return;
+    } catch (error) {
+      console.error("Erro ao bloquear o usuário:", error);
+      throw new Error(
+        "Erro ao bloquear o usuário. Tente novamente mais tarde."
+      );
+    }
+  }
+
+  async newPost(): Promise<ForumPostModel> {
+    try {
+      const { questionId, content, parentId } = this;
+
+      const data: { questionId: string; content: string; parentId?: string } = {
+        questionId,
+        content,
+      };
+
+      if (parentId && parentId !== "") {
+        data.parentId = parentId;
+      }
+
+      const response = await HttpClient.fetch<ResponseModel<ForumPostModel>>(
+        `/comments`,
+        {
+          method: "POST",
+          next: {
+            tags: [CACHE_TAGS.MENUS],
+          },
+          body: JSON.stringify(data),
+        }
+      )
+        .then((res) => {
+          return res.data;
+        })
+        .catch((err) => {
+          console.error(err);
+          throw new Error(
+            "Erro ao buscar as discussões. Tente novamente mais tarde."
+          );
+        });
+
+      return response;
+    } catch (error) {
+      console.error("Erro ao votar na discussão:", error);
+      throw new Error(
+        "Erro ao votar na discussão. Tente novamente mais tarde."
+      );
+    }
+  }
+
+  async deletePost(): Promise<void> {
+    try {
+      const { id } = this;
+
+      await HttpClient.fetch<ResponseModel<void>>(`/comments/${id}`, {
+        method: "DELETE",
+        next: {
+          tags: [CACHE_TAGS.MENUS],
+        },
+      })
+        .then(() => {
+          return;
+        })
+        .catch((err) => {
+          console.error(err);
+          throw new Error(
+            "Erro ao deletar a discussão. Tente novamente mais tarde."
+          );
+        });
+    } catch (error) {
+      console.error("Erro ao deletar a discussão:", error);
+      throw new Error(
+        "Erro ao deletar a discussão. Tente novamente mais tarde."
       );
     }
   }

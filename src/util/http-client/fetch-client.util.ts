@@ -27,6 +27,10 @@ const HttpClient = Object.freeze({
 
       return (await response.json()) as T;
     } catch (error) {
+      if (error instanceof Error && error.message.includes("401")) {
+        window.location.href = "/login?unauthorized=true";
+        return Promise.reject(error);
+      }
       console.error("Error during fetch:", error);
       throw new Error("Failed to fetch resource");
     }

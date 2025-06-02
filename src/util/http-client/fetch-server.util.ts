@@ -6,7 +6,7 @@ const HttpClient = Object.freeze({
   async fetch<T>(resource: string, opts?: RequestInit) {
     const url = baseUrl ? `${baseUrl}${resource}` : resource;
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
 
     const headers: Record<string, string> = {
@@ -26,10 +26,6 @@ const HttpClient = Object.freeze({
         revalidate: 180,
       },
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
 
     return (await response.json()) as T;
   },

@@ -43,7 +43,7 @@ export const CreateFolderProvider = ({ children }: PropsWithChildren) => {
     <CreateFolderContext.Provider value={{ openCreateFolderModal }}>
       {children}
       <Modal
-        destroyOnClose
+        destroyOnHidden
         title="Criar pasta"
         open={isOpen}
         okButtonProps={{

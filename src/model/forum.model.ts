@@ -1,25 +1,28 @@
 export interface ForumPostModel {
   id: string;
-  postVotes: number;
-  userName: string;
-  userVotes: number;
-  isUserSilenced: boolean;
-  isUserBlocked: boolean;
-  postMessage: string;
-  postDateTime: string;
-  voteType?: ForumVoteType;
+  authorName: string;
+  authorScore: number;
+  commentScore: number;
+  content: string;
+  createdAt: string;
+  negativeVotes: number;
+  parentId: string | null;
+  positiveVotes: number;
+  questionId: string;
+  userId: string;
+  userVote: number;
 }
 
 export enum ForumOrderBy {
   DATE = "date",
-  POINTS = "points",
+  SCORE = "score",
   USER = "user",
-  MYVOTES = "myVotes",
+  MYVOTES = "myVote",
   DEFAULT = "",
 }
 
 export enum ForumVoteType {
-  UPVOTE = "upvote",
-  DOWNVOTE = "downvote",
-  DEFAULT = "",
+  UPVOTE = 1,
+  DOWNVOTE = -1,
+  DEFAULT = 0,
 }
