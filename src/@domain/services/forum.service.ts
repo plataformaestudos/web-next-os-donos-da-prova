@@ -46,6 +46,41 @@ export class ForumService extends Forum {
     }
   }
 
+  async getAnswers(params: {
+    page: number;
+    postId: string;
+  }): Promise<ResponseModel<ForumPostModel[]>> {
+    const { page, postId } = params;
+
+    try {
+      const response = await HttpClient.fetch<ResponseModel<ForumPostModel[]>>(
+        `/comments/${postId}/replies?page=${page}&itemsPerPage=5`,
+        {
+          method: "GET",
+          next: {
+            tags: [CACHE_TAGS.MENUS],
+          },
+        }
+      )
+        .then((response) => {
+          return response;
+        })
+        .catch((err) => {
+          console.error(err);
+          throw new Error(
+            "Erro ao buscar as respostas. Tente novamente mais tarde."
+          );
+        });
+
+      return response;
+    } catch (error) {
+      console.error("Erro ao buscar as respostas:", error);
+      throw new Error(
+        "Erro ao buscar as respostas. Tente novamente mais tarde."
+      );
+    }
+  }
+
   async votePost(): Promise<void> {
     const { id, userVote } = this;
 

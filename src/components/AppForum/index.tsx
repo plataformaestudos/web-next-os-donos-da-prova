@@ -2,6 +2,7 @@
 
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
 import { BsReplyAll } from "react-icons/bs";
+import { FiChevronsDown } from "react-icons/fi";
 import { App } from "antd";
 import { useEffect, useState, Fragment } from "react";
 
@@ -40,6 +41,7 @@ export const AppForum = ({ questionId, userId }: IAppForumProps) => {
   const [allChildren, setAllChildren] = useState<ForumPostModel[]>([]);
   const [orderBy, setOrderBy] = useState<ForumOrderBy>(ForumOrderBy.SCORE);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingAnswer, setIsLoadingAnswer] = useState<boolean>(false);
   const [text, setText] = useState<string>("");
   const [textAnswer, setTextAnswer] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -68,16 +70,7 @@ export const AppForum = ({ questionId, userId }: IAppForumProps) => {
         questionId,
       });
 
-      const posts = response.data.filter(
-        (post) => post.parentId === "" || post.parentId === null
-      );
-
-      const children = response.data.filter(
-        (post) => post.parentId !== "" && post.parentId !== null
-      );
-
-      setPosts(posts);
-      setAllChildren(children);
+      setPosts(response.data || []);
       setTotalPages(response.totalPages || 1);
       setCurrentPage(response.page || 1);
     } catch {
@@ -86,6 +79,28 @@ export const AppForum = ({ questionId, userId }: IAppForumProps) => {
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const getAnswers = async (postId: string, restItems: number) => {
+    const currentPage = Math.ceil(restItems / 5) || 1;
+
+    setIsLoadingAnswer(true);
+    try {
+      const forumService = new ForumService({} as ForumPostModel);
+
+      const response = await forumService.getAnswers({
+        page: currentPage,
+        postId: postId,
+      });
+
+      setAllChildren([...allChildren, ...(response.data || [])]);
+    } catch {
+      message.error(
+        "Erro ao buscar as discussões. Tente novamente mais tarde."
+      );
+    } finally {
+      setIsLoadingAnswer(false);
     }
   };
 
@@ -193,14 +208,33 @@ export const AppForum = ({ questionId, userId }: IAppForumProps) => {
   const getChildren = (parentId: string): Array<ForumPostModel> => {
     const children = allChildren.filter((child) => child.parentId === parentId);
 
-    children.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    children.sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
 
     return children || [];
   };
 
+  const getRestItems = (post: ForumPostModel): number => {
+    if (!isNaN(post.repliesCount) && !isNaN(getChildren(post.id).length)) {
+      return post.repliesCount - getChildren(post.id).length;
+    }
+
+    return 0;
+  };
+
+  const handleShowAnswer = (post: ForumPostModel) => {
+    const restItems = getRestItems(post);
+
+    if (restItems > 0) {
+      getAnswers(post.id, restItems);
+    }
+  };
+
   useEffect(() => {
     getData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderBy, currentPage]);
 
   return (
@@ -308,11 +342,30 @@ export const AppForum = ({ questionId, userId }: IAppForumProps) => {
                     editable={false}
                     defaultValue={post.content}
                   />{" "}
-                  <BsReplyAll
-                    color="#3398da"
-                    size={20}
-                    onClick={() => handleAnswerPost(post.id)}
-                  />
+                  <S.PostAnswerActions>
+                    {post.hasReplies && getRestItems(post) > 0 && (
+                      <S.PostAction
+                        style={{ marginTop: 2 }}
+                        onClick={() =>
+                          !isLoadingAnswer && handleShowAnswer(post)
+                        }
+                      >
+                        {isLoadingAnswer ? (
+                          "Carregando respostas..."
+                        ) : (
+                          <Fragment>
+                            <FiChevronsDown />
+                            ver respostas ({getRestItems(post)})
+                          </Fragment>
+                        )}
+                      </S.PostAction>
+                    )}
+                    <BsReplyAll
+                      color="#3398da"
+                      size={20}
+                      onClick={() => handleAnswerPost(post.id)}
+                    />
+                  </S.PostAnswerActions>
                   {answeringPost.isAnswering &&
                     answeringPost.postId === post.id && (
                       <S.NewPostContainer style={{ marginTop: "16px" }}>
@@ -350,7 +403,10 @@ export const AppForum = ({ questionId, userId }: IAppForumProps) => {
                                             ForumVoteType.DEFAULT
                                           )
                                       : () =>
-                                          handleVote(child, ForumVoteType.UPVOTE)
+                                          handleVote(
+                                            child,
+                                            ForumVoteType.UPVOTE
+                                          )
                                   }
                                 />
                                 <S.PostVoteCount>
@@ -382,7 +438,9 @@ export const AppForum = ({ questionId, userId }: IAppForumProps) => {
                               {child.authorName.charAt(0).toUpperCase()}
                             </S.PostAvatar>
                             <S.PostInfoUser>
-                              <S.PostUserName>{child.authorName}</S.PostUserName>
+                              <S.PostUserName>
+                                {child.authorName}
+                              </S.PostUserName>
                               <S.PostUserRating>
                                 <span
                                   className={

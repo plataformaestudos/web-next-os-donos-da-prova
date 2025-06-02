@@ -13,6 +13,8 @@ export class Forum implements ForumPostModel {
   questionId: string;
   userId: string;
   userVote: number;
+  hasReplies: boolean;
+  repliesCount: number;
 
   constructor(service: ForumPostModel) {
     this.id = service.id;
@@ -27,5 +29,7 @@ export class Forum implements ForumPostModel {
     this.questionId = service.questionId;
     this.userId = service.userId;
     this.userVote = service.userVote;
+    this.hasReplies = service.hasReplies;
+    this.repliesCount = service.repliesCount;
   }
 }

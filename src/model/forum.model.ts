@@ -11,6 +11,8 @@ export interface ForumPostModel {
   questionId: string;
   userId: string;
   userVote: number;
+  hasReplies: boolean;
+  repliesCount: number;
 }
 
 export enum ForumOrderBy {

@@ -212,6 +212,8 @@ export const PostAction = styled.span`
   font-weight: 400;
   color: #3398da;
   cursor: pointer;
+  display: flex;
+  align-items: center;
 
   span {
     color: #ff4d4f;
@@ -226,10 +228,15 @@ export const PostContent = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
+`;
+
+export const PostAnswerActions = styled.div`
+  display: flex;
+  width: 100%;
+  margin-top: 4px;
 
   svg {
     margin-left: auto;
-    margin-top: 4px;
 
     &:hover {
       cursor: pointer;
