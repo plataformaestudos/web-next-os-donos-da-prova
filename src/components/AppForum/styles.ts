@@ -224,7 +224,7 @@ export const PostContent = styled.div`
   font-size: 14px;
   margin-top: 16px;
   font-weight: 500;
-  color: #83828b;
+  color: ${({ theme }) => theme.colorTextPrimary};
   width: 100%;
   display: flex;
   flex-direction: column;
