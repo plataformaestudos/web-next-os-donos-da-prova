@@ -88,7 +88,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
           checked={values.isFree}
           onChange={e => handleChange("isFree", e.target.checked)}
         >
-          Gratuito
+          Free Trial
         </Checkbox>
         <Divider />
 
