@@ -23,6 +23,9 @@
       "@/*": ["./src/*"]
     }
   },
+  "experimental": {
+    "appDir": true,
+  },
   "include": [
     "src/next-auth.d.ts",
     "src/next-env.d.ts",
@@ -30,5 +33,5 @@
     "**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
 }

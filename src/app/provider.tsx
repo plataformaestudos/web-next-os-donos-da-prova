@@ -19,6 +19,7 @@ import {
 import { StyleProvider, createCache, extractStyle } from "@ant-design/cssinjs";
 
 import { useServerInsertedHTML } from "next/navigation";
+import { DefaultTheme } from "styled-components/dist/types";
 
 export const RootStyleRegistry = ({ children }: PropsWithChildren) => {
   const [cache] = useState(() => createCache());
@@ -80,10 +81,18 @@ const themes = {
   light: {
     ...defaultTheme,
     algorithm: antdTheme.defaultAlgorithm,
+    token: {
+      ...defaultTheme.token,
+      colorBgFilter: "#EDEFF0",
+    },
   },
   dark: {
     ...defaultTheme,
     algorithm: antdTheme.darkAlgorithm,
+    token: {
+      ...defaultTheme.token,
+      colorBgFilter: "#1A1A1A",
+    },
   },
 } as Record<string, ThemeConfig>;
 
@@ -92,8 +101,12 @@ const { useToken } = theme;
 function WithAntdTheme({ children }: PropsWithChildren) {
   const { token } = useToken();
 
+  const styledTheme = {
+    ...token,
+  } as DefaultTheme;
+
   return (
-    <StyledComponentsThemeProvider theme={token}>
+    <StyledComponentsThemeProvider theme={styledTheme}>
       {children}
     </StyledComponentsThemeProvider>
   );

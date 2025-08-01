@@ -103,7 +103,7 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
         )}
       />
       <Modal
-        destroyOnClose
+        destroyOnHidden
         title={
           <Flex vertical>
             <Typography.Text

@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import { ModuleTreeItemTitle } from "./module-tree-item-title.component";
 import { ModuleViewModel } from "@/model/module.model";
 import { Tree } from "antd";
-import { useSearchParams } from "next/navigation";
 
 interface ModulesTreeProps {
   modules: ModuleViewModel[];

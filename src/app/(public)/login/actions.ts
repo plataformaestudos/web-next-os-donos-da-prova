@@ -3,12 +3,21 @@
 import { createClient } from "@/util/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { LoginService } from "@/@domain/services/login.service";
+import { LoginModel } from "@/model/login.model";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
+  const loginModel = {
+    username: formData.get("email") as string,
+    password: formData.get("password") as string,
+  } as LoginModel;
+
+  const loginService = new LoginService(loginModel);
+
+  await loginService.login();
+
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,

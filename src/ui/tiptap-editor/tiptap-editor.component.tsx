@@ -152,8 +152,8 @@ export function TiptapEditor({
           const regex = /(?<![R\\])\$(.*?)(?<![R\\])\$/g;
           const matches = node.text?.match(regex);
           return matches && matches.length > 0 ? true : false;
-        }
-      })
+        },
+      }),
     ],
     immediatelyRender: false,
     onFocus: () => {
@@ -171,9 +171,12 @@ export function TiptapEditor({
   });
 
   useEffect(() => {
-    editor?.commands.setContent(defaultValue ?? "");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValue]);
+    if (!editor) return;
+
+    if (defaultValue === "") {
+      editor.commands.clearContent();
+    }
+  }, [editor, defaultValue]);
 
   return (
     <StyledEditorContent

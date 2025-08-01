@@ -2,6 +2,13 @@ export interface UpsertPlanDTO {
   id?: string;
   name: string;
   description: string;
-  price: number;
+  isFree: boolean;
+  durationDays?: number;
+  questionLimit?: number;
+  monthValue?: number;
+  quarterlyValue?: number;
+  semiannualValue?: number;
+  yearlyValue?: number;
+  lifetimeValue?: number;
   modules: string[];
 }

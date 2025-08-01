@@ -24,6 +24,7 @@ export interface QuestionBookNextQuestionModel {
     nextOrder: number | null;
     nextUnansweredOrder: number | null;
   };
+  questionId?: string;
 }
 
 export interface QuestionBookModel {

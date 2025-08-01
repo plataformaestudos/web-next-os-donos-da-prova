@@ -1,4 +1,13 @@
-import { BarChartOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import {
+  QuestionBookModel,
+  QuestionBookNextQuestionModel,
+} from "@/question-books/question-book.model";
+import { Roles, verify } from "@/util/roles";
+import {
+  BarChartOutlined,
+  QuestionCircleOutlined,
+  WechatOutlined,
+} from "@ant-design/icons";
 import {
   Breadcrumb,
   BreadcrumbProps,
@@ -10,19 +19,16 @@ import {
   Statistic,
   Tabs,
 } from "antd";
-import {
-  QuestionBookModel,
-  QuestionBookNextQuestionModel,
-} from "@/question-books/question-book.model";
-import { Roles, verify } from "@/util/roles";
 
+import { AppForum } from "@/components/AppForum";
+import { ResponseModel } from "@/model/common.model";
 import { AnswerQuestion } from "@/question-books/answer-question/answer-question.component";
 import { CACHE_TAGS } from "@/util/cache-tags.util";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import Link from "next/link";
-import { ResponseModel } from "@/model/common.model";
-import { TabContainer } from "./page.style";
 import { redirect } from "next/navigation";
+import { Container, TabContainer } from "./page.style";
+import { createClient } from "@/util/supabase/server";
 
 function getQuestionBookQuestion(
   id: string,
@@ -114,9 +120,22 @@ export default async function QuestionBookPage({
       title: questionBook.name,
     });
 
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data?.user) {
+      redirect("/login");
+    }
+
+    const userProfile = await supabase
+      .from("profiles")
+      .select("*")
+      .match({ user_id: data.user.id })
+      .single();
+
     return (
-      <div style={{ padding: "16px 32px", flex: 1 }}>
-        <Breadcrumb style={{ marginBottom: 24 }} items={breadcrumbItems} />
+      <Container>
+        <Breadcrumb items={breadcrumbItems} />
         <TabContainer>
           <Tabs
             items={[
@@ -147,8 +166,14 @@ export default async function QuestionBookPage({
                 icon: <BarChartOutlined />,
                 children: questionBook.questionBookStats ? (
                   <Row gutter={[16, 16]}>
-                    <Col span={24} sm={{ span: 10 }}>
-                      <Flex align="center" gap={24}>
+                    <Col
+                      span={24}
+                      sm={{ span: 10 }}
+                    >
+                      <Flex
+                        align="center"
+                        gap={24}
+                      >
                         <Flex vertical>
                           <Statistic
                             title="Total de questões respondidas"
@@ -172,14 +197,27 @@ export default async function QuestionBookPage({
                         />
                       </Flex>
                     </Col>
-                    <Col span={0} sm={{ span: 2 }} offset={1}>
+                    <Col
+                      span={0}
+                      sm={{ span: 2 }}
+                      offset={1}
+                    >
                       <Divider type="vertical" />
                     </Col>
-                    <Col span={24} sm={{ span: 0 }}>
+                    <Col
+                      span={24}
+                      sm={{ span: 0 }}
+                    >
                       <Divider type="horizontal" />
                     </Col>
-                    <Col span={24} sm={{ span: 10 }}>
-                      <Flex align="center" gap={24}>
+                    <Col
+                      span={24}
+                      sm={{ span: 10 }}
+                    >
+                      <Flex
+                        align="center"
+                        gap={24}
+                      >
                         <Flex vertical>
                           <Statistic
                             title="Total de questões acertadas"
@@ -257,10 +295,21 @@ export default async function QuestionBookPage({
                   <p>Nenhuma estatística encontrada!</p>
                 ),
               },
+              {
+                key: "3",
+                label: "Fórum de discussão",
+                icon: <WechatOutlined />,
+                children: (
+                  <AppForum
+                    questionId={question?.questionId || ""}
+                    userId={userProfile.data?.user_id || ""}
+                  />
+                ),
+              },
             ]}
           />
         </TabContainer>
-      </div>
+      </Container>
     );
   }
 }

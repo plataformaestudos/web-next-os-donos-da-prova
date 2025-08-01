@@ -54,7 +54,7 @@ export const CreateModuleProvider = ({ children }: PropsWithChildren) => {
     <CreateModuleContext.Provider value={{ openCreateModal }}>
       {children}
       <Modal
-        destroyOnClose
+        destroyOnHidden
         title={
           parentModuleName ? (
             <Flex vertical>

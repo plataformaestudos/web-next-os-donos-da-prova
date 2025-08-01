@@ -38,7 +38,7 @@ export function Navbar() {
   const handlers = useHorizontalSwipe({
     onSwipeLeft: () => setIsNavbarCollapsed(true),
   });
-  const { menus, isLoading } = useMenus();
+  const { menus, isLoading } = useMenus() as { menus: { link: string; activeRegex: string; icon: string; description: string }[]; isLoading: boolean };
 
   return (
     <div {...handlers}>

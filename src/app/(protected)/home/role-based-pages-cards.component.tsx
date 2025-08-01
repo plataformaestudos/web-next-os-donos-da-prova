@@ -7,11 +7,8 @@ import {
   LuHouse,
 } from "react-icons/lu";
 
-import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { CgProfile } from "react-icons/cg";
-import HttpClient from "@/util/http-client/fetch-server.util";
 import { MenuModel } from "@/model/menu.model";
-import { ResponseModel } from "@/model/common.model";
 
 const icons = {
   home: <LuHouse size={48} />,
@@ -22,24 +19,7 @@ const icons = {
   plan: <LuCircleDollarSign size={48} />,
 };
 
-export async function RoleBasedPagesCards() {
-  const menus = await HttpClient.fetch<ResponseModel<MenuModel[]>>(
-    "/menu/menus",
-    {
-      method: "GET",
-      next: {
-        tags: [CACHE_TAGS.MENUS],
-      },
-    }
-  )
-    .then(
-      (response) =>
-        response.data?.sort(
-          ({ order: orderA }, { order: orderB }) => orderA - orderB
-        ) as Array<MenuModel>
-    )
-    .catch(() => []);
-
+export function RoleBasedPagesCards({ menus }: { menus: MenuModel[] }) {
   return (
     <CardsContainer>
       {menus
