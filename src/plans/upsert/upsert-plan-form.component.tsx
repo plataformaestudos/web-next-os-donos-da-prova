@@ -1,22 +1,30 @@
 "use client";
 
-import { Divider, Flex, Input, InputNumber, Typography } from "antd";
-
+import { Divider, Flex, Input, InputNumber, Typography, Checkbox } from "antd";
+import styled from "styled-components";
+import { useState } from "react";
 import { ModuleViewModel } from "@/model/module.model";
 import { ModulesTree } from "@/modules/tree/modules-tree.component";
 import { UPSERT_PLAN_FORM_ID } from "./upsert-plan-form.constant";
-import styled from "styled-components";
-import { useState } from "react";
 import { useUpsertPlan } from "./upsert-plan.context";
 
+interface PlanFormValues {
+  id?: string;
+  name: string;
+  description: string;
+  isFree: boolean;
+  durationDays?: number;
+  questionLimit?: number;
+  monthValue?: number;
+  quarterlyValue?: number;
+  semiannualValue?: number;
+  yearlyValue?: number;
+  lifetimeValue?: number;
+  modules: string[];
+}
+
 interface UpsertPlanFormProps {
-  plan?: {
-    id?: string;
-    name?: string;
-    description?: string;
-    price?: number;
-    modules?: string[];
-  } | null;
+  plan?: PlanFormValues | null;
   modules: {
     loadData: (key: string) => Promise<Array<ModuleViewModel>>;
     data: Array<ModuleViewModel>;
@@ -26,70 +34,159 @@ interface UpsertPlanFormProps {
 export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
   const { upsertPlan, error } = useUpsertPlan();
 
-  const [name, setName] = useState(plan?.name ?? "");
-  const [description, setDescription] = useState(plan?.description ?? "");
-  const [price, setPrice] = useState(plan?.price ?? 0);
-  const [selectedModules, setSelectedModules] = useState(plan?.modules ?? []);
+  const [values, setValues] = useState<PlanFormValues>({
+    id: plan?.id,
+    name: plan?.name || "",
+    description: plan?.description || "",
+    isFree: plan?.isFree ?? false,
+    durationDays: plan?.durationDays || 0,
+    questionLimit: plan?.questionLimit || 0,
+    monthValue: plan?.monthValue || 0,
+    quarterlyValue: plan?.quarterlyValue || 0,
+    semiannualValue: plan?.semiannualValue || 0,
+    yearlyValue: plan?.yearlyValue || 0,
+    lifetimeValue: plan?.lifetimeValue || 0,
+    modules: plan?.modules || []
+  });
+
+  const handleChange = (field: keyof PlanFormValues, value: any) => {
+    setValues(v => ({ ...v, [field]: value }));
+  };
+
+  const handleSubmit = () => {
+    upsertPlan(values);
+  };
 
   return (
     <Container>
-      <form
-        id={UPSERT_PLAN_FORM_ID}
-        action={() =>
-          upsertPlan({
-            id: plan?.id,
-            name,
-            description,
-            price,
-            modules: selectedModules,
-          })
-        }
-      >
-        {plan?.id && (
+      <form id={UPSERT_PLAN_FORM_ID} action={handleSubmit}>
+        {values.id && (
           <Flex vertical style={{ opacity: 0.6 }}>
-            <Label htmlFor="name">ID</Label>
-            <Typography.Text
-              style={{ cursor: "default" }}
-              copyable={{
-                text: plan.id,
-                tooltips: ["Copiar ID", "ID copiado!"],
-              }}
-            >
-              {plan.id}
-            </Typography.Text>
+            <Label>ID</Label>
+            <Typography.Text copyable>{values.id}</Typography.Text>
             <Divider />
           </Flex>
         )}
+
         <Label htmlFor="name">Nome</Label>
         <Input
           id="name"
-          name="name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
+          value={values.name}
+          onChange={e => handleChange("name", e.target.value)}
         />
         <Divider />
+
         <Label htmlFor="description">Descrição</Label>
         <Input
           id="description"
-          name="description"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          value={values.description}
+          onChange={e => handleChange("description", e.target.value)}
         />
         <Divider />
-        <Flex vertical>
-          <Label htmlFor="price">Preço</Label>
-          <InputNumber
-            style={{ width: "100%" }}
-            id="price"
-            name="price"
-            type="number"
-            prefix="R$"
-            step="0.01"
-            value={price}
-            onChange={(value) => setPrice(Number(value))}
-          />
-        </Flex>
+
+        <Checkbox
+          checked={values.isFree}
+          onChange={e => handleChange("isFree", e.target.checked)}
+        >
+          Free Trial
+        </Checkbox>
         <Divider />
+
+        {values.isFree && (
+          <>
+            <Flex style={{ gap: 16 }}>
+              <Flex vertical style={{ flex: 1 }}>
+                <Label htmlFor="durationDays">Duração (dias)</Label>
+                <InputNumber
+                  id="durationDays"
+                  value={values.durationDays}
+                  onChange={val => handleChange("durationDays", val)}
+                  style={{ width: '100%' }}
+                  min={0}
+                />
+              </Flex>
+
+              <Flex vertical style={{ flex: 1 }}>
+                <Label htmlFor="questionLimit">Limite de Questões</Label>
+                <InputNumber
+                  id="questionLimit"
+                  value={values.questionLimit}
+                  onChange={val => handleChange("questionLimit", val)}
+                  style={{ width: '100%' }}
+                  min={0}
+                />
+              </Flex>
+            </Flex>
+            <Divider />
+          </>
+        )}
+
+        <Label>Faixa de Valores</Label>
+        <Flex style={{ gap: 16, flexWrap: 'wrap' }}>
+          <Flex vertical style={{ flex: 1, minWidth: 120 }}>
+            <Label>Mensal</Label>
+            <InputNumber
+              id="monthValue"
+              value={values.monthValue}
+              prefix="R$"
+              step={0.01}
+              onChange={val => handleChange("monthValue", val)}
+              style={{ width: '100%' }}
+              disabled={values.isFree}
+            />
+          </Flex>
+          <Flex vertical style={{ flex: 1, minWidth: 120 }}>
+            <Label>Trimestral</Label>
+            <InputNumber
+              id="quarterlyValue"
+              value={values.quarterlyValue}
+              prefix="R$"
+              step={0.01}
+              onChange={val => handleChange("quarterlyValue", val)}
+              style={{ width: '100%' }}
+              disabled={values.isFree}
+            />
+          </Flex>
+          <Flex vertical style={{ flex: 1, minWidth: 120 }}>
+            <Label>Semestral</Label>
+            <InputNumber
+              id="semiannualValue"
+              value={values.semiannualValue}
+              prefix="R$"
+              step={0.01}
+              onChange={val => handleChange("semiannualValue", val)}
+              style={{ width: '100%' }}
+              disabled={values.isFree}
+            />
+          </Flex>
+          <Flex vertical style={{ flex: 1, minWidth: 120 }}>
+            <Label>Anual</Label>
+            <InputNumber
+              id="yearlyValue"
+              value={values.yearlyValue}
+              prefix="R$"
+              step={0.01}
+              onChange={val => handleChange("yearlyValue", val)}
+              style={{ width: '100%' }}
+              disabled={values.isFree}
+            />
+          </Flex>
+          <Flex vertical style={{ flex: 1, minWidth: 120 }}>
+            <Label>Vitalício</Label>
+            <InputNumber
+              id="lifetimeValue"
+              value={values.lifetimeValue}
+              prefix="R$"
+              step={0.01}
+              onChange={val => handleChange("lifetimeValue", val)}
+              style={{ width: '100%' }}
+              disabled={values.isFree}
+            />
+          </Flex>
+        </Flex>
+
+        <Divider />
+
         <Label>Módulos</Label>
         <ModulesTree
           modules={modules.data}
@@ -97,9 +194,9 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
           readonly
           checkable
           autoExpand
-          defaultCheckedKeys={plan?.modules}
-          onCheck={({ checkedRoots: modules }) => {
-            setSelectedModules(modules.map((module) => module.id));
+          defaultCheckedKeys={values.modules}
+          onCheck={({ checkedRoots }) => {
+            handleChange("modules", checkedRoots.map(m => m.id));
           }}
         />
       </form>

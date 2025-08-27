@@ -11,11 +11,11 @@ export async function upsertPlan(
   _: {
     error: string | null;
   },
-  { id, name, description, price, modules }: UpsertPlanDTO
+  { id, name, description, isFree, durationDays, lifetimeValue, monthValue, quarterlyValue, questionLimit, semiannualValue, yearlyValue, modules }: UpsertPlanDTO
 ): Promise<{ error: string | null }> {
-  if (!name || isNaN(parseFloat(price as unknown as string))) {
+  if (!name) {
     return {
-      error: "Nome e preço são obrigatórios",
+      error: "Nome é obrigatório",
     };
   }
 
@@ -27,7 +27,14 @@ export async function upsertPlan(
       id,
       name,
       description,
-      month_value: price,
+      month_value: monthValue,
+      quarterly_value: quarterlyValue,
+      semiannual_value: semiannualValue,
+      annual_value: yearlyValue,
+      lifetime_value: lifetimeValue,
+      is_free: isFree,
+      duration_days: durationDays,
+      question_limit: questionLimit,
     })
     .select()
     .single();
