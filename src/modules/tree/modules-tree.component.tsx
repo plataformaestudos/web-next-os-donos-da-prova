@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { ModuleTreeItemTitle } from "./module-tree-item-title.component";
 import { ModuleViewModel } from "@/model/module.model";
 import { Tree } from "antd";
+import { TreeContainer } from "./styles";
 
 interface ModulesTreeProps {
   modules: ModuleViewModel[];
@@ -36,11 +37,13 @@ function SwitcherIcon({
 }) {
   if (isLeaf) return null;
   return loading ? (
-    <LoadingOutlined style={{ fontSize: 16 }} />
+    <LoadingOutlined style={{ fontSize: 16, height: "100%", paddingLeft: 4 }} />
   ) : expanded ? (
-    <FolderOpenOutlined style={{ fontSize: 16 }} />
+    <FolderOpenOutlined
+      style={{ fontSize: 16, height: "100%", paddingLeft: 4 }}
+    />
   ) : (
-    <FolderOutlined style={{ fontSize: 16 }} />
+    <FolderOutlined style={{ fontSize: 16, height: "100%", paddingLeft: 4 }} />
   );
 }
 
@@ -50,6 +53,7 @@ function mapTreeData(list: ModuleViewModel[]): ModuleViewModel[] {
       ...node,
       switcherIcon: SwitcherIcon,
       children: mapTreeData(node.children ?? []),
+      className: "tree-item",
     };
   });
 }
@@ -143,71 +147,73 @@ export function ModulesTree(props: ModulesTreeProps) {
   }, [props.modules, autoExpand, props.autoExpand, props.defaultCheckedKeys]);
 
   return (
-    <Tree
-      showLine={true}
-      autoExpandParent={autoExpandParent}
-      defaultCheckedKeys={props.defaultCheckedKeys}
-      expandedKeys={expandadedKeys}
-      onExpand={(keys) => {
-        setExpandedKeys(keys as string[]);
-        setAutoExpandParent(false);
-      }}
-      loadedKeys={loadedKeys}
-      onLoad={(lk) => setLoadedKeys(lk as string[])}
-      rootStyle={{
-        padding: "8px 8px 4px 8px",
-      }}
-      style={{ flex: 1 }}
-      blockNode
-      selectable={false}
-      checkable={props.checkable ?? false}
-      onCheck={(_, info) => {
-        const checkedRoots = info.checkedNodes
-          .filter((node) => !node.isLeaf && !node.parentModuleId)
-          .concat(
-            ...info.checkedNodes.filter((node) =>
-              info.halfCheckedKeys?.includes(node.parentModuleId as string)
+    <TreeContainer>
+      <Tree
+        showLine={true}
+        autoExpandParent={autoExpandParent}
+        defaultCheckedKeys={props.defaultCheckedKeys}
+        expandedKeys={expandadedKeys}
+        onExpand={(keys) => {
+          setExpandedKeys(keys as string[]);
+          setAutoExpandParent(false);
+        }}
+        loadedKeys={loadedKeys}
+        onLoad={(lk) => setLoadedKeys(lk as string[])}
+        rootStyle={{
+          backgroundColor: "transparent",
+        }}
+        style={{ flex: 1 }}
+        blockNode
+        selectable={false}
+        checkable={props.checkable ?? false}
+        onCheck={(_, info) => {
+          const checkedRoots = info.checkedNodes
+            .filter((node) => !node.isLeaf && !node.parentModuleId)
+            .concat(
+              ...info.checkedNodes.filter((node) =>
+                info.halfCheckedKeys?.includes(node.parentModuleId as string)
+              )
+            );
+
+          const checkedParentKeys = Array.from(
+            new Set(
+              info.checkedNodes
+                .map((node) => node.parentModuleId)
+                .filter(Boolean) as string[]
             )
           );
+          const checkedLeaves = info.checkedNodes.filter(
+            (node) => !checkedParentKeys.includes(node.key)
+          );
 
-        const checkedParentKeys = Array.from(
-          new Set(
-            info.checkedNodes
-              .map((node) => node.parentModuleId)
-              .filter(Boolean) as string[]
-          )
-        );
-        const checkedLeaves = info.checkedNodes.filter(
-          (node) => !checkedParentKeys.includes(node.key)
-        );
-
-        props.onCheck?.({
-          checkedLeaves,
-          checkedRoots,
-          allChecked: info.checkedNodes,
-        });
-      }}
-      treeData={mapTreeData(tree)}
-      loadData={async ({ key }) => {
-        const newChildren = await props.loadData(key);
-        setTree((origin) => updateTreeData(origin, key, newChildren));
-      }}
-      titleRender={({ key, title, parentModuleId, isLeaf }) => (
-        <ModuleTreeItemTitle
-          onClick={() => {
-            setExpandedKeys(
-              expandadedKeys.includes(key)
-                ? expandadedKeys.filter((expandedKey) => expandedKey !== key)
-                : expandadedKeys.concat(key)
-            );
-          }}
-          id={key}
-          title={title}
-          isLeaf={isLeaf}
-          parentModuleId={parentModuleId}
-          readonly={props.readonly}
-        />
-      )}
-    />
+          props.onCheck?.({
+            checkedLeaves,
+            checkedRoots,
+            allChecked: info.checkedNodes,
+          });
+        }}
+        treeData={mapTreeData(tree)}
+        loadData={async ({ key }) => {
+          const newChildren = await props.loadData(key);
+          setTree((origin) => updateTreeData(origin, key, newChildren));
+        }}
+        titleRender={({ key, title, parentModuleId, isLeaf }) => (
+          <ModuleTreeItemTitle
+            onClick={() => {
+              setExpandedKeys(
+                expandadedKeys.includes(key)
+                  ? expandadedKeys.filter((expandedKey) => expandedKey !== key)
+                  : expandadedKeys.concat(key)
+              );
+            }}
+            id={key}
+            title={title}
+            isLeaf={isLeaf}
+            parentModuleId={parentModuleId}
+            readonly={props.readonly}
+          />
+        )}
+      />
+    </TreeContainer>
   );
 }

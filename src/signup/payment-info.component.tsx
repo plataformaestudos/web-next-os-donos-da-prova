@@ -11,9 +11,9 @@ export interface PaymentInfo {
 }
 
 export function PaymentInfoThirdStep({
-  form,
+  formV,
 }: {
-  form: FormInstance<PaymentInfo>;
+  formV: FormInstance<PaymentInfo>;
 }) {
   return (
     <>
@@ -21,7 +21,7 @@ export function PaymentInfoThirdStep({
         Preencha as informações de pagamento
       </Typography.Paragraph>
       <Form<PaymentInfo>
-        form={form}
+        form={formV}
         name="payment=info"
         initialValues={{ remember: true }}
         autoComplete="off"

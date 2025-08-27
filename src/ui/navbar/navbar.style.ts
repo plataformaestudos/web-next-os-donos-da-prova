@@ -93,19 +93,29 @@ export const Link = styled(NextLink)<{ $active: boolean }>`
   transition: background-color 200ms ease-in-out;
 
   &:hover {
-    background-color: #0150be;
+    background-color: white;
+    svg {
+      color: ${({ theme }) => theme.colorTertiary} !important;
+    }
+    span {
+      color: ${({ theme }) => theme.colorTertiary};
+    }
   }
 
-  ${({ $active }) => $active && `background-color: #0150be;`}
+  ${({ $active }) => $active && `background-color: white;`}
 
   svg {
-    color: #fff;
+    color: ${({ theme, $active }) =>
+      $active ? theme.colorTertiary : "#fff"} !important;
     flex-shrink: 0;
+  }
+
+  span {
+    color: ${({ theme, $active }) => ($active ? theme.colorTertiary : "#fff")};
   }
 `;
 
-export const LinkText = styled.span<{ $collapsed: boolean }>`
-  color: #fff;
+export const LinkText = styled.span<{ $collapsed: boolean; $active: boolean }>`
   line-height: 1.25rem;
   transition: opacity 200ms ease-in-out;
   opacity: 0;

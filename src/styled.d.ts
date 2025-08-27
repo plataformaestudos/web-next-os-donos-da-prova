@@ -7,5 +7,8 @@ declare module "styled-components" {
   export interface DefaultTheme extends GlobalToken {
     colorBgFilter: string;
     colorTextPrimary: string;
+    colorSecondary: string;
+    colorTertiary: string;
+    colorTertiaryText: string;
   }
 }

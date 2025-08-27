@@ -21,3 +21,10 @@ body {
 p {
   margin: 0;
 }
+
+.subscription-page
+  :where(.css-dev-only-do-not-override-21i0xg).ant-tabs
+  > .ant-tabs-nav
+  .ant-tabs-nav-list {
+  margin: auto;
+}

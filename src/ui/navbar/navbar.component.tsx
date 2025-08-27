@@ -22,12 +22,48 @@ import { useNabvarContext } from "./navbar.context";
 import { usePathname } from "next/navigation";
 
 const icons = {
-  home: <LuHouse color="#fff" size={24} />,
-  book: <LuBook color="#fff" size={24} />,
-  question: <LuFileQuestion color="#fff" size={24} />,
-  profile: <CgProfile color="#fff" size={24} />,
-  module: <LuFolders color="#fff" size={24} />,
-  plan: <LuCircleDollarSign color="#fff" size={24} />,
+  home: (
+    <LuHouse
+      color="#fff"
+      size={24}
+    />
+  ),
+  book: (
+    <LuBook
+      color="#fff"
+      size={24}
+    />
+  ),
+  question: (
+    <LuFileQuestion
+      color="#fff"
+      size={24}
+    />
+  ),
+  profile: (
+    <CgProfile
+      color="#fff"
+      size={24}
+    />
+  ),
+  module: (
+    <LuFolders
+      color="#fff"
+      size={24}
+    />
+  ),
+  plan: (
+    <LuCircleDollarSign
+      color="#fff"
+      size={24}
+    />
+  ),
+  subscription: (
+    <LuCircleDollarSign
+      color="#fff"
+      size={24}
+    />
+  )
 };
 
 export function Navbar() {
@@ -38,7 +74,15 @@ export function Navbar() {
   const handlers = useHorizontalSwipe({
     onSwipeLeft: () => setIsNavbarCollapsed(true),
   });
-  const { menus, isLoading } = useMenus() as { menus: { link: string; activeRegex: string; icon: string; description: string }[]; isLoading: boolean };
+  const { menus, isLoading } = useMenus() as {
+    menus: {
+      link: string;
+      activeRegex: string;
+      icon: string;
+      description: string;
+    }[];
+    isLoading: boolean;
+  };
 
   return (
     <div {...handlers}>
@@ -103,28 +147,48 @@ export function Navbar() {
                 }}
               >
                 {icons[item.icon as keyof typeof icons]}
-                <Styled.LinkText $collapsed={isNavbarCollapsed}>
+                <Styled.LinkText
+                  $collapsed={isNavbarCollapsed}
+                  $active={new RegExp(item.activeRegex).test(pathname)}
+                >
                   {item.description}
                 </Styled.LinkText>
               </Styled.Link>
             );
           })}
           <span style={{ flex: 1 }} />
-          <Tooltip title={isNavbarCollapsed ? "Sair" : null} placement="right">
-            <Styled.Link
-              key="/login"
-              href="/login"
-              $active={false}
-              onClick={() => {
-                supabase.auth.signOut();
-              }}
+          <div
+            style={{
+              width: "100%",
+              backgroundColor: "#af2615",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              paddingTop: 16,
+            }}
+          >
+            <Tooltip
+              title={isNavbarCollapsed ? "Sair" : null}
+              placement="right"
             >
-              <FaArrowRightToBracket size={20} />
-              <Styled.LinkText $collapsed={isNavbarCollapsed}>
-                {isNavbarCollapsed ? null : "Sair"}
-              </Styled.LinkText>
-            </Styled.Link>
-          </Tooltip>
+              <Styled.Link
+                key="/login"
+                href="/login"
+                $active={false}
+                onClick={() => {
+                  supabase.auth.signOut();
+                }}
+              >
+                <FaArrowRightToBracket size={20} />
+                <Styled.LinkText
+                  $collapsed={isNavbarCollapsed}
+                  $active={false}
+                >
+                  {isNavbarCollapsed ? null : "Sair"}
+                </Styled.LinkText>
+              </Styled.Link>
+            </Tooltip>
+          </div>
         </Styled.MenuItemsContainer>
       </Styled.Container>
     </div>

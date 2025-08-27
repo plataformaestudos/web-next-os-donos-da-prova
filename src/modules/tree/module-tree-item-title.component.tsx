@@ -97,10 +97,13 @@ export function ModuleTreeItemTitle({
     <Flex
       justify="space-between"
       align="center"
-      style={{ minHeight: 32, cursor: "pointer" }}
+      style={{ minHeight: 32, cursor: "pointer", padding: "8px 0" }}
       onClick={onClick}
     >
-      <Title level={5} style={{ margin: 0 }}>
+      <Title
+        level={5}
+        style={{ margin: 0 }}
+      >
         {title}
       </Title>
       {!readonly && (
@@ -113,7 +116,10 @@ export function ModuleTreeItemTitle({
           trigger={["click"]}
         >
           <span onClick={(ev) => ev.stopPropagation()}>
-            <Button size="small" icon={<EllipsisOutlined />} />
+            <Button
+              size="small"
+              icon={<EllipsisOutlined />}
+            />
           </span>
         </Dropdown>
       )}

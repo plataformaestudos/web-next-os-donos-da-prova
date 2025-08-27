@@ -23,12 +23,9 @@ export async function login(formData: FormData) {
     password: formData.get("password") as string,
   };
 
-  const { error, data: _data } = await supabase.auth.signInWithPassword(data);
-
-  console.log(_data);
+  const { error} = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    console.log(error);
     redirect("/error");
   }
 
