@@ -79,9 +79,11 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
         </Link>
       </ProfileTitleWrapper>
       <AvatarWrapper>
-        <Avatar
-          size={100}
-          icon={<UserOutlined />}
+        <img
+          src="/images/usuario-passaro.png"
+          alt="Usuário pássaro"
+          width={170}
+          style={{ height: "auto" }}
         />
       </AvatarWrapper>
 

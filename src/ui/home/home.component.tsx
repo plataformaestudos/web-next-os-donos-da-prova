@@ -79,7 +79,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
   });
 
   const activeCount = activeDaysSet.size;
-  
+
 
   return (
     <div>
@@ -144,12 +144,34 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                     ? `${dashData.totalBooksFavorited} cadernos favoritos`
                     : "1 caderno favorito"}{" "}
                 </S.Info>
-                <LuNotebookText size={25} />{" "}
+                <img
+                  src="/images/cadernos-favoritos.png"
+                  alt="Cadernos Favoritos"
+                  width={40}
+                  style={{ height: "auto" }}
+                />
               </S.Flex>
+              <img
+                src="/images/mascote-celular.png"
+                alt="Coruja"
+                style={{
+                  position: "absolute",
+                  top: "-182px",   
+                  left: "55%",  
+                  transform: "translateX(-50%)", 
+                  width: "200px", 
+                  height: "auto"
+                }}
+              />
             </S.Card>
             <S.Card>
               <S.CardTitle>
-                Concursos <IoTrophySharp size={20} />{" "}
+                Concursos  <img
+                  src="/images/concursos.png"
+                  alt="Concursos"
+                  width={30}
+                  style={{ height: "auto" }}
+                />{" "}
               </S.CardTitle>
             </S.Card>
             {/* <S.Card>
@@ -169,7 +191,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
 
                 <S.DaysGrid aria-label="Dias do mês">
                   {daysArray.map((day) => {
-                    const isActive = activeDaysSet.has(day); 
+                    const isActive = activeDaysSet.has(day);
                     return (
                       <S.DayDot
                         key={day}

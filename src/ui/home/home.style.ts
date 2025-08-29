@@ -29,6 +29,7 @@ export const CardPerformance = styled.div<{ $large?: boolean }>`
 `;
 
 export const Card = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;

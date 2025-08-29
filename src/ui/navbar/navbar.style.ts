@@ -131,3 +131,18 @@ export const LinkText = styled.span<{ $collapsed: boolean; $active: boolean }>`
       display: block;
     `}
 `;
+export const RedHeader = styled.div`
+  width: 100%;
+  background-color: #af2615;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 0;      /* aumenta o padding vertical */
+  margin-bottom: 24px;  /* cria espaço entre o vermelho e os menus */
+  
+  img {
+    width: 70px;        /* aumenta o tamanho da imagem para não cortar */
+    height: 70px;
+    object-fit: contain;
+  }
+`;

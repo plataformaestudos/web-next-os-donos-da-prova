@@ -86,19 +86,17 @@ export function Navbar() {
 
   return (
     <div {...handlers}>
-      <Styled.Backdrop
-        $collapsed={isNavbarCollapsed}
-        onClick={() => setIsNavbarCollapsed(!isNavbarCollapsed)}
-      />
       <Styled.Container $collapsed={isNavbarCollapsed}>
-        <Styled.LogoContainer>
-          <Button
-            type="text"
-            size="large"
-            onClick={() => setIsNavbarCollapsed(!isNavbarCollapsed)}
-            icon={<MenuOutlined size={24} />}
-          />
-        </Styled.LogoContainer>
+        <Styled.RedHeader onClick={() => setIsNavbarCollapsed(!isNavbarCollapsed)} >
+          <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: 16 }}>
+            <img
+              src="/images/passaro.png"
+              alt="Passaro"
+             
+            />
+          </div>
+        </Styled.RedHeader>
+
         <Styled.MenuItemsContainer>
           {isLoading && (
             <>

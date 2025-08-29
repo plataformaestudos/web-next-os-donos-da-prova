@@ -43,6 +43,12 @@ export function Header() {
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           />
         </Tooltip>
+        <img
+          src="/images/sino-2.png"
+          alt="Notificações"
+          style={{ width: "28px", height: "28px", cursor: "pointer" }}
+        />
+
         <Styled.StyledAvatar>
           {userEmail.charAt(0).toUpperCase()}
         </Styled.StyledAvatar>
