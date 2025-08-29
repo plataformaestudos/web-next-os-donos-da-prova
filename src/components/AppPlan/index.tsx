@@ -154,6 +154,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
 
   async function subscribePlan(planData: PlanModel) {
     setIsLoading(true);
+    console.log("to aqui:", isPaymentInfoValid);
     if (!isPaymentInfoValid) {
       message.error("Por favor, preencha os dados de pagamento corretamente");
       setIsLoading(false);
