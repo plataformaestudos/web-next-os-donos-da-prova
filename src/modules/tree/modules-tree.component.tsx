@@ -197,22 +197,28 @@ export function ModulesTree(props: ModulesTreeProps) {
           const newChildren = await props.loadData(key);
           setTree((origin) => updateTreeData(origin, key, newChildren));
         }}
-        titleRender={({ key, title, parentModuleId, isLeaf }) => (
-          <ModuleTreeItemTitle
-            onClick={() => {
-              setExpandedKeys(
-                expandadedKeys.includes(key)
-                  ? expandadedKeys.filter((expandedKey) => expandedKey !== key)
-                  : expandadedKeys.concat(key)
-              );
-            }}
-            id={key}
-            title={title}
-            isLeaf={isLeaf}
-            parentModuleId={parentModuleId}
-            readonly={props.readonly}
-          />
-        )}
+        titleRender={({ key, title, parentModuleId, isLeaf }) => {
+          const module = tree.find((m) => m.key === key) || { percent: 0 };
+
+          return (
+            <ModuleTreeItemTitle
+              onClick={() => {
+                setExpandedKeys(
+                  expandadedKeys.includes(key)
+                    ? expandadedKeys.filter((expandedKey) => expandedKey !== key)
+                    : expandadedKeys.concat(key)
+                );
+              }}
+              id={key}
+              title={title}
+              isLeaf={isLeaf}
+              percent={module.percent}
+              parentModuleId={parentModuleId}
+              readonly={props.readonly}
+            />
+
+          );
+        }}
       />
     </TreeContainer>
   );

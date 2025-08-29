@@ -52,8 +52,34 @@ export function HomeContent({ userProfile }: HomeContentProps) {
 
     getData()
       .then((response) => setDashData(response ? response : dashData))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
+
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth(); // 0-indexed
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+  const activeDaysSet = new Set<number>();
+  (dashData.loginsInCurrentMonth || []).forEach((entry) => {
+    if (!entry) return;
+    const asNumber = parseInt(entry, 10);
+    if (!Number.isNaN(asNumber) && asNumber >= 1 && asNumber <= daysInMonth) {
+      activeDaysSet.add(asNumber);
+      return;
+    }
+
+    const parsed = new Date(entry);
+    if (!Number.isNaN(parsed.getTime())) {
+      if (parsed.getFullYear() === currentYear && parsed.getMonth() === currentMonth) {
+        activeDaysSet.add(parsed.getDate());
+      }
+    }
+  });
+
+  const activeCount = activeDaysSet.size;
+  
 
   return (
     <div>
@@ -71,12 +97,12 @@ export function HomeContent({ userProfile }: HomeContentProps) {
               <S.CardTitle>Continue de onde parou</S.CardTitle>
               <S.Spacer />
               <S.CardTitle>
-                {dashData?.statsLastBookAnswered.nameBook}
+                {dashData?.statsLastBookAnswered?.nameBook}
               </S.CardTitle>
               <Progress
                 type="line"
                 percent={parseFloat(
-                  dashData?.statsLastBookAnswered.percentAnswered.replace(
+                  dashData?.statsLastBookAnswered?.percentAnswered.replace(
                     "%",
                     ""
                   ) ?? "0"
@@ -129,6 +155,35 @@ export function HomeContent({ userProfile }: HomeContentProps) {
             {/* <S.Card>
               <S.CardTitle>Visão Geral</S.CardTitle>
             </S.Card> */}
+            <S.CardPerformance $large>
+              <S.CardTitle>Meu Desempenho</S.CardTitle>
+              <S.Spacer />
+
+
+              <S.Performance>
+                <S.PerformanceHeader>
+                  <div>Visão do mês atual</div>
+                  <div style={{ fontWeight: 700 }}>{activeCount} dias ativos</div>
+                </S.PerformanceHeader>
+
+
+                <S.DaysGrid aria-label="Dias do mês">
+                  {daysArray.map((day) => {
+                    const isActive = activeDaysSet.has(day); 
+                    return (
+                      <S.DayDot
+                        key={day}
+                        title={`Dia ${day} - ${isActive ? "ativo" : "inativo"}`}
+                        $active={isActive}
+                      >
+                        {day}
+                      </S.DayDot>
+                    );
+                  })}
+                </S.DaysGrid>
+
+              </S.Performance>
+            </S.CardPerformance>
           </S.Content>
         </S.Container>
       )}
