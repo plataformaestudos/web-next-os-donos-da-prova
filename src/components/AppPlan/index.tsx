@@ -1,7 +1,15 @@
 "use client";
 
 import { PlanModel } from "@/model/plan.model";
-import { Button, Card, Descriptions, message, Typography, Form } from "antd";
+import {
+  Button,
+  Card,
+  Descriptions,
+  message,
+  Typography,
+  Form,
+  Flex,
+} from "antd";
 import { ReactNode, useEffect, useState } from "react";
 import styled from "styled-components";
 import { AppConfirmModal } from "../AppConfirmModal";
@@ -48,28 +56,32 @@ interface ModalProps {
   confirmText?: string;
   cancelText?: string;
   visible: boolean;
+  isDeclined?: boolean;
 }
 
-const useForm = <T,>() => {
-  const [isValid, setIsFormValid] = useState<boolean | null>(null);
-  const [form] = Form.useForm<T>();
-  const formValues = Form.useWatch([], form);
-
-  useEffect(() => {
-    form
-      .validateFields({ validateOnly: true })
-      .then(() => setIsFormValid(true))
-      .catch(() => setIsFormValid(false));
-  }, [form, formValues]);
-
-  return {
-    form,
-    values: formValues,
-    isValid,
-  };
-};
-
 export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
+  const useForm = <T,>() => {
+    const [isValid, setIsFormValid] = useState<boolean | null>(null);
+    const [form] = Form.useForm<T>();
+    const formValues = Form.useWatch([], form);
+
+    useEffect(() => {
+      form
+        .validateFields({ validateOnly: true })
+        .then(() => {
+          console.log("Form is valid", isValid);
+          setIsFormValid(true);
+        })
+        .catch(() => setIsFormValid(false));
+    }, [form, formValues, isValid]);
+
+    return {
+      form,
+      values: formValues,
+      isValid,
+    };
+  };
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modalProps, setModalProps] = useState<ModalProps>({
     title: "",
@@ -79,6 +91,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
     confirmText: "Confirmar",
     cancelText: "Cancelar",
     visible: false,
+    isDeclined: false,
   });
 
   const {
@@ -101,6 +114,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
       confirmText: "Sim, cancelar",
       cancelText: "Não",
       visible: true,
+      isDeclined: true,
     });
   };
 
@@ -131,6 +145,30 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
       confirmText: "Sim, assinar",
       cancelText: "Não",
       visible: true,
+      isDeclined: false,
+    });
+  };
+
+  const handleUpdatePayment = (planData: PlanModel) => {
+    setModalProps({
+      title: "Atualizar dados de pagamento",
+      content: (
+        <div style={{ display: "flex", flexDirection: "column", gap: 30 }}>
+          <span>
+            Tem certeza que deseja atualizar os dados de pagamento do plano{" "}
+            <strong>{planData.name}</strong>
+            ?
+            <br />
+          </span>
+          <PaymentInfoThirdStep formV={paymentInfoForm} />
+        </div>
+      ),
+      onConfirm: () => updatePlan(planData),
+      onCancel: () => setModalProps({ ...modalProps, visible: false }),
+      confirmText: "Sim, atualizar",
+      cancelText: "Não",
+      visible: true,
+      isDeclined: false,
     });
   };
 
@@ -154,7 +192,6 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
 
   async function subscribePlan(planData: PlanModel) {
     setIsLoading(true);
-    console.log("to aqui:", isPaymentInfoValid);
     if (!isPaymentInfoValid) {
       message.error("Por favor, preencha os dados de pagamento corretamente");
       setIsLoading(false);
@@ -193,6 +230,47 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
       .finally(() => setIsLoading(false));
   }
 
+  async function updatePlan(planData: PlanModel) {
+    setIsLoading(true);
+
+    if (!isPaymentInfoValid) {
+      message.error("Por favor, preencha os dados de pagamento corretamente");
+      setIsLoading(false);
+      return;
+    }
+
+    const payload = {
+      planId: planData.id,
+      saveCard: paymentInfoValues.saveCard,
+      billingType: "CREDIT_CARD",
+      cycle: planData.billingRecurrencyType ?? "MONTHLY",
+      description: planData?.description ?? "",
+      creditCard: {
+        holderName: paymentInfoValues.holderName,
+        number: paymentInfoValues.number,
+        expiryMonth: paymentInfoValues.expiryDate.split("/")[0],
+        expiryYear: paymentInfoValues.expiryDate.split("/")[1],
+        ccv: paymentInfoValues.cvv,
+      },
+    };
+
+    return HttpClient.fetch(`/subscription/update-credit-card`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    })
+      .then(() => {
+        message.success("Dados de pagamento atualizados com sucesso");
+        setModalProps({ ...modalProps, visible: false });
+        setTimeout(() => {
+          window.location.reload();
+        }, 200);
+      })
+      .catch(() => {
+        message.error("Erro ao atualizar os dados de pagamento");
+      })
+      .finally(() => setIsLoading(false));
+  }
+
   return (
     <ProfileCard title="">
       <ProfileTitle level={3}>
@@ -223,14 +301,29 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
       </Descriptions>
       <ButtonContent>
         {myPlan ? (
-          <Button
-            type="primary"
-            size="large"
-            danger
-            onClick={() => handleCancelPlan(plan)}
+          <Flex
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
           >
-            Cancelar Plano
-          </Button>
+            <Button
+              type="primary"
+              size="large"
+              danger
+              onClick={() => handleCancelPlan(plan)}
+            >
+              Cancelar Plano
+            </Button>
+            <Button
+              type="primary"
+              size="large"
+              onClick={() => handleUpdatePayment(plan)}
+            >
+              Gerenciar pagamento
+            </Button>
+          </Flex>
         ) : (
           <Button
             type="primary"
@@ -249,6 +342,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
         visible={modalProps.visible}
         onConfirm={modalProps.onConfirm}
         onCancel={modalProps.onCancel}
+        isDeclined={modalProps.isDeclined}
       />
       <AppLoading
         loadingModal

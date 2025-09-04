@@ -91,6 +91,7 @@ const themes = {
       colorSecondary: "#FFFFFF",
       colorTertiary: "#af2615",
       colorTertiaryText: "#FFFFFF",
+      colorMenu: "#163658",
     },
   },
   dark: {
@@ -103,9 +104,10 @@ const themes = {
       colorPrimaryText: "#EDEFF0",
       colorText: "#EDEFF0",
       colorPrimaryBg: "#163658",
-      colorSecondary: "#163658",
+      colorSecondary: "#1A1A1A",
       colorTertiary: "#af2615",
       colorTertiaryText: "#FFFFFF",
+      colorMenu: "#1A1A1A",
     },
   },
 } as Record<string, ThemeConfig>;

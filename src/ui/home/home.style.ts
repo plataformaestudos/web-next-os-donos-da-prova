@@ -12,6 +12,7 @@ export const Container = styled.div`
 
 export const CardPerformance = styled.div<{ $large?: boolean }>`
   display: flex;
+    position: relative;
   flex-direction: column;
   justify-content: center;
   background-color: ${({ theme }) => theme.colorSecondary};
@@ -55,6 +56,10 @@ export const CardTitle = styled.h2`
   gap: 8px;
 `;
 
+export const CardText = styled.span`
+  color: ${({ theme }) => theme.colorPrimaryText};
+`;
+
 export const Info = styled.span<InfoProps>`
   color: ${({ theme, $tertiary }) =>
     $tertiary ? theme.colorTertiary : theme.colorTextPrimary};
@@ -68,6 +73,14 @@ export const Content = styled.div`
   flex-wrap: wrap;
   gap: 16px;
   margin-top: 40px;
+`;
+
+export const RightContent = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 40px;
+  margin-left: 16px;
 `;
 
 export const SubContent = styled.div`
@@ -167,7 +180,7 @@ export const DayDot = styled.div<{ $active?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;            
+  line-height: 1;
   font-size: 12px;
   cursor: default;
   user-select: none;
@@ -175,11 +188,8 @@ export const DayDot = styled.div<{ $active?: boolean }>`
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: ${({ $active, theme }) =>
     $active ? theme.colorTertiary : "#f2f2f2"};
-   color: ${({ $active, theme }) =>
-    $active ? theme.colorTertiaryText : theme.colorTextPrimary};
+  color: ${({ $active, theme }) =>
+    $active ? theme.colorTertiaryText : "#163658"};
   box-sizing: border-box;
   z-index: 0;
 `;
-
-
-

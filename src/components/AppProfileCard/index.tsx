@@ -1,10 +1,10 @@
 "use client";
 
-import { Avatar, Button, Card, Descriptions, Tabs, Typography } from "antd";
-import Link from "next/link";
-import { UserOutlined } from "@ant-design/icons";
-import styled from "styled-components";
 import { User } from "@supabase/supabase-js";
+import { Button, Card, Descriptions, Tabs, Typography } from "antd";
+import Image from "next/image";
+import Link from "next/link";
+import styled from "styled-components";
 
 interface AppProfileCardProps {
   user: User | null;
@@ -79,10 +79,11 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
         </Link>
       </ProfileTitleWrapper>
       <AvatarWrapper>
-        <img
+        <Image
           src="/images/usuario-passaro.png"
           alt="Usuário pássaro"
           width={170}
+          height={170}
           style={{ height: "auto" }}
         />
       </AvatarWrapper>

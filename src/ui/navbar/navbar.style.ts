@@ -3,7 +3,7 @@ import styled, { css } from "styled-components";
 import NextLink from "next/link";
 
 export const Container = styled.div<{ $collapsed: boolean }>`
-  background-color: ${({ theme }) => theme.colorPrimary};
+  background-color: ${({ theme }) => theme.colorMenu};
   position: absolute;
   height: 100%;
   width: 75%;

@@ -1,15 +1,14 @@
 "use client";
 
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
-import { IoTrophySharp } from "react-icons/io5";
-import { LuNotebookText } from "react-icons/lu";
 import * as S from "./home.style";
 
+import { AppLoading } from "@/components/AppLoading";
+import { ResponseModel } from "@/model/common.model";
+import HttpClient from "@/util/http-client/fetch-client.util";
 import { Progress } from "antd";
 import { useEffect, useState } from "react";
-import HttpClient from "@/util/http-client/fetch-client.util";
-import { ResponseModel } from "@/model/common.model";
-import { AppLoading } from "@/components/AppLoading";
+import Image from "next/image";
 
 interface DashboardData {
   loginsInCurrentMonth: string[];
@@ -52,7 +51,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
 
     getData()
       .then((response) => setDashData(response ? response : dashData))
-      .catch(() => { });
+      .catch(() => {});
   }, []);
 
   const today = new Date();
@@ -72,7 +71,10 @@ export function HomeContent({ userProfile }: HomeContentProps) {
 
     const parsed = new Date(entry);
     if (!Number.isNaN(parsed.getTime())) {
-      if (parsed.getFullYear() === currentYear && parsed.getMonth() === currentMonth) {
+      if (
+        parsed.getFullYear() === currentYear &&
+        parsed.getMonth() === currentMonth
+      ) {
         activeDaysSet.add(parsed.getDate());
       }
     }
@@ -80,12 +82,14 @@ export function HomeContent({ userProfile }: HomeContentProps) {
 
   const activeCount = activeDaysSet.size;
 
-
   return (
     <div>
       <S.Title>Olá, {userProfile.data?.name}</S.Title>
       {isLoading ? (
-        <AppLoading show={isLoading} loadingText="Carregando dashboard..." />
+        <AppLoading
+          show={isLoading}
+          loadingText="Carregando dashboard..."
+        />
       ) : (
         <S.Container>
           <S.Content>
@@ -144,50 +148,39 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                     ? `${dashData.totalBooksFavorited} cadernos favoritos`
                     : "1 caderno favorito"}{" "}
                 </S.Info>
-                <img
+                <Image
                   src="/images/cadernos-favoritos.png"
                   alt="Cadernos Favoritos"
                   width={40}
+                  height={40}
                   style={{ height: "auto" }}
                 />
               </S.Flex>
-              <img
-                src="/images/mascote-celular.png"
-                alt="Coruja"
-                style={{
-                  position: "absolute",
-                  top: "-182px",   
-                  left: "55%",  
-                  transform: "translateX(-50%)", 
-                  width: "200px", 
-                  height: "auto"
-                }}
-              />
             </S.Card>
             <S.Card>
               <S.CardTitle>
-                Concursos  <img
+                Concursos{" "}
+                <Image
                   src="/images/concursos.png"
                   alt="Concursos"
                   width={30}
-                  style={{ height: "auto" }}
+                  height={30}
                 />{" "}
               </S.CardTitle>
             </S.Card>
-            {/* <S.Card>
-              <S.CardTitle>Visão Geral</S.CardTitle>
-            </S.Card> */}
+          </S.Content>
+          <S.RightContent>
             <S.CardPerformance $large>
               <S.CardTitle>Meu Desempenho</S.CardTitle>
               <S.Spacer />
 
-
               <S.Performance>
                 <S.PerformanceHeader>
-                  <div>Visão do mês atual</div>
-                  <div style={{ fontWeight: 700 }}>{activeCount} dias ativos</div>
+                  <S.CardText>Visão do mês atual</S.CardText>
+                  <S.CardText style={{ fontWeight: 700 }}>
+                    {activeCount} dias ativos
+                  </S.CardText>
                 </S.PerformanceHeader>
-
 
                 <S.DaysGrid aria-label="Dias do mês">
                   {daysArray.map((day) => {
@@ -203,10 +196,22 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                     );
                   })}
                 </S.DaysGrid>
-
               </S.Performance>
+              <Image
+                src="/images/mascote-celular.png"
+                alt="Coruja"
+                style={{
+                  position: "absolute",
+                  top: "-182px",
+                  left: "55%",
+                  transform: "translateX(-50%)",
+                  height: "auto",
+                }}
+                width={200}
+                height={100}
+              />
             </S.CardPerformance>
-          </S.Content>
+          </S.RightContent>
         </S.Container>
       )}
     </div>

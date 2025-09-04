@@ -22,5 +22,5 @@ export interface PlanModel {
   subscriptionPlan?: {
     name: string;
     description: string;
-  }
+  };
 }

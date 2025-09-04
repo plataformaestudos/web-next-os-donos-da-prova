@@ -10,5 +10,6 @@ declare module "styled-components" {
     colorSecondary: string;
     colorTertiary: string;
     colorTertiaryText: string;
+    colorMenu: string;
   }
 }

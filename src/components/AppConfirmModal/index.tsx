@@ -11,6 +11,7 @@ interface AppConfirmModalProps extends ModalProps {
   confirmText?: string;
   cancelText?: string;
   visible: boolean;
+  isDeclined?: boolean;
 }
 
 export function AppConfirmModal({
@@ -21,6 +22,7 @@ export function AppConfirmModal({
   confirmText = "Confirmar",
   cancelText = "Cancelar",
   visible,
+  isDeclined = false,
   ...modalProps
 }: AppConfirmModalProps) {
   const { Text } = Typography;
@@ -47,8 +49,19 @@ export function AppConfirmModal({
         justify="end"
         gap={8}
       >
-        <Button onClick={onCancel}>{cancelText}</Button>
-        <Button onClick={onConfirm}>{confirmText}</Button>
+        <Button
+          onClick={onCancel}
+          size="large"
+        >
+          {cancelText}
+        </Button>
+        <Button
+          onClick={onConfirm}
+          danger={isDeclined}
+          size="large"
+        >
+          {confirmText}
+        </Button>
       </Flex>
     </Modal>
   );
