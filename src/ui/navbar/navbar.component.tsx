@@ -4,10 +4,7 @@ import * as Styled from "./navbar.style";
 
 import { Skeleton, Tooltip } from "antd";
 import {
-  LuBook,
-  LuCircleDollarSign,
   LuFileQuestion,
-  LuFolders,
 } from "react-icons/lu";
 
 import { createClient } from "@/util/supabase/client";
@@ -15,7 +12,6 @@ import { useHorizontalSwipe } from "@/util/use-horizontal-swipe.hook";
 import { useIsMobile } from "@/util/use-media-query.hook";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { CgProfile } from "react-icons/cg";
 import { FaArrowRightToBracket } from "react-icons/fa6";
 import { useNabvarContext } from "./navbar.context";
 import { useMenus } from "./use-menus.hook";
@@ -160,6 +156,7 @@ export function Navbar() {
         <Styled.RedHeader
           onClick={() => setIsNavbarCollapsed(!isNavbarCollapsed)}
         >
+
           <div
             style={{
               width: "100%",
@@ -168,11 +165,15 @@ export function Navbar() {
               padding: 16,
             }}
           >
-            <img
+            <Image
               src="/images/passaro.png"
               alt="Passaro"
+              width={isNavbarCollapsed ? 40 : 120}
+              height={isNavbarCollapsed ? 40 : 120}
+              priority
             />
           </div>
+
         </Styled.RedHeader>
 
         <Styled.MenuItemsContainer>
@@ -223,7 +224,7 @@ export function Navbar() {
                 onMouseLeave={() => setHovered(null)}
               >
                 {new RegExp(item.activeRegex).test(pathname) ||
-                hovered === item.link
+                  hovered === item.link
                   ? icons[item.icon as keyof typeof icons]
                   : iconsB[item.icon as keyof typeof iconsB]}
                 <Styled.LinkText

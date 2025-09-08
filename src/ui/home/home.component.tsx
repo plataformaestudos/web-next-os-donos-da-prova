@@ -52,7 +52,9 @@ export function HomeContent({ userProfile }: HomeContentProps) {
     }
 
     getData()
-      .then((response) => setDashData(response ? response : dashData))
+      .then((response) =>
+        setDashData((prev) => (response ? response : prev))
+      )
       .catch(() => { });
   }, []);
 

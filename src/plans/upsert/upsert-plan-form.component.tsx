@@ -49,9 +49,13 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
     modules: plan?.modules || []
   });
 
-  const handleChange = (field: keyof PlanFormValues, value: any) => {
+  const handleChange = <K extends keyof PlanFormValues>(
+    field: K,
+    value: PlanFormValues[K]
+  ) => {
     setValues(v => ({ ...v, [field]: value }));
   };
+
 
   const handleSubmit = () => {
     upsertPlan(values);
@@ -100,7 +104,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
                 <InputNumber
                   id="durationDays"
                   value={values.durationDays}
-                  onChange={val => handleChange("durationDays", val)}
+                  onChange={val => handleChange("durationDays",  val ?? undefined)}
                   style={{ width: '100%' }}
                   min={0}
                 />
@@ -111,7 +115,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
                 <InputNumber
                   id="questionLimit"
                   value={values.questionLimit}
-                  onChange={val => handleChange("questionLimit", val)}
+                  onChange={val => handleChange("questionLimit",  val ?? undefined)}
                   style={{ width: '100%' }}
                   min={0}
                 />
@@ -130,7 +134,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
               value={values.monthValue}
               prefix="R$"
               step={0.01}
-              onChange={val => handleChange("monthValue", val)}
+              onChange={val => handleChange("monthValue",  val ?? undefined)}
               style={{ width: '100%' }}
               disabled={values.isFree}
             />
@@ -142,7 +146,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
               value={values.quarterlyValue}
               prefix="R$"
               step={0.01}
-              onChange={val => handleChange("quarterlyValue", val)}
+              onChange={val => handleChange("quarterlyValue",  val ?? undefined)}
               style={{ width: '100%' }}
               disabled={values.isFree}
             />
@@ -154,7 +158,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
               value={values.semiannualValue}
               prefix="R$"
               step={0.01}
-              onChange={val => handleChange("semiannualValue", val)}
+              onChange={val => handleChange("semiannualValue",  val ?? undefined)}
               style={{ width: '100%' }}
               disabled={values.isFree}
             />
@@ -166,7 +170,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
               value={values.yearlyValue}
               prefix="R$"
               step={0.01}
-              onChange={val => handleChange("yearlyValue", val)}
+              onChange={val => handleChange("yearlyValue",  val ?? undefined)}
               style={{ width: '100%' }}
               disabled={values.isFree}
             />
@@ -178,7 +182,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
               value={values.lifetimeValue}
               prefix="R$"
               step={0.01}
-              onChange={val => handleChange("lifetimeValue", val)}
+              onChange={val => handleChange("lifetimeValue",  val ?? undefined)}
               style={{ width: '100%' }}
               disabled={values.isFree}
             />

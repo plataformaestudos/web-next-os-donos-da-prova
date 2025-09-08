@@ -198,7 +198,7 @@ export function ModulesTree(props: ModulesTreeProps) {
           setTree((origin) => updateTreeData(origin, key, newChildren));
         }}
         titleRender={({ key, title, parentModuleId, isLeaf }) => {
-          const module = tree.find((m) => m.key === key) || { percent: 0 };
+          const moduleUser = tree.find((m) => m.key === key) || { percent: 0 };
 
           return (
             <ModuleTreeItemTitle
@@ -212,7 +212,7 @@ export function ModulesTree(props: ModulesTreeProps) {
               id={key}
               title={title}
               isLeaf={isLeaf}
-              percent={module.percent}
+              percent={moduleUser.percent}
               parentModuleId={parentModuleId}
               readonly={props.readonly}
             />

@@ -3,7 +3,6 @@
 import { PlanModel } from "@/model/plan.model";
 import {
   Button,
-  Card,
   Descriptions,
   message,
   Typography,
@@ -27,15 +26,15 @@ interface AppPlanProps {
 
 const { Title } = Typography;
 
-const ProfileCard = styled(Card)`
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  min-width: 350px;
-  max-width: 350px;
-  height: fit-content;
-`;
+// const ProfileCard = styled(Card)`
+//   background-color: #fff;
+//   border-radius: 10px;
+//   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+//   width: 100%;
+//   min-width: 350px;
+//   max-width: 350px;
+//   height: fit-content;
+// `;
 
 const ProfileTitle = styled(Title)`
   color: #1890ff;
