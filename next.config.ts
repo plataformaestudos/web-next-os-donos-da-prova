@@ -15,6 +15,7 @@ const routeAlias: {
   "/planos": "/plans",
   "/planos/novo": "/plans/new",
   "/planos/:id": "/plans/:id",
+  "/assinatura": "/subscription",
   "/perfil": "/profile",
 };
 

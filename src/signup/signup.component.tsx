@@ -137,7 +137,7 @@ export default function SignupSteps({
               display: currentStep === 3 ? "block" : "none",
             }}
           >
-            <PaymentInfoThirdStep form={paymentInfoForm} />
+            <PaymentInfoThirdStep formV={paymentInfoForm} />
           </div>
 
           {error && <Typography.Text type="danger">{error}</Typography.Text>}

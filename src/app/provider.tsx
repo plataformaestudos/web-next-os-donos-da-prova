@@ -84,6 +84,15 @@ const themes = {
     token: {
       ...defaultTheme.token,
       colorBgFilter: "#EDEFF0",
+      colorPrimary: "#163658",
+      colorPrimaryBg: "#e7f1fe",
+      colorBgContainer: "#FFFFFF",  
+      colorPrimaryText: "#163658",
+      colorText: "#163658",
+      colorSecondary: "#FFFFFF",
+      colorTertiary: "#af2615",
+      colorTertiaryText: "#FFFFFF",
+      colorMenu: "#163658",
     },
   },
   dark: {
@@ -92,6 +101,14 @@ const themes = {
     token: {
       ...defaultTheme.token,
       colorBgFilter: "#1A1A1A",
+      colorPrimary: "#af2615",
+      colorPrimaryText: "#EDEFF0",
+      colorText: "#EDEFF0",
+      colorPrimaryBg: "#163658",
+      colorSecondary: "#1A1A1A",
+      colorTertiary: "#af2615",
+      colorTertiaryText: "#FFFFFF",
+      colorMenu: "#1A1A1A",
     },
   },
 } as Record<string, ThemeConfig>;

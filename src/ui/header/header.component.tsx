@@ -9,6 +9,7 @@ import { useContext, useEffect, useState } from "react";
 import { ThemeProvider } from "@/app/provider";
 import { createClient } from "@/util/supabase/client";
 import { useNabvarContext } from "../navbar/navbar.context";
+import Image from "next/image";
 
 export function Header() {
   const supabase = createClient();
@@ -35,7 +36,10 @@ export function Header() {
           icon={<MenuOutlined size={24} />}
         />
       </Styled.LeftContainer>
-      <Flex align="center" gap="16px">
+      <Flex
+        align="center"
+        gap="16px"
+      >
         <Tooltip title={theme === "light" ? "Modo escuro" : "Modo claro"}>
           <Button
             type="text"
@@ -43,7 +47,16 @@ export function Header() {
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           />
         </Tooltip>
-        <Styled.StyledAvatar>
+        <Image
+          src="/images/sino-2.png"
+          alt="Notificações"
+          width={28}
+          height={28}
+          style={{ cursor: "pointer" }}
+        />
+        <Styled.StyledAvatar
+          onClick={() => (window.location.href = "/profile")}
+        >
           {userEmail.charAt(0).toUpperCase()}
         </Styled.StyledAvatar>
       </Flex>

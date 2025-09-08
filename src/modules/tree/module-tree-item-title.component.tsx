@@ -13,18 +13,21 @@ import { LuFileQuestion } from "react-icons/lu";
 import Title from "antd/es/typography/Title";
 import { UnlinkModuleButton } from "../delete/unlink-module-button.component";
 import { useCreateModule } from "../create/create-module.context";
+import { InlineProgressBarContainer, InlineProgressBarFiller } from "./progress-bar-tree.component";
 
 export function ModuleTreeItemTitle({
   id,
   title,
   parentModuleId,
   isLeaf,
+  percent,
   readonly,
   onClick,
 }: {
   id: string;
   title: string;
   parentModuleId: string | null;
+  percent: number | 0;
   isLeaf?: boolean;
   readonly?: boolean;
   onClick?: () => void;
@@ -94,29 +97,36 @@ export function ModuleTreeItemTitle({
   }, [id, title, parentModuleId, isLeaf, openCreateModal]);
 
   return (
-    <Flex
-      justify="space-between"
-      align="center"
-      style={{ minHeight: 32, cursor: "pointer" }}
-      onClick={onClick}
-    >
-      <Title level={5} style={{ margin: 0 }}>
+    <Flex onClick={onClick} justify="space-between" align="center" style={{ minHeight: 32, cursor: "pointer", padding: "8px 0" }}>
+      <Title level={5} style={{ margin: 0, flex: 1 }}>
         {title}
       </Title>
-      {!readonly && (
-        <Dropdown
-          open={menuOpened}
-          onOpenChange={setMenuOpened}
-          menu={{
-            items,
-          }}
-          trigger={["click"]}
-        >
-          <span onClick={(ev) => ev.stopPropagation()}>
-            <Button size="small" icon={<EllipsisOutlined />} />
+
+      {!readonly  && (
+        <Flex align="center" style={{ gap: 4, flexShrink: 0 }}>
+          <InlineProgressBarContainer style={{ width: 80, marginRight: 8 }}>
+            <InlineProgressBarFiller value={percent} />
+          </InlineProgressBarContainer>
+
+          <span
+            style={{
+              fontWeight: 600,
+              width: 40,
+              textAlign: "right",
+              marginRight: 12,
+            }}
+          >
+            {percent.toFixed(2)}%
           </span>
-        </Dropdown>
+          <Dropdown open={menuOpened} onOpenChange={setMenuOpened} menu={{ items }} trigger={["click"]}>
+            <span onClick={(ev) => ev.stopPropagation()}>
+              <Button size="small" icon={<EllipsisOutlined />} />
+            </span>
+          </Dropdown>
+        </Flex>
       )}
     </Flex>
+
+
   );
 }

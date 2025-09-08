@@ -3,6 +3,7 @@ export interface ModuleModel {
   name: string;
   numberQuestions: number;
   treeCode: string;
+  percent: number;
   parentModuleId: string | null;
   isLeaf?: boolean;
   childModules?: ModuleModel[];

@@ -3,7 +3,7 @@ import styled, { css } from "styled-components";
 import NextLink from "next/link";
 
 export const Container = styled.div<{ $collapsed: boolean }>`
-  background-color: ${({ theme }) => theme.colorPrimary};
+  background-color: ${({ theme }) => theme.colorMenu};
   position: absolute;
   height: 100%;
   width: 75%;
@@ -93,19 +93,29 @@ export const Link = styled(NextLink)<{ $active: boolean }>`
   transition: background-color 200ms ease-in-out;
 
   &:hover {
-    background-color: #0150be;
+    background-color: white;
+    svg {
+      color: ${({ theme }) => theme.colorTertiary} !important;
+    }
+    span {
+      color: ${({ theme }) => theme.colorTertiary};
+    }
   }
 
-  ${({ $active }) => $active && `background-color: #0150be;`}
+  ${({ $active }) => $active && `background-color: white;`}
 
   svg {
-    color: #fff;
+    color: ${({ theme, $active }) =>
+      $active ? theme.colorTertiary : "#fff"} !important;
     flex-shrink: 0;
+  }
+
+  span {
+    color: ${({ theme, $active }) => ($active ? theme.colorTertiary : "#fff")};
   }
 `;
 
-export const LinkText = styled.span<{ $collapsed: boolean }>`
-  color: #fff;
+export const LinkText = styled.span<{ $collapsed: boolean; $active: boolean }>`
   line-height: 1.25rem;
   transition: opacity 200ms ease-in-out;
   opacity: 0;
@@ -120,4 +130,19 @@ export const LinkText = styled.span<{ $collapsed: boolean }>`
       transition-delay: 200ms;
       display: block;
     `}
+`;
+export const RedHeader = styled.div`
+  width: 100%;
+  background-color: #af2615;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 0;      /* aumenta o padding vertical */
+  margin-bottom: 24px;  /* cria espaço entre o vermelho e os menus */
+  
+  img {
+    width: 70px;        /* aumenta o tamanho da imagem para não cortar */
+    height: 70px;
+    object-fit: contain;
+  }
 `;

@@ -28,4 +28,8 @@ export const LeftContainer = styled.div`
 export const StyledAvatar = styled(Avatar)`
   background-color: ${({ theme }) => theme.colorBgElevated} !important;
   color: ${({ theme }) => theme.colorText} !important;
+
+  &:hover {
+    cursor: pointer;
+  }
 `;
