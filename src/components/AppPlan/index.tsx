@@ -69,7 +69,7 @@ const FlipCardFace = styled.div<{ back?: boolean }>`
   position: absolute;
   width: 100%;
   backface-visibility: hidden;
-  background: ${({ back }) => (back ? "#fafafa" : "#fff")};
+  background: ${({ theme }) => ( theme.colorBgContainer)};
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   padding: 20px;

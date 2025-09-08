@@ -86,6 +86,7 @@ const themes = {
       colorBgFilter: "#EDEFF0",
       colorPrimary: "#163658",
       colorPrimaryBg: "#e7f1fe",
+      colorBgContainer: "#FFFFFF",  
       colorPrimaryText: "#163658",
       colorText: "#163658",
       colorSecondary: "#FFFFFF",
@@ -100,7 +101,7 @@ const themes = {
     token: {
       ...defaultTheme.token,
       colorBgFilter: "#1A1A1A",
-      colorPrimary: "#FFFFFF",
+      colorPrimary: "#af2615",
       colorPrimaryText: "#EDEFF0",
       colorText: "#EDEFF0",
       colorPrimaryBg: "#163658",

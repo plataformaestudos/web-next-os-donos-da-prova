@@ -1,6 +1,5 @@
-import { Flex, Row, Tabs } from "antd";
+import { Row, Tabs } from "antd";
 import { createClient } from "@/util/supabase/server";
-import { AppPlan } from "@/components/AppPlan";
 import { AppPayments } from "@/components/AppPayments";
 import { AppMyPlans } from "@/components/AppMyPlans";
 import { AppNewPlans } from "@/components/AppNewPlans";
