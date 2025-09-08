@@ -31,6 +31,7 @@ export const AppMyPlans = () => {
         })
         .catch(() => null)
         .finally(() => setIsLoading(false));
+        
     }
 
     getPayments();
