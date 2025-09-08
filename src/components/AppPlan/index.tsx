@@ -47,6 +47,38 @@ const ButtonContent = styled.div`
   justify-content: center;
   margin-top: 20px;
 `;
+const FlipCardContainer = styled.div`
+  perspective: 1000px;
+  width: 100%;
+  min-width: 350px;
+  max-width: 350px;
+  height: fit-content
+  margin: 10px;
+`;
+
+
+const FlipCardInner = styled.div<{ flipped: boolean }>`
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+  transform: ${({ flipped }) => (flipped ? "rotateY(180deg)" : "rotateY(0deg)")};
+`;
+
+const FlipCardFace = styled.div<{ back?: boolean }>`
+  position: absolute;
+  width: 100%;
+  backface-visibility: hidden;
+  background: ${({ back }) => (back ? "#fafafa" : "#fff")};
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 250px;
+  justify-content: space-between;
+  transform: ${({ back }) => (back ? "rotateY(180deg)" : "none")};
+`;
 
 interface ModalProps {
   title: string;
@@ -86,19 +118,23 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
   const [modalProps, setModalProps] = useState<ModalProps>({
     title: "",
     content: "",
-    onConfirm: () => {},
-    onCancel: () => {},
+    onConfirm: () => { },
+    onCancel: () => { },
     confirmText: "Confirmar",
     cancelText: "Cancelar",
     visible: false,
     isDeclined: false,
   });
 
+  const [flipped, setFlipped] = useState(false);
+
   const {
     form: paymentInfoForm,
     values: paymentInfoValues,
     isValid: isPaymentInfoValid,
   } = useForm<PaymentInfo>();
+
+  const handleFlip = () => setFlipped(!flipped);
 
   const handleCancelPlan = (planData: PlanModel) => {
     setModalProps({
@@ -272,68 +308,94 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
   }
 
   return (
-    <ProfileCard title="">
-      <ProfileTitle level={3}>
-        {plan?.name ?? plan?.subscriptionPlan?.name ?? "Nome não informado"}
-      </ProfileTitle>
-      <p style={{ textAlign: "center", marginBottom: "16px" }}>
-        {plan?.description ??
-          plan?.subscriptionPlan?.description ??
-          "Descrição não informada"}
-      </p>
+    <FlipCardContainer>
+      <FlipCardInner flipped={flipped}>
+        <FlipCardFace>
+            <ProfileTitle level={3}>
+              {plan?.name ?? plan?.subscriptionPlan?.name ?? "Nome não informado"}
+            </ProfileTitle>
+            <p style={{ textAlign: "center", marginBottom: "16px" }}>
+              {plan?.description ??
+                plan?.subscriptionPlan?.description ??
+                "Descrição não informada"}
+            </p>
 
-      <Descriptions
-        bordered
-        column={1}
-      >
-        <Descriptions.Item label="Valor">
-          {Number(plan?.month_value ?? plan?.billingValue ?? 0).toLocaleString(
-            "pt-BR",
-            {
-              style: "currency",
-              currency: "BRL",
-            }
-          )}
-        </Descriptions.Item>
-        <Descriptions.Item label="Limite de questões">
-          {plan?.question_limit || 0}
-        </Descriptions.Item>
-      </Descriptions>
-      <ButtonContent>
-        {myPlan ? (
-          <Flex
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-            }}
-          >
-            <Button
-              type="primary"
-              size="large"
-              danger
-              onClick={() => handleCancelPlan(plan)}
+            <Descriptions
+              bordered
+              column={1}
             >
-              Cancelar Plano
-            </Button>
-            <Button
-              type="primary"
-              size="large"
-              onClick={() => handleUpdatePayment(plan)}
-            >
-              Gerenciar pagamento
-            </Button>
-          </Flex>
-        ) : (
-          <Button
-            type="primary"
-            size="large"
-            onClick={() => handleSelectPlan(plan)}
-          >
-            Assinar Plano
-          </Button>
-        )}
-      </ButtonContent>
+              <Descriptions.Item label="Valor">
+                {Number(plan?.month_value ?? plan?.billingValue ?? 0).toLocaleString(
+                  "pt-BR",
+                  {
+                    style: "currency",
+                    currency: "BRL",
+                  }
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Limite de questões">
+                {plan?.question_limit || 0}
+              </Descriptions.Item>
+            </Descriptions>
+            <ButtonContent>
+              {myPlan ? (
+                <Flex
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
+                  }}
+                >
+                  <Button
+                    type="primary"
+                    size="large"
+                    danger
+                    onClick={() => handleCancelPlan(plan)}
+                  >
+                    Cancelar Plano
+                  </Button>
+                  <Button
+                    type="primary"
+                    size="large"
+                    onClick={() => handleUpdatePayment(plan)}
+                  >
+                    Gerenciar pagamento
+                  </Button>
+                </Flex>
+              ) : (
+                <Flex
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
+                  }}
+                >
+                  <Button
+                    type="primary"
+                    size="large"
+                    onClick={() => handleSelectPlan(plan)}
+                  >
+                    Assinar Plano
+                  </Button>
+                  <Button type="default" size="large" onClick={handleFlip}>Ver Módulos</Button>
+                </Flex>
+              )}
+            </ButtonContent>
+        </FlipCardFace>
+        <FlipCardFace back>
+          <ProfileTitle level={4}>Módulos do Plano</ProfileTitle>
+          {plan.modules && plan.modules.length > 0 ? (
+            <ul>
+              {plan.modules.map((mod) => <li key={mod.id}>{mod.name}</li>)}
+            </ul>
+          ) : <p>Nenhum módulo disponível</p>}
+
+          <ButtonContent>
+            <Button type="default" size="large" onClick={handleFlip}>Voltar</Button>
+          </ButtonContent>
+        </FlipCardFace>
+      </FlipCardInner>
+
       <AppConfirmModal
         title={modalProps.title}
         content={modalProps.content}
@@ -348,6 +410,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
         loadingModal
         show={isLoading}
       />
-    </ProfileCard>
+   
+    </FlipCardContainer >
   );
 };

@@ -3,6 +3,7 @@ import { createClient } from "@/util/supabase/server";
 import { AppPlan } from "@/components/AppPlan";
 import { AppPayments } from "@/components/AppPayments";
 import { AppMyPlans } from "@/components/AppMyPlans";
+import { AppNewPlans } from "@/components/AppNewPlans";
 
 const UserProfile = async () => {
   const supabase = await createClient();
@@ -33,25 +34,7 @@ const UserProfile = async () => {
     {
       key: "3",
       label: `Planos`,
-      children: (
-        <Flex
-          wrap="wrap"
-          justify="start"
-          style={{
-            width: "100%",
-            gap: "20px",
-            padding: "32px",
-            height: "fit-content",
-          }}
-        >
-          {plans.map((plan) => (
-            <AppPlan
-              key={plan.id}
-              plan={plan}
-            />
-          ))}
-        </Flex>
-      ),
+      children: <AppNewPlans />,
     },
   ];
 

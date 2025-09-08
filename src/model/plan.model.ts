@@ -23,4 +23,8 @@ export interface PlanModel {
     name: string;
     description: string;
   };
+  modules?: {
+    id: string;
+    name: string;
+  }[] | null;
 }

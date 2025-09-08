@@ -2,7 +2,7 @@ import { styled } from "styled-components";
 
 export const TreeContainer = styled.div`
   .tree-item {
-    background-color: white;
+    background-color: ${({ theme }) => theme.colorSecondary};
     border-radius: 4px;
   }
 

@@ -17,7 +17,8 @@ interface DashboardData {
   statsLastBookAnswered: {
     percentAnswered: string;
     nameBook: string;
-  };
+    idBook: string;
+  } | null;
 }
 
 interface HomeContentProps {
@@ -34,6 +35,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
     statsLastBookAnswered: {
       percentAnswered: "0%",
       nameBook: "Nenhum caderno respondido",
+      idBook: "",
     },
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -51,7 +53,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
 
     getData()
       .then((response) => setDashData(response ? response : dashData))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const today = new Date();
@@ -95,10 +97,16 @@ export function HomeContent({ userProfile }: HomeContentProps) {
           <S.Content>
             <S.Card
               onClick={() => {
-                window.location.href = "/question-books";
+                if (dashData?.statsLastBookAnswered) {
+                  window.location.href = `/question-books/${dashData.statsLastBookAnswered.idBook}`;
+                } else {
+                  window.location.href = `/question-books`;
+                }
               }}
             >
-              <S.CardTitle>Continue de onde parou</S.CardTitle>
+              <S.CardTitle> {dashData?.statsLastBookAnswered
+                ? "Continue de onde parou"
+                : "Iniciar novo caderno"}</S.CardTitle>
               <S.Spacer />
               <S.CardTitle>
                 {dashData?.statsLastBookAnswered?.nameBook}
