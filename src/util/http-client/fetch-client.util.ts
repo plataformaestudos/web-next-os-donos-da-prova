@@ -11,10 +11,14 @@ const HttpClient = Object.freeze({
         ...opts.headers,
       };
 
+      console.log("Fetching URL:", url);
+      console.log("Fetching headers:", headers);
+      console.log("Fetching opts:", opts);
+
       const response = await fetch(url, {
         ...opts,
         headers,
-        credentials: opts.credentials || "include",
+        credentials:  "include",
         next: {
           ...opts.next,
           revalidate: 180,
