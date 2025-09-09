@@ -18,6 +18,7 @@ export default async function QuestionBooks({
   }>;
 }) {
   if (!(await verify([Roles.ADMIN, Roles.STUDENT]))) {
+    console.log("aqui")
     return redirect("/");
   }
 

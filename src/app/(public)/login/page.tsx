@@ -3,42 +3,34 @@
 import * as Styled from "./page.style";
 
 import { App, Button, Form, Input, Typography } from "antd";
-import { login, signup } from "./actions";
+import { loginClient } from "./login.action";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/util/supabase/client";
+import { useUser } from "@/app/context/user.context";
 
 const { Title } = Typography;
 
 export default function LoginPage() {
   const supabase = createClient();
-
+  const { loginUser  } = useUser();
   const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const router = useRouter();
 
   const onFinish = async (
-    values: { email: string; password: string },
-    action: "login" | "signup"
+    values: { email: string; password: string }
   ) => {
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append("email", values.email);
-    formData.append("password", values.password);
-
     try {
-      if (action === "login") {
-        await login(formData);
-        message.success("Login bem-sucedido!");
-        router.push("/home");
-      } else {
-        await signup(formData);
-        message.success("Cadastro bem-sucedido!");
-        router.push("/home");
-      }
+      const userData = await loginClient(values.email, values.password);
+      if (!userData) throw new Error("Usuário não encontrado");
+      await loginUser(userData);
+      message.success("Login bem-sucedido!");
+      router.push("/home");
     } catch (error) {
       console.log(error);
       message.error("Erro ao tentar realizar a ação.");
@@ -71,6 +63,7 @@ export default function LoginPage() {
         <Form
           form={form}
           layout="vertical"
+          onFinish={onFinish}
         >
           <Form.Item
             label={<span>Email</span>}
@@ -105,8 +98,7 @@ export default function LoginPage() {
               type="primary"
               block
               loading={loading}
-              onClick={() => onFinish(form.getFieldsValue(), "login")}
-            >
+              htmlType="submit">
               Entrar
             </Button>
           </Form.Item>

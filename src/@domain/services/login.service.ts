@@ -25,8 +25,6 @@ export class LoginService extends Login {
         }
       );
 
-      console.log("Resposta do login:", response.headers["set-cookie"]);
-
       const rawCookie = response.headers["set-cookie"]?.find((cookie) =>
         cookie.startsWith("access_token=")
       );
@@ -39,7 +37,7 @@ export class LoginService extends Login {
           name: "access_token",
           value: jwt,
         });
-        console.log("Token JWT armazenado no cookie:", jwt);
+
         return jwt;
       }
 

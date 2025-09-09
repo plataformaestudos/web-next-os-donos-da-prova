@@ -10,23 +10,12 @@ import { ThemeProvider } from "@/app/provider";
 import { createClient } from "@/util/supabase/client";
 import { useNabvarContext } from "../navbar/navbar.context";
 import Image from "next/image";
+import { useUser } from "@/app/context/user.context"; 
 
 export function Header() {
-  const supabase = createClient();
   const { theme, setTheme } = useContext(ThemeProvider);
-  const [userEmail, setUserEmail] = useState("");
   const { isNavbarCollapsed, setIsNavbarCollapsed } = useNabvarContext();
-
-  useEffect(() => {
-    async function getUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      setUserEmail(user?.email as string);
-    }
-    getUser();
-  }, [supabase.auth]);
+  const { user } = useUser();
 
   return (
     <Styled.Container>
@@ -54,11 +43,11 @@ export function Header() {
           height={28}
           style={{ cursor: "pointer" }}
         />
-        <Styled.StyledAvatar
-          onClick={() => (window.location.href = "/profile")}
-        >
-          {userEmail.charAt(0).toUpperCase()}
-        </Styled.StyledAvatar>
+        {user && (
+          <Styled.StyledAvatar onClick={() => (window.location.href = "/profile")}>
+            {user.email?.charAt(0).toUpperCase()}
+          </Styled.StyledAvatar>
+        )}
       </Flex>
     </Styled.Container>
   );

@@ -2,7 +2,7 @@ import {
   QuestionBookModel,
   // QuestionBookNextQuestionModel,
 } from "@/question-books/question-book.model";
-import { Roles, verify } from "@/util/roles";
+import { canAccess, Roles, verify } from "@/util/roles";
 import {
   BarChartOutlined,
   QuestionCircleOutlined,
@@ -30,6 +30,7 @@ import { redirect } from "next/navigation";
 import { Container, TabContainer } from "./page.style";
 import { createClient } from "@/util/supabase/server";
 import { AppQuestionLoader } from "@/components/AppQuestionLoader";
+import { useUser } from "@/app/context/user.context";
 
 function getQuestionBook(id: string) {
   return HttpClient.fetch<ResponseModel<QuestionBookModel>>(
@@ -52,7 +53,11 @@ export default async function QuestionBookPage({
     seq: string;
   }>;
 }) {
-  if (!(await verify([Roles.ADMIN, Roles.STUDENT]))) {
+  const { user } = useUser();
+  if (!user) {
+    redirect("/login");
+  }
+  if (!user || !canAccess(user, [Roles.ADMIN, Roles.STUDENT])){
     return redirect("/");
   }
 
@@ -86,19 +91,6 @@ export default async function QuestionBookPage({
     breadcrumbItems.push({
       title: questionBook.name,
     });
-
-    const supabase = await createClient();
-
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data?.user) {
-      redirect("/login");
-    }
-
-    const userProfile = await supabase
-      .from("profiles")
-      .select("*")
-      .match({ user_id: data.user.id })
-      .single();
 
     return (
       <Container>
@@ -147,7 +139,7 @@ export default async function QuestionBookPage({
                           percent={Math.round(
                             (questionBook.questionBookStats.totalAnswers /
                               questionBook.questionBookStats.totalQuestions) *
-                              100
+                            100
                           )}
                           size="small"
                         />
@@ -191,7 +183,7 @@ export default async function QuestionBookPage({
                           percent={Math.round(
                             (questionBook.questionBookStats.correctAnswers /
                               questionBook.questionBookStats.totalAnswers) *
-                              100
+                            100
                           )}
                           size="small"
                         />
@@ -209,7 +201,7 @@ export default async function QuestionBookPage({
                 children: (
                   <AppForum
                     questionId={question?.questionId || ""}
-                    userId={userProfile.data?.user_id || ""}
+                    userId={user.id || ""}
                   />
                 ),
               },

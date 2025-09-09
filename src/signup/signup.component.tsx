@@ -9,11 +9,12 @@ import {
   PersonalInfoSecondStep,
 } from "./personal-info.component";
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 import { ChoosePlanFirstStep } from "./choose-plan.component";
 import Link from "next/link";
 import Title from "antd/es/typography/Title";
-import { signup } from "./signup.action";
+import { signUpClient } from "./signup.action";
 import { useIsMobile } from "@/util/use-media-query.hook";
 
 const useForm = <T,>() => {
@@ -53,6 +54,7 @@ export default function SignupSteps({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const router = useRouter();
 
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
@@ -162,26 +164,39 @@ export default function SignupSteps({
             loading={isPending}
             onClick={() => {
               if (currentStep === 3) {
-                startTransition(async () => {
-                  const { error } = await signup({
-                    planId: selectedPlan as string,
-                    saveCard: paymentInfo.saveCard,
-                    billingType: "CREDIT_CARD",
-                    cycle: "MONTHLY",
-                    description: "",
-                    userInfo: {
-                      ...personalInfo,
-                      cpfCnpj: personalInfo.cpf,
-                    },
-                    creditCard: {
-                      holderName: paymentInfo.holderName,
-                      number: paymentInfo.number,
-                      expiryMonth: paymentInfo.expiryDate.split("/")[0],
-                      expiryYear: paymentInfo.expiryDate.split("/")[1],
-                      ccv: paymentInfo.cvv,
-                    },
-                  });
-                  setError(error);
+                startTransition(() => {
+                  (async () => {
+                    try {
+                      setError(null); 
+                      const result = await signUpClient({
+                        planId: selectedPlan as string,
+                        saveCard: paymentInfo.saveCard,
+                        billingType: "CREDIT_CARD",
+                        cycle: "MONTHLY",
+                        description: "",
+                        userInfo: {
+                          ...personalInfo,
+                          cpfCnpj: personalInfo.cpf,
+                        },
+                        creditCard: {
+                          holderName: paymentInfo.holderName,
+                          number: paymentInfo.number,
+                          expiryMonth: paymentInfo.expiryDate.split("/")[0],
+                          expiryYear: paymentInfo.expiryDate.split("/")[1],
+                          ccv: paymentInfo.cvv,
+                        },
+                      });
+
+                      if (result.success) {
+                        router.push("/home");
+                      } else {
+                        setError(result.error ?? "Erro desconhecido no cadastro");
+                      }
+                    } catch (err) {
+                      console.error(err);
+                      setError(err instanceof Error ? err.message : String(err));
+                    }
+                  })();
                 });
               } else {
                 setCurrentStep(currentStep + 1);

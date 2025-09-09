@@ -1,9 +1,18 @@
-import { type NextRequest } from "next/server";
-import { updateSession } from "@/util/supabase/middleware";
+import { type NextRequest, NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+
+export function middleware(request: NextRequest) {
+  const token = request.cookies.get("access_token")?.value; 
+  if (!token && !request.nextUrl.pathname.startsWith("/login")) {
+    console.log("No access token found, redirecting to login");
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next();
 }
+
 
 export const config = {
   matcher: [

@@ -3,6 +3,8 @@ import "@/app/global.css";
 import { ClientProviders } from "./provider";
 import { Inter } from "next/font/google";
 import { Metadata } from "next";
+import { UserProvider } from "./context/user.context";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,7 +25,12 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
-        <ClientProviders>{children}</ClientProviders>
+        <ClientProviders>
+          <UserProvider>
+            {children}
+          </UserProvider>
+        </ClientProviders>
+
       </body>
     </html>
   );

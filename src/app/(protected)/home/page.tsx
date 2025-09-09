@@ -1,24 +1,25 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/app/context/user.context";
 import { HomeContent } from "@/ui/home/home.component";
-import { createClient } from "@/util/supabase/server";
-import { redirect } from "next/navigation";
 
-export default async function HomePage() {
-  const supabase = await createClient();
+export default function HomePage() {
+  const { user, loading } = useUser();
+  const router = useRouter();
+  useEffect(() => {
+    console.log("Checking user authentication status in HomePage:", user);
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user,loading, router]);
 
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    redirect("/login");
-  }
-
-  const userProfile = await supabase
-    .from("profiles")
-    .select("*")
-    .match({ user_id: data.user.id })
-    .single();
+  if (loading || !user?.profile) return <div>Carregando...</div>;
 
   return (
     <main style={{ padding: 24 }}>
-      <HomeContent userProfile={userProfile} />
+      <HomeContent userProfile={user.profile} />
     </main>
   );
 }

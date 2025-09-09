@@ -1,15 +1,22 @@
+"use client";
+
 import Link from "next/link";
-import { createClient } from "@/util/supabase/server";
-import { redirect } from "next/navigation";
+import { useUser } from "@/app/context/user.context";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default async function IndexPage() {
-  const supabase = await createClient();
+export default function IndexPage() {
+  const { user, loading } = useUser();
+  const router = useRouter();
 
-  const { data } = await supabase.auth.getUser();
+  useEffect(() => {
+    if (!loading) {
+      if (user) router.push("/home"); // para landing page
+      else router.push("/login");    // para páginas protegidas
+    }
+  }, [user, loading]);
 
-  if (data?.user) {
-    redirect("/home");
-  }
+  if (!user) return <div>Carregando...</div>;
 
   return (
     <main>

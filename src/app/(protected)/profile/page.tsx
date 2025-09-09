@@ -5,9 +5,10 @@ import {
 
 import { AppProfileCard } from "@/components/AppProfileCard";
 import { getUser } from "@/util/user";
+import { useUser } from "@/app/context/user.context";
 
 const UserProfile = async () => {
-  const user = await getUser();
+  const { user } = useUser();
 
   if (!user) {
     return (

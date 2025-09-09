@@ -22,9 +22,9 @@ interface DashboardData {
 }
 
 interface HomeContentProps {
-  userProfile: PostgrestSingleResponse<{
+  userProfile: {
     name?: string;
-  }>;
+  };
 }
 
 export function HomeContent({ userProfile }: HomeContentProps) {
@@ -88,7 +88,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
 
   return (
     <div>
-      <S.Title>Olá, {userProfile.data?.name}</S.Title>
+      <S.Title>Olá, {userProfile.name}</S.Title>
       {isLoading ? (
         <AppLoading
           show={isLoading}
