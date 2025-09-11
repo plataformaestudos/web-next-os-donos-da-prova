@@ -11,10 +11,10 @@ export default function IndexPage() {
 
   useEffect(() => {
     if (!loading) {
-      if (user) router.push("/home"); // para landing page
-      else router.push("/login");    // para páginas protegidas
+      if (user) router.push("/home"); 
+      else router.push("/login");    
     }
-  }, [user, loading]);
+  }, [user, loading, router]);
 
   if (!user) return <div>Carregando...</div>;
 

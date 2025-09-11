@@ -2,8 +2,10 @@
 import { createClient } from "@/util/supabase/server";
 import { EditQuestionPageClient } from "./pageClient";
 
-export default async function EditQuestionPage({ params }: any) {
-  const { id } = await params;
+type Params = Promise<{ id: string }>
+
+export default async function EditQuestionPage(props: { params: Params } ) {
+  const { id } = await props.params;
 
   const supabase = await createClient();
   const { data } = await supabase

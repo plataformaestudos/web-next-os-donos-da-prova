@@ -8,6 +8,7 @@ import { Container, TabContainer } from "./page.style";
 import { AppForum } from "@/components/AppForum";
 import { AppQuestionLoader } from "@/components/AppQuestionLoader";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
+import { QuestionBookModel } from "@/question-books/question-book.model";
 export function QuestionBookPageClient({
   id,
   seq,
@@ -15,7 +16,7 @@ export function QuestionBookPageClient({
 }: {
   id: string;
   seq: string;
-  questionBook: any;
+  questionBook: QuestionBookModel;
 }) {
   const { user, loading, allowed } = useAuthGuard({
     requireRoles: [Roles.ADMIN, Roles.STUDENT],

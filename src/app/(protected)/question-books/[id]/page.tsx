@@ -2,9 +2,13 @@
 import { getQuestionBook } from "../api";
 import { QuestionBookPageClient } from "./pageClient";
 
-export default async function QuestionBookPage({ params, searchParams }: any) {
-  const { id } = await params;
-  const { seq } = await searchParams;
+type Params = Promise<{ id: string }>
+type SearchParams = Promise<{ seq: string }>
+
+
+export default async function QuestionBookPage(props: { params: Params, searchParams: SearchParams }) {
+  const { id } = await props.params;
+  const { seq } = await props.searchParams;
 
   const questionBook = await getQuestionBook(id);
 

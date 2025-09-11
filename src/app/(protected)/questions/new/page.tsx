@@ -2,9 +2,12 @@
 import { createClient } from "@/util/supabase/server";
 import { NewQuestionPageClient } from "./pageClient";
 
-export default async function NewQuestionPage({ searchParams }: { searchParams: { modulos?: string } }) {
+type SearchParams = Promise<{ modulos?: string }>
+
+export default async function NewQuestionPage(props: { searchParams: SearchParams }) {
   const supabase = await createClient();
-  const modulesParam = searchParams.modulos;
+  const {modulos} = await props.searchParams;
+  const modulesParam = modulos;
 
   let defaultSelectedModules: { id: string; name: string }[] = [];
 

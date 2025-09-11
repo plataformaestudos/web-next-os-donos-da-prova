@@ -2,6 +2,7 @@
 import { createClient } from "@/util/supabase/server";
 import { queryModules } from "@/modules/tree/load-modules.action";
 import { EditPlanPageClient } from "./pageClient";
+import { PlanFormValues } from "@/plans/upsert/upsert-plan-form.component";
 
 export default async function EditPlanPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -11,7 +12,7 @@ export default async function EditPlanPage({ params }: { params: Promise<{ id: s
   const rootModules = await queryModules();
 
   // Busca plano
-  const { data: plan } = await supabase
+  const { data } = await supabase
     .from("subscription_plans")
     .select(
       `
@@ -31,12 +32,13 @@ export default async function EditPlanPage({ params }: { params: Promise<{ id: s
     )
     .eq("id", id)
     .single()
-    .then((response) => {
-      if (response.data) {
-        response.data.modules = response.data.modules.map((m) => m.module_id);
-      }
-      return response;
-    });
+
+  const plan: PlanFormValues | null = data
+    ? {
+      ...data,
+      modules: data.modules.map((m: { module_id: string }) => m.module_id),
+    }
+    : null;
 
   if (!plan) return null;
 

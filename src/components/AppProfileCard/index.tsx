@@ -59,10 +59,10 @@ const formatDocument = (document: string | undefined) => {
   }
 };
 
-const formatCep = (cep: string | undefined) => {
-  if (!cep) return "";
-  return cep.replace(/(\d{5})(\d{3})/, "$1-$2");
-};
+// const formatCep = (cep: string | undefined) => {
+//   if (!cep) return "";
+//   return cep.replace(/(\d{5})(\d{3})/, "$1-$2");
+// };
 
 export const AppProfileCard = ({ user }: AppProfileCardProps) => {
   console.log("AppProfileCard render", { user });
@@ -89,7 +89,7 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
         />
       </AvatarWrapper>
 
-      <ProfileTitle level={2}>{user?.profile.name}</ProfileTitle>
+      <ProfileTitle level={2}>{user?.profile?.name}</ProfileTitle>
 
       <Tabs defaultActiveKey="1">
         <TabPane
@@ -100,7 +100,7 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
             bordered
             column={1}
           >
-            <Descriptions.Item label="Apelido">{user?.profile.name}</Descriptions.Item>
+            <Descriptions.Item label="Apelido">{user?.profile?.name}</Descriptions.Item>
             <Descriptions.Item label="Usuário desde">
               {formatDate(user?.user?.created_at)}
             </Descriptions.Item>
@@ -126,10 +126,10 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
             column={1}
           >
             <Descriptions.Item label="Nome Completo">
-              {user?.profile.name}
+              {user?.profile?.name}
             </Descriptions.Item>
             <Descriptions.Item label="Email">{user?.user?.email}</Descriptions.Item>
-            <Descriptions.Item label="CPF">{formatDocument(user?.profile.doc)}</Descriptions.Item>
+            <Descriptions.Item label="CPF">{formatDocument(user?.profile?.doc)}</Descriptions.Item>
             {/* <Descriptions.Item label="Senha">{user?.email}</Descriptions.Item> */}
             {/* <Descriptions.Item label="CEP">{formatCep(user?.user_metadata.postalCode)}</Descriptions.Item> */}
             <Descriptions.Item label="CEP">{31810440}</Descriptions.Item>

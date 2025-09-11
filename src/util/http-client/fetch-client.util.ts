@@ -16,7 +16,7 @@ const HttpClient = Object.freeze({
       ...opts,
       headers,
       credentials: opts.credentials ?? "include",
-      next: (opts as any).next ?? undefined,
+      next: opts.next ?? undefined,
     });
 
     if (response.status === 401) {

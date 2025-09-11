@@ -8,9 +8,10 @@ import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Roles } from "@/util/roles";
 import { loadChildrenModules } from "@/modules/tree/load-modules.action";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
+import { ModuleViewModel } from "@/model/module.model";
 
-export function ModulesPageClient({ rootModules }: { rootModules: any[] }) {
-  const { user, loading, allowed } = useAuthGuard({
+export function ModulesPageClient({ rootModules }: { rootModules: ModuleViewModel[] }) {
+  const {  loading, allowed } = useAuthGuard({
     requireRoles: [Roles.ADMIN, Roles.COLLABORATOR],
   });
 

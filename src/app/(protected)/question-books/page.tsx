@@ -1,11 +1,8 @@
 import { createClient } from "@/util/supabase/server";
 import { QuestionBooksClient } from "./pageClient";
-
-export default async function QuestionBooks({
-  searchParams,
-}: {
-  searchParams: { pasta?: string };
-}) {
+type SearchParams = Promise<{ pasta: string }>
+export default async function QuestionBooks(props: { searchParams: SearchParams }) {
+  const { pasta } = await props.searchParams;
   const supabase = await createClient();
 
   // Busca pastas e question books
@@ -23,7 +20,7 @@ export default async function QuestionBooks({
   return (
     <QuestionBooksClient
       initialFolders={folders || []}
-      folderId={searchParams.pasta}
+      folderId={pasta}
     />
   );
 }

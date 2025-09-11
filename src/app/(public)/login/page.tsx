@@ -7,13 +7,11 @@ import { loginClient } from "./login.action";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { createClient } from "@/util/supabase/client";
 import { useUser } from "@/app/context/user.context";
 
 const { Title } = Typography;
 
 export default function LoginPage() {
-  const supabase = createClient();
   const { loginUser  } = useUser();
   const { message } = App.useApp();
   const [loading, setLoading] = useState(false);

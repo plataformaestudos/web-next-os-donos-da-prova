@@ -7,14 +7,25 @@ import HttpClient, { UnauthorizedError } from "@/util/http-client/fetch-client.u
 
 export type UserExtended = User & {
     user?: User
-    profile?: any; // profile do Supabase
+    profile?: UserProfile; // profile do Supabase
 };
+export interface UserProfile {
+  id: string;
+  role_id: string;
+  doc: string;
+  name: string;
+  created_at: string;  // ou Date, se você converter
+  created_by: string;
+  updated_at: string;  // ou Date
+  updated_by: string;
+  user_id: string;
+}
 
 type UserContextType = {
     user: UserExtended | null;
     setUser: (user: UserExtended | null) => void;
-    loginUser: (userData: UserExtended) => Promise<void>; // função para logar
-    loading: boolean; // adiciona aqui
+    loginUser: (userData: UserExtended) => Promise<void>; 
+    loading: boolean; 
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);

@@ -1,6 +1,5 @@
 "use client";
 
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import * as S from "./home.style";
 
 import { AppLoading } from "@/components/AppLoading";

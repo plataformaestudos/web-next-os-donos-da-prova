@@ -11,13 +11,29 @@ import { QuestionFormSubmitButton } from "@/questions/question-form-submit-butto
 import { UpserQuestionProvider } from "@/questions/upsert/upsert-question.context";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Roles } from "@/util/roles";
+import { QuestionType } from "@/model/question.model";
+interface QuestionProps {
+  id: string;
+  text: string;
+  type: QuestionType;
+  comment: string;
+  alternatives: {
+    id: string;
+    text: string;
+    is_correct: boolean;
+  }[];
+  modules: {
+    id: string;
+    name: string;
+  }[];
+}
 
-export function EditQuestionPageClient({ question }: { question: any }) {
-  const { user, loading, allowed } = useAuthGuard({
+export function EditQuestionPageClient({ question }: { question: QuestionProps }) {
+  const { loading, allowed } = useAuthGuard({
     requireRoles: [Roles.ADMIN, Roles.COLLABORATOR],
   });
 
-if (loading) return <FullPageLoading />;
+  if (loading) return <FullPageLoading />;
 
   if (!allowed) return null; // usuário não autorizado
 

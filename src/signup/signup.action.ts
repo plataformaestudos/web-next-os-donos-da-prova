@@ -3,7 +3,28 @@ import { SignupDTO } from "./signup.dto";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export async function signUpClient(dto: SignupDTO): Promise<{ success: boolean; error: string | null; payload?: any }> {
+export interface SignupData {
+  id: string;
+  costumerId?: string;
+  value: number;
+  creditCard?: {
+    creditCardNumber: string;
+    creditCardBrand: string;
+    creditCardToken: string;
+  };
+}
+
+export interface DefaultResponse<T> {
+  statusCode: number;
+  data: T;
+  message: string;
+  error: string | null;
+  total?: number;
+  page?: number | null;
+  itemsPerPage?: number | null;
+}
+
+export async function signUpClient(dto: SignupDTO): Promise<{ success: boolean; error: string | null; payload?: DefaultResponse<SignupData> }> {
   const res = await fetch(`${API_BASE}/subscription/new-user`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -11,7 +32,7 @@ export async function signUpClient(dto: SignupDTO): Promise<{ success: boolean; 
     body: JSON.stringify(dto),
   });
 
-  const payload = await res.json().catch(() => null);
+  const payload: DefaultResponse<SignupData> | null = await res.json().catch(() => null);
   if (!res.ok) {
     throw new Error(payload?.message || `Signup failed: ${res.status}`);
   }
@@ -26,11 +47,11 @@ export async function signUpClient(dto: SignupDTO): Promise<{ success: boolean; 
     }),
   });
 
- if (!loginRes.ok) {
+  if (!loginRes.ok) {
     const loginPayload = await loginRes.text().catch(() => "");
     return { success: false, error: `Login after signup failed: ${loginRes.status} ${loginPayload}` };
   }
 
-  return { success: true, error: null, payload };
+  return { success: true, error: null, payload: payload ?? undefined };
 }
 

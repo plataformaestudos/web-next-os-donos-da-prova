@@ -8,20 +8,29 @@ import { loadChildrenModules } from "@/modules/tree/load-modules.action";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Roles } from "@/util/roles";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
+import { ModuleViewModel } from "@/model/module.model";
+interface FoldersProps {
+  id: string;
+  name: string;
+  questionBooks: {
+    id: string;
+    name: string;
+  }[]
+}
 export function NewQuestionBookPageClient({
-  folderId,
-  folders,
-  rootModules,
-}: {
-  folderId: string | undefined;
-  folders: any[];
-  rootModules: any[];
-}) {
+    folderId,
+    folders,
+    rootModules,
+  }: {
+    folderId: string | undefined;
+    folders: FoldersProps[];
+    rootModules: ModuleViewModel[];
+  }) {
   const { allowed, loading } = useAuthGuard({
     requireRoles: [Roles.ADMIN, Roles.STUDENT],
   });
 
-if (loading) return <FullPageLoading />;
+  if (loading) return <FullPageLoading />;
 
   if (!allowed) return null;
 

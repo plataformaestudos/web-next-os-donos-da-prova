@@ -8,7 +8,7 @@ import { ModulesTree } from "@/modules/tree/modules-tree.component";
 import { UPSERT_PLAN_FORM_ID } from "./upsert-plan-form.constant";
 import { useUpsertPlan } from "./upsert-plan.context";
 
-interface PlanFormValues {
+export interface PlanFormValues {
   id?: string;
   name: string;
   description: string;

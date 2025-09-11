@@ -1,5 +1,4 @@
 import { UserExtended } from "@/app/context/user.context";
-import { createClient } from "./supabase/server";
 
 export enum Roles {
   ADMIN = "ADMIN",
@@ -18,6 +17,6 @@ export function canAccess(user: UserExtended | null, roles: Roles[]) {
   if (!user?.profile) return false;
 
   return roles.some(
-    (role) => user.profile.role_id === ROLES_IDS[role]
+    (role) => user.profile?.role_id === ROLES_IDS[role]
   );
 }

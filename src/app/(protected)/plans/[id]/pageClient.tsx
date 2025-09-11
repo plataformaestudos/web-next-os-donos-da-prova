@@ -1,7 +1,7 @@
 "use client";
 
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
-import { UpsertPlanForm } from "@/plans/upsert/upsert-plan-form.component";
+import { PlanFormValues, UpsertPlanForm } from "@/plans/upsert/upsert-plan-form.component";
 import { UpsertPlanFormSubmitButton } from "@/plans/upsert/upsert-plan-form-submit-button.component";
 import { UpsertPlanProvider } from "@/plans/upsert/upsert-plan.context";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
@@ -14,10 +14,11 @@ import HttpClient from "@/util/http-client/fetch-client.util";
 import React from "react";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
 
-export function EditPlanPageClient({ plan, rootModules }: { plan: any; rootModules: ModuleViewModel[] }) {
-  const { user, loading, allowed } = useAuthGuard({ requireRoles: [Roles.ADMIN] });
+export function EditPlanPageClient({ plan, rootModules }: { plan: PlanFormValues; rootModules: ModuleViewModel[] }) {
+  const { loading, allowed } = useAuthGuard({ requireRoles: [Roles.ADMIN] });
 
   const [planModules, setPlanModules] = React.useState<ModuleViewModel[]>([]);
+
 
   React.useEffect(() => {
     if (plan.modules.length > 0) {
@@ -33,7 +34,7 @@ export function EditPlanPageClient({ plan, rootModules }: { plan: any; rootModul
     }
   }, [plan.modules]);
 
-if (loading) return <FullPageLoading />;
+  if (loading) return <FullPageLoading />;
 
   if (!allowed) return null;
 

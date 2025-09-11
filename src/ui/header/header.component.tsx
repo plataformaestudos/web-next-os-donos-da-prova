@@ -4,10 +4,9 @@ import * as Styled from "./header.style";
 
 import { Button, Flex, Tooltip } from "antd";
 import { MenuOutlined, MoonFilled, SunFilled } from "@ant-design/icons";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 
 import { ThemeProvider } from "@/app/provider";
-import { createClient } from "@/util/supabase/client";
 import { useNabvarContext } from "../navbar/navbar.context";
 import Image from "next/image";
 import { useUser } from "@/app/context/user.context"; 

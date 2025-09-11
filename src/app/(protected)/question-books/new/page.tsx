@@ -1,11 +1,16 @@
 // NewQuestionBookPage.tsx (Server Component)
 import { createClient } from "@/util/supabase/server";
-import { queryModules, loadChildrenModules } from "@/modules/tree/load-modules.action";
+import { queryModules } from "@/modules/tree/load-modules.action";
 import { NewQuestionBookPageClient } from "./pageClient";
 
-export default async function NewQuestionBookPage({ searchParams }: { searchParams: { pasta?: string } }) {
+type SearchParams = Promise<{ pasta: string }>
+
+
+
+export default async function NewQuestionBookPage(props: { searchParams: SearchParams }) {
   const supabase = await createClient();
-  const folderId = searchParams.pasta;
+  const { pasta } = await props.searchParams;
+  const folderId = pasta
 
   const rootModules = await queryModules();
 
