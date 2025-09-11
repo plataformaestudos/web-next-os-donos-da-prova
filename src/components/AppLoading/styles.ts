@@ -12,7 +12,7 @@ export const LoadingContiner = styled.div`
 export const LoadingText = styled.span`
   font-size: 16px;
   font-weight: 500;
-  color: #333333;
+  color: ${({ theme }) => theme.colorPrimary};
 `;
 
 export const LoadingModal = styled.div`
@@ -26,6 +26,6 @@ export const LoadingModal = styled.div`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: ${({ theme }) => theme.colorPrimary}
   z-index: 9999999999;
 `;

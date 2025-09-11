@@ -39,22 +39,14 @@ export default function LoginPage() {
     }
   };
 
-  useEffect(() => {
-    const handleUnauthorized = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("unauthorized") === "true") {
-        try {
-          await supabase.auth.signOut();
-          message.error("Você foi deslogado, tente fazer login novamente");
-        } catch (error) {
-          console.error("Erro ao deslogar:", error);
-        }
-      }
-    };
+useEffect(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("unauthorized") === "true") {
+    message.error("Você foi deslogado, tente fazer login novamente");
+    // NÃO chame supabase.auth.signOut() aqui
+  }
+}, [message]);
 
-    handleUnauthorized();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <Styled.Container>

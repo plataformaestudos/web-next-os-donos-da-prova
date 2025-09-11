@@ -3,9 +3,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { createClient } from "@/util/supabase/client";
 import { User } from "@supabase/supabase-js";
-import HttpClient from "@/util/http-client/fetch-client.util";
+import HttpClient, { UnauthorizedError } from "@/util/http-client/fetch-client.util";
 
 export type UserExtended = User & {
+    user?: User
     profile?: any; // profile do Supabase
 };
 
@@ -47,8 +48,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                     setUser(null);
                 }
             } catch (err) {
-                console.error("Não foi possível inicializar o usuário:", err);
-                setUser(null);
+                if (err instanceof UnauthorizedError) {
+                    setUser(null);
+                } else {
+                    console.error("Erro ao inicializar usuário:", err);
+                    setUser(null);
+                }
             } finally {
                 setLoading(false);
             }

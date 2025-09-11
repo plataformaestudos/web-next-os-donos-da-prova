@@ -1,13 +1,13 @@
 "use client";
 
-import { User } from "@supabase/supabase-js";
+import { UserExtended } from "@/app/context/user.context";
 import { Button, Card, Descriptions, Tabs, Typography } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import styled from "styled-components";
 
 interface AppProfileCardProps {
-  user: User | null;
+  user: UserExtended | null;
 }
 
 const { Title } = Typography;
@@ -65,6 +65,7 @@ const formatCep = (cep: string | undefined) => {
 };
 
 export const AppProfileCard = ({ user }: AppProfileCardProps) => {
+  console.log("AppProfileCard render", { user });
   return (
     <ProfileCard title="">
       <ProfileTitleWrapper>
@@ -88,7 +89,7 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
         />
       </AvatarWrapper>
 
-      <ProfileTitle level={2}>{user?.user_metadata.name}</ProfileTitle>
+      <ProfileTitle level={2}>{user?.profile.name}</ProfileTitle>
 
       <Tabs defaultActiveKey="1">
         <TabPane
@@ -99,9 +100,9 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
             bordered
             column={1}
           >
-            <Descriptions.Item label="Apelido">{user?.user_metadata.name}</Descriptions.Item>
+            <Descriptions.Item label="Apelido">{user?.profile.name}</Descriptions.Item>
             <Descriptions.Item label="Usuário desde">
-              {formatDate(user?.created_at)}
+              {formatDate(user?.user?.created_at)}
             </Descriptions.Item>
           </Descriptions>
           <ButtonContent>
@@ -125,12 +126,13 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
             column={1}
           >
             <Descriptions.Item label="Nome Completo">
-              {user?.user_metadata.name}
+              {user?.profile.name}
             </Descriptions.Item>
-            <Descriptions.Item label="Email">{user?.email}</Descriptions.Item>
-            <Descriptions.Item label="CPF">{formatDocument(user?.user_metadata.cpfCnpj)}</Descriptions.Item>
+            <Descriptions.Item label="Email">{user?.user?.email}</Descriptions.Item>
+            <Descriptions.Item label="CPF">{formatDocument(user?.profile.doc)}</Descriptions.Item>
             {/* <Descriptions.Item label="Senha">{user?.email}</Descriptions.Item> */}
-            <Descriptions.Item label="CEP">{formatCep(user?.user_metadata.postalCode)}</Descriptions.Item>
+            {/* <Descriptions.Item label="CEP">{formatCep(user?.user_metadata.postalCode)}</Descriptions.Item> */}
+            <Descriptions.Item label="CEP">{31810440}</Descriptions.Item>
           </Descriptions>
           <ButtonContent>
             <Link href="/subscription">

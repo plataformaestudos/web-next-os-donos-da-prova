@@ -1,60 +1,20 @@
-import * as Styled from "./page.style";
-
-import { Button, Divider } from "antd";
-import { Roles, verify } from "@/util/roles";
-
-import Link from "next/link";
-import { LuArrowLeft } from "react-icons/lu";
-import { QuestionForm } from "@/questions/question-form.component";
-import { QuestionFormSubmitButton } from "@/questions/question-form-submit-button.component";
-import { UpserQuestionProvider } from "@/questions/upsert/upsert-question.context";
+// NewQuestionPage.tsx (Server Component)
 import { createClient } from "@/util/supabase/server";
-import { redirect } from "next/navigation";
+import { NewQuestionPageClient } from "./pageClient";
 
-export default async function NewQuestionPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    modulos: string;
-  }>;
-}) {
-  if (!(await verify([Roles.ADMIN, Roles.COLLABORATOR]))) {
-    return redirect("/");
-  }
-
+export default async function NewQuestionPage({ searchParams }: { searchParams: { modulos?: string } }) {
   const supabase = await createClient();
-  const { modulos: modules } = await searchParams;
+  const modulesParam = searchParams.modulos;
 
-  let defaultSelectedModules = [] as {
-    id: string;
-    name: string;
-  }[];
-  if (modules) {
+  let defaultSelectedModules: { id: string; name: string }[] = [];
+
+  if (modulesParam) {
     const { data } = await supabase
       .from("modules")
       .select("id, name")
-      .in("id", modules.split(","));
-
-    if (data) {
-      defaultSelectedModules = data;
-    }
+      .in("id", modulesParam.split(","));
+    if (data) defaultSelectedModules = data;
   }
 
-  return (
-    <UpserQuestionProvider>
-      <Styled.QuestionContainer>
-        <Styled.QuestionHeader>
-          <Styled.QuestionTitleContainer>
-            <Link href="/questions">
-              <Button shape="circle" icon={<LuArrowLeft />} />
-            </Link>
-            <Styled.Title>Nova questão</Styled.Title>
-          </Styled.QuestionTitleContainer>
-          <QuestionFormSubmitButton />
-        </Styled.QuestionHeader>
-        <Divider />
-        <QuestionForm modules={defaultSelectedModules} />
-      </Styled.QuestionContainer>
-    </UpserQuestionProvider>
-  );
+  return <NewQuestionPageClient defaultSelectedModules={defaultSelectedModules} />;
 }
