@@ -128,10 +128,10 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
             <Descriptions.Item label="Nome Completo">
               {user?.profile?.name}
             </Descriptions.Item>
-            <Descriptions.Item label="Email">{user?.user?.email}</Descriptions.Item>
-            <Descriptions.Item label="CPF">{formatDocument(user?.profile?.doc)}</Descriptions.Item>
+            <Descriptions.Item label="Email">{user?.user?.email ? user?.user?.email : ""}</Descriptions.Item>
+            <Descriptions.Item label="CPF">{formatDocument(user?.profile?.doc ? user?.profile?.doc : "")}</Descriptions.Item>
             {/* <Descriptions.Item label="Senha">{user?.email}</Descriptions.Item> */}
-            <Descriptions.Item label="CEP">{formatCep(user?.user_metadata.postalCode)}</Descriptions.Item>
+            <Descriptions.Item label="CEP">{formatCep(user?.user_metadata?.postalCode ? user?.user_metadata?.postalCode : "")}</Descriptions.Item>
             <Descriptions.Item label="CEP">{31810440}</Descriptions.Item>
           </Descriptions>
           <ButtonContent>
