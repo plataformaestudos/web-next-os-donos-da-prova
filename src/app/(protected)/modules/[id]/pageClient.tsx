@@ -19,7 +19,6 @@ interface EditModulePageClientProps {
     name: string;
     numberQuestions: number;
     treeCode: string;
-    percent: number;
     isLeaf?: boolean;
     childModules?: ModuleModel[];
   }[]

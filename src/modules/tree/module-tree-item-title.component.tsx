@@ -13,21 +13,18 @@ import { LuFileQuestion } from "react-icons/lu";
 import Title from "antd/es/typography/Title";
 import { UnlinkModuleButton } from "../delete/unlink-module-button.component";
 import { useCreateModule } from "../create/create-module.context";
-import { InlineProgressBarContainer, InlineProgressBarFiller } from "./progress-bar-tree.component";
 
 export function ModuleTreeItemTitle({
   id,
   title,
   parentModuleId,
   isLeaf,
-  percent,
   readonly,
   onClick,
 }: {
   id: string;
   title: string;
   parentModuleId: string | null;
-  percent: number | 0;
   isLeaf?: boolean;
   readonly?: boolean;
   onClick?: () => void;
@@ -104,20 +101,7 @@ export function ModuleTreeItemTitle({
 
       {!readonly  && (
         <Flex align="center" style={{ gap: 4, flexShrink: 0 }}>
-          <InlineProgressBarContainer style={{ width: 80, marginRight: 8 }}>
-            <InlineProgressBarFiller value={percent} />
-          </InlineProgressBarContainer>
-
-          <span
-            style={{
-              fontWeight: 600,
-              width: 40,
-              textAlign: "right",
-              marginRight: 12,
-            }}
-          >
-            {percent.toFixed(2)}%
-          </span>
+          
           <Dropdown open={menuOpened} onOpenChange={setMenuOpened} menu={{ items }} trigger={["click"]}>
             <span onClick={(ev) => ev.stopPropagation()}>
               <Button size="small" icon={<EllipsisOutlined />} />

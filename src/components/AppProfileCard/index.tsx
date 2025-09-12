@@ -59,10 +59,10 @@ const formatDocument = (document: string | undefined) => {
   }
 };
 
-// const formatCep = (cep: string | undefined) => {
-//   if (!cep) return "";
-//   return cep.replace(/(\d{5})(\d{3})/, "$1-$2");
-// };
+const formatCep = (cep: string | undefined) => {
+  if (!cep) return "";
+  return cep.replace(/(\d{5})(\d{3})/, "$1-$2");
+};
 
 export const AppProfileCard = ({ user }: AppProfileCardProps) => {
   console.log("AppProfileCard render", { user });
@@ -131,7 +131,7 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
             <Descriptions.Item label="Email">{user?.user?.email}</Descriptions.Item>
             <Descriptions.Item label="CPF">{formatDocument(user?.profile?.doc)}</Descriptions.Item>
             {/* <Descriptions.Item label="Senha">{user?.email}</Descriptions.Item> */}
-            {/* <Descriptions.Item label="CEP">{formatCep(user?.user_metadata.postalCode)}</Descriptions.Item> */}
+            <Descriptions.Item label="CEP">{formatCep(user?.user_metadata.postalCode)}</Descriptions.Item>
             <Descriptions.Item label="CEP">{31810440}</Descriptions.Item>
           </Descriptions>
           <ButtonContent>

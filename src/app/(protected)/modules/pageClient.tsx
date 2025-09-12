@@ -11,11 +11,11 @@ import { FullPageLoading } from "@/ui/loading/full-page-loading";
 import { ModuleViewModel } from "@/model/module.model";
 
 export function ModulesPageClient({ rootModules }: { rootModules: ModuleViewModel[] }) {
-  const {  loading, allowed } = useAuthGuard({
+  const { loading, allowed } = useAuthGuard({
     requireRoles: [Roles.ADMIN, Roles.COLLABORATOR],
   });
 
-if (loading) return <FullPageLoading />;
+  if (loading) return <FullPageLoading />;
 
   if (!allowed) return null;
 

@@ -8,7 +8,7 @@ import { moduleModelToViewModelAdapter } from "../modules.util";
 
 export async function loadChildrenModules(moduleId: string) {
   return HttpClient.fetch<ResponseModel<ModuleModel[]>>(
-    `/user-modules/stats/${moduleId}/child-modules`,
+    `/modules/${moduleId}/child-modules`,
     {
       method: "GET",
       next: {
@@ -26,7 +26,7 @@ export async function queryModules(query?: string, parentModuleId?: string) {
   let $queryPromise: Promise<ResponseModel<ModuleModel[]>>;
   if (!query) {
     $queryPromise = HttpClient.fetch<ResponseModel<ModuleModel[]>>(
-      "/user-modules/stats",
+      "/modules/root-modules",
       {
         method: "GET",
         next: {

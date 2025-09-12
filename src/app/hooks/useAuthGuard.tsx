@@ -7,9 +7,9 @@ import { canAccess } from "@/util/roles";
 import { Roles } from "@/util/roles";
 
 type Options = {
-  redirectTo?: string;       // rota caso não authenticated
-  redirectOnForbidden?: string; // rota caso authenticated mas sem permissão
-  requireRoles?: Roles[];    // roles necessárias
+  redirectTo?: string;
+  redirectOnForbidden?: string;
+  requireRoles?: Roles[];
 };
 
 export function useAuthGuard(options: Options = {}) {

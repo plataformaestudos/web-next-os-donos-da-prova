@@ -1,4 +1,4 @@
-import { Col, Flex, Form, FormInstance, Input, Row, Typography } from "antd";
+import { Col, Flex, Form, FormInstance, Input, Row } from "antd";
 
 import { MaskedInput } from "@/ui/masked-input/masked-input.component";
 
@@ -17,9 +17,9 @@ export function PersonalInfoSecondStep({
 }) {
   return (
     <>
-      <Typography.Paragraph>
+      {/* <Typography.Paragraph>
         Preencha suas informações pessoais
-      </Typography.Paragraph>
+      </Typography.Paragraph> */}
       <Form<PersonalInfo>
         form={form}
         name="personal-info"
@@ -43,6 +43,50 @@ export function PersonalInfoSecondStep({
             rules={[{ required: true, message: "Por favor preencha seu cpf" }]}
           >
             <MaskedInput mask="___.___.___-__" replacement={{ _: /\d/ }} />
+          </Form.Item>
+        </Flex>
+
+        <Flex gap={12}>
+          <Form.Item
+            style={{ flex: 0.2 }}
+            label="CEP"
+            name="postalCode"
+            rules={[{ required: true, message: "Por favor preencha seu cep" }]}
+          >
+            <MaskedInput mask="_____-___" replacement={{ _: /\d/ }} />
+          </Form.Item>
+
+          <Form.Item
+            style={{ flex: 0.3 }}
+            label="Rua"
+            name="address"
+            rules={[{ required: true, message: "Por favor preencha seu endereço" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            style={{ flex: 0.1 }}
+            label="Número"
+            name="addressNumber"
+            rules={[{ required: true, message: "Por favor preencha o número" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            style={{ flex: 0.3 }}
+            label="Bairro"
+            name="addressNeighborhood"
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            style={{ flex: 0.2 }}
+            label="Complemento"
+            name="addressComplement"
+          >
+            <Input />
           </Form.Item>
         </Flex>
 
