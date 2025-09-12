@@ -8,22 +8,25 @@ const HttpClient = Object.freeze({
     const url = baseUrl ? `${baseUrl}${resource}` : resource;
 
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get("access_token")?.value;
+    const allCookies = cookieStore.getAll()
+      .map(({ name, value }) => `${name}=${value}`)
+      .join("; ");
+
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...(opts?.headers as Record<string, string>),
+      ...(opts?.headers
+        ? Object.fromEntries(
+          Object.entries(opts.headers as Record<string, string>)
+        )
+        : {}),
+      ...(allCookies ? { Cookie: allCookies } : {}),
     };
-
-    if (accessToken) {
-      headers["Authorization"] = `Bearer ${accessToken}`;
-    }
 
 
     const response = await fetch(url, {
       ...opts,
       headers,
-      credentials: opts?.credentials || "include",
       next: {
         revalidate: 180,
       },
