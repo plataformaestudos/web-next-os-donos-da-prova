@@ -6,7 +6,6 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 const HttpClient = Object.freeze({
   async fetch<T>(resource: string, opts?: RequestInit) {
     const url = baseUrl ? `${baseUrl}${resource}` : resource;
-    console.log(url)
 
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("access_token")?.value;
@@ -17,8 +16,9 @@ const HttpClient = Object.freeze({
     };
 
     if (accessToken) {
-      headers["cookie"] = `access_token=${accessToken}`;
+      headers["Authorization"] = `Bearer ${accessToken}`;
     }
+
 
     const response = await fetch(url, {
       ...opts,
@@ -38,7 +38,6 @@ const HttpClient = Object.freeze({
       throw new Error(`HTTP error! status: ${response.status} ${text}`);
     }
 
-    console.log("HTTP Response:", { url, status: response.status });
 
     return (await response.json()) as T;
   },
