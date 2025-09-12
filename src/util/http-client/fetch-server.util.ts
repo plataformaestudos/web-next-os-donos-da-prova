@@ -12,6 +12,11 @@ const HttpClient = Object.freeze({
       .map(({ name, value }) => `${name}=${value}`)
       .join("; ");
 
+    console.log("Cookies enviados na requisição:", allCookies.split("; ").map(c => c.split("=")[0]));
+
+    const cookieSizeBytes = new TextEncoder().encode(allCookies).length;
+    console.log("Tamanho total dos cookies:", cookieSizeBytes, "bytes");
+
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
