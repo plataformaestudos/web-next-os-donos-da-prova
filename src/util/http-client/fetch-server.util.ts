@@ -9,15 +9,15 @@ const HttpClient = Object.freeze({
     console.log(url)
 
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
+    const accessToken = cookieStore.get("access_token")?.value;
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       ...(opts?.headers as Record<string, string>),
     };
 
-    if (cookieHeader) {
-      headers["cookie"] = cookieHeader;
+    if (accessToken) {
+      headers["cookie"] = `access_token=${accessToken}`;
     }
 
     const response = await fetch(url, {
