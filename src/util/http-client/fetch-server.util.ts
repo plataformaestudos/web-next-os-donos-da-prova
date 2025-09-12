@@ -6,29 +6,19 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 const HttpClient = Object.freeze({
   async fetch<T>(resource: string, opts?: RequestInit) {
     const url = baseUrl ? `${baseUrl}${resource}` : resource;
+    console.log("HttpClient.fetch", url);
 
     const cookieStore = await cookies();
-    const allCookies = cookieStore.getAll()
-      .map(({ name, value }) => `${name}=${value}`)
-      .join("; ");
-
-    console.log("Cookies enviados na requisição:", allCookies.split("; ").map(c => c.split("=")[0]));
-
-    const cookieSizeBytes = new TextEncoder().encode(allCookies).length;
-    console.log("Tamanho total dos cookies:", cookieSizeBytes, "bytes");
-
+    const accessToken = cookieStore.get("access_token")?.value;
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...(opts?.headers
-        ? Object.fromEntries(
-          Object.entries(opts.headers as Record<string, string>)
-        )
-        : {}),
-      ...(allCookies ? { Cookie: allCookies } : {}),
+      "Authorization": accessToken ? `Bearer ${accessToken}` : "",
     };
 
 
+    console.log("headers", { headers });
+    console.log("fetch", opts );
     const response = await fetch(url, {
       ...opts,
       headers,
