@@ -8,8 +8,8 @@ import { useContext } from "react";
 
 import { ThemeProvider } from "@/app/provider";
 import { useNabvarContext } from "../navbar/navbar.context";
-import Image from "next/image";
 import { useUser } from "@/app/context/user.context"; 
+import NotificationsClient from "../notifications/notifications.client";
 
 export function Header() {
   const { theme, setTheme } = useContext(ThemeProvider);
@@ -35,16 +35,10 @@ export function Header() {
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           />
         </Tooltip>
-        <Image
-          src="/images/sino-2.png"
-          alt="Notificações"
-          width={28}
-          height={28}
-          style={{ cursor: "pointer" }}
-        />
+         <NotificationsClient />
         {user && (
           <Styled.StyledAvatar onClick={() => (window.location.href = "/profile")}>
-            {user.email?.charAt(0).toUpperCase()}
+            {user.profile?.name?.charAt(0).toUpperCase()}
           </Styled.StyledAvatar>
         )}
       </Flex>
