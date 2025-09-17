@@ -41,7 +41,6 @@ export function QuestionBookPageClient({
   if (!allowed) return null;
 
   const question = questionBook?.nextQuestion;
-
   const breadcrumbItems = [
     {
       title: questionBook?.folder ? "Minhas pastas" : "Meus cadernos",
@@ -62,7 +61,7 @@ export function QuestionBookPageClient({
 
   return (
     <Container>
-      <AppQuestionCounter question={question.orderDetails.questionOrder} />
+      <AppQuestionCounter question={seq} total={questionBook.questionsCount} />
       <Breadcrumb items={breadcrumbItems} />
       <TabContainer>
         <Tabs

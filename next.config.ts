@@ -17,6 +17,7 @@ const routeAlias: {
   "/planos/:id": "/plans/:id",
   "/assinatura": "/subscription",
   "/perfil": "/profile",
+  "/perfil/editar": "/profile/edit",
 };
 
 const nextConfig = {

@@ -11,7 +11,6 @@ interface AppProfileCardProps {
 }
 
 const { Title } = Typography;
-const { TabPane } = Tabs;
 
 const ProfileCard = styled(Card)`
   background-color: #fff;
@@ -66,15 +65,81 @@ const formatCep = (cep: string | undefined) => {
 
 export const AppProfileCard = ({ user }: AppProfileCardProps) => {
   console.log("AppProfileCard render", { user });
+    const items = [
+    {
+      key: "1",
+      label: "Meu Perfil",
+      children: (
+        <>
+          <Descriptions bordered column={1}>
+            <Descriptions.Item label="Apelido">{user?.profile?.nickname}</Descriptions.Item>
+            <Descriptions.Item label="Usuário desde">
+              {formatDate(user?.profile?.created_at)}
+            </Descriptions.Item>
+          </Descriptions>
+          <ButtonContent>
+            <Link href="/subscription">
+              <Button type="primary" size="large">
+                Gerenciar Assinatura
+              </Button>
+            </Link>
+          </ButtonContent>
+        </>
+      ),
+    },
+    {
+      key: "2",
+      label: "Dados Cadastrais",
+      children: (
+        <>
+          <Descriptions bordered column={1}>
+            <Descriptions.Item label="Nome Completo">{user?.profile?.name ?? user?.user_metadata?.name}</Descriptions.Item>
+            <Descriptions.Item label="Email">
+              {user?.profile?.email ?? user?.user_metadata?.email}
+            </Descriptions.Item>
+            <Descriptions.Item label="Telefone">
+              {user?.profile?.phone ?? user?.user_metadata?.phone}
+            </Descriptions.Item>
+            <Descriptions.Item label="CPF">
+              {formatDocument(user?.profile?.doc ?? user?.user_metadata?.cpfCnpj)}
+            </Descriptions.Item>
+          </Descriptions>
+        </>
+      ),
+    },
+    {
+      key: "3",
+      label: "Endereço",
+      children: (
+        <>
+          <Descriptions bordered column={1}>
+            <Descriptions.Item label="CEP">
+              {formatCep(user?.profile?.postal_code ?? user?.user_metadata?.postalCode)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Endereço">
+              {user?.profile?.address ?? user?.user_metadata?.address}
+            </Descriptions.Item>
+            <Descriptions.Item label="Bairro">
+              {user?.profile?.address_neighborhood ?? user?.user_metadata?.addressNeighborhood}
+            </Descriptions.Item>
+            <Descriptions.Item label="Número">
+              {user?.profile?.address_number ?? user?.user_metadata?.addressNumber}
+            </Descriptions.Item>
+            <Descriptions.Item label="Complemento">
+              {user?.profile?.address_complement ?? user?.user_metadata?.addressComplement}
+            </Descriptions.Item>
+          </Descriptions>
+        </>
+      ),
+    },
+  ];
+
   return (
     <ProfileCard title="">
       <ProfileTitleWrapper>
         <ProfileTitle level={2}>Perfil do Usuário</ProfileTitle>
         <Link href="/profile/edit">
-          <Button
-            type="primary"
-            size="large"
-          >
+          <Button type="primary" size="large">
             Editar Perfil
           </Button>
         </Link>
@@ -91,62 +156,7 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
 
       <ProfileTitle level={2}>{user?.profile?.name}</ProfileTitle>
 
-      <Tabs defaultActiveKey="1">
-        <TabPane
-          tab="Meu Perfil"
-          key="1"
-        >
-          <Descriptions
-            bordered
-            column={1}
-          >
-            <Descriptions.Item label="Apelido">{user?.profile?.name}</Descriptions.Item>
-            <Descriptions.Item label="Usuário desde">
-              {formatDate(user?.user?.created_at)}
-            </Descriptions.Item>
-          </Descriptions>
-          <ButtonContent>
-            <Link href="/subscription">
-              <Button
-                type="primary"
-                size="large"
-              >
-                Gerenciar Assinatura
-              </Button>
-            </Link>
-          </ButtonContent>
-        </TabPane>
-
-        <TabPane
-          tab="Dados Cadastrais"
-          key="2"
-        >
-          <Descriptions
-            bordered
-            column={1}
-          >
-            <Descriptions.Item label="Nome Completo">
-              {user?.profile?.name}
-            </Descriptions.Item>
-            <Descriptions.Item label="Email">{user?.user?.email ? user?.user?.email : ""}</Descriptions.Item>
-            <Descriptions.Item label="CPF">{formatDocument(user?.profile?.doc ? user?.profile?.doc : "")}</Descriptions.Item>
-            {/* <Descriptions.Item label="Senha">{user?.email}</Descriptions.Item> */}
-            <Descriptions.Item label="CEP">{formatCep(user?.user_metadata?.postalCode ? user?.user_metadata?.postalCode : "")}</Descriptions.Item>
-            <Descriptions.Item label="CEP">{31810440}</Descriptions.Item>
-          </Descriptions>
-          <ButtonContent>
-            <Link href="/subscription">
-              <Button
-                type="primary"
-                size="large"
-              >
-                Gerenciar Assinatura
-              </Button>
-            </Link>
-          </ButtonContent>
-        </TabPane>
-
-      </Tabs>
+      <Tabs defaultActiveKey="1" items={items} />
     </ProfileCard>
   );
 };

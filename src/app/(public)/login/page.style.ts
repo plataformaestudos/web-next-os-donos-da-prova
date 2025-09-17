@@ -5,7 +5,7 @@ export const Container = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: ${({ theme }) => theme.colorFillContent};
+  background-color: ${({ theme }) => theme.colorPrimaryBg};
 `;
 
 export const Card = styled.div`
