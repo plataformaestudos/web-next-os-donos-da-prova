@@ -23,7 +23,7 @@ export function AppQuestionLoader({
   seq,
   questionBook,
 }: AppQuestionLoaderProps) {
-  const [question, setQuestion] = useState(questionBook.nextQuestion);
+  const [question, setQuestion] = useState(questionBook?.nextQuestion);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { message } = App.useApp();
@@ -59,10 +59,10 @@ export function AppQuestionLoader({
 
     if (
       seq &&
-      parseInt(seq) !== questionBook.nextQuestion.orderDetails.questionOrder
+      parseInt(seq) !== questionBook?.nextQuestion.orderDetails.questionOrder
     ) {
       getQuestionBookQuestion(id, seq)
-        .then((response) => setQuestion(response ?? questionBook.nextQuestion))
+        .then((response) => setQuestion(response ?? questionBook?.nextQuestion))
         .catch(() => {
           message.error(
             "Limite de questões atingido, aguarde seu limite ser renovado, ou mude seu plano."

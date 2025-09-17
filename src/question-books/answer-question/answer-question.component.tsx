@@ -7,7 +7,7 @@ import {
   Container,
   QuestionContainer,
 } from "./answer-question.style";
-import { Button, Flex, Tooltip, Typography } from "antd";
+import { Button, Flex, theme, Tooltip, Typography } from "antd";
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
@@ -88,13 +88,21 @@ export function AnswerQuestion({
       <QuestionContainer>
         {module && (
           <Typography.Paragraph
-            style={{ marginBottom: 4, fontSize: 12 }}
+            style={{
+              marginBottom: 12,
+              fontSize: 16,
+              fontWeight: "bold",
+              color: theme.useToken().token.colorPrimaryText,
+            }}
             type="secondary"
           >
-            Módulo: {module.name}
+            #Módulo: {module.name}
           </Typography.Paragraph>
         )}
-        <TiptapEditor editable={false} defaultValue={text} />
+        <TiptapEditor
+          editable={false}
+          defaultValue={text}
+        />
         {alternatives.length > 0 && (
           <AlternativesContainer>
             {alternatives.map(({ id, text }, index) => {
@@ -117,9 +125,15 @@ export function AnswerQuestion({
                     {type === QuestionType.MULTIPLE_CHOICE &&
                       String.fromCharCode(65 + index)}
                   </AlternativeLetter>
-                  <TiptapEditor editable={false} defaultValue={text} />
+                  <TiptapEditor
+                    editable={false}
+                    defaultValue={text}
+                  />
                   {type === QuestionType.MULTIPLE_CHOICE && (
-                    <Tooltip title="Descartar questão" placement="left">
+                    <Tooltip
+                      title="Descartar questão"
+                      placement="left"
+                    >
                       <Button
                         type="link"
                         icon={<StrikethroughOutlined />}
@@ -174,17 +188,25 @@ export function AnswerQuestion({
         </Typography.Text>
       )}
       {correctAlternative && selectedAlternative && (
-        <Flex vertical gap={16} align="start">
+        <Flex
+          vertical
+          gap={16}
+          align="center"
+        >
           <Typography.Text
             type={
               correctAlternative === selectedAlternative ? "success" : "danger"
             }
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+            }}
           >
             {correctAlternative === selectedAlternative ? (
-              "Resposta correta!"
+              <span>Você acertou!</span>
             ) : (
               <span>
-                Resposta incorreta.{" "}
+                Você errou!{" "}
                 <b>
                   Gabarito:{" "}
                   {String.fromCharCode(
@@ -206,7 +228,10 @@ export function AnswerQuestion({
             </Button>
           )}
           {comment && showComment && (
-            <TiptapEditor editable={false} defaultValue={comment} />
+            <TiptapEditor
+              editable={false}
+              defaultValue={comment}
+            />
           )}
         </Flex>
       )}
