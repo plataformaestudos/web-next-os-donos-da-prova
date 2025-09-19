@@ -46,7 +46,7 @@ export function ModuleForm(props: ModuleFormProps & { allModules: ModuleEntitie[
                 </label>
 
                 <label>
-                    <Title level={4}>Parent Module</Title>
+                    <Title level={4}>Módulo Pai</Title>
                     <Select
                         showSearch
                         disabled={isPending}
