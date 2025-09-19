@@ -19,6 +19,8 @@ export async function deleteModule(id: string) {
         if (error) return false;
 
         revalidateTag(CACHE_TAGS.MODULES);
+        revalidateTag(CACHE_TAGS.CHILD_MODULES);
+        revalidateTag(CACHE_TAGS.ROOT_MODULES);
         revalidatePath("/modules");
 
         return true;
@@ -36,6 +38,8 @@ export async function unlinkModule(id: string, parentModuleId: string) {
         });
 
         revalidateTag(CACHE_TAGS.MODULES);
+        revalidateTag(CACHE_TAGS.CHILD_MODULES);
+        revalidateTag(CACHE_TAGS.ROOT_MODULES);
         revalidatePath("/modules");
     } catch {
         return false;

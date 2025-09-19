@@ -18,7 +18,6 @@ export async function updateModule(
             error: "O nome do módulo não pode ser vazio",
         };
     }
-
     const { data, error } = await HttpClient.fetch<ResponseModel<ModuleModel>>(
         `/modules/${id}`,
         {
@@ -29,7 +28,6 @@ export async function updateModule(
             }),
         }
     );
-
     if (!data) {
         return {
             error: "Módulo não encontrado",
@@ -41,6 +39,8 @@ export async function updateModule(
     }
 
     revalidateTag(CACHE_TAGS.MODULES);
+    revalidateTag(CACHE_TAGS.CHILD_MODULES);
+    revalidateTag(CACHE_TAGS.ROOT_MODULES);
     revalidatePath("/modules");
     revalidatePath(`/modules/${id}`);
 

@@ -9,40 +9,42 @@ import { ModuleModel } from "@/model/module.model";
 import { ResponseModel } from "@/model/common.model";
 
 export async function createModule({
-  parentModuleId,
-  name,
+    parentModuleId,
+    name,
 }: CreateModuleDTO): Promise<{
-  success: boolean | null;
-  error: string | null;
+    success: boolean | null;
+    error: string | null;
 }> {
-  if (!name) {
-    return {
-      success: false,
-      error: "O nome deve ser preenchido",
-    };
-  }
-
-  const { data, error } = await HttpClient.fetch<ResponseModel<ModuleModel>>(
-    "/modules",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        name,
-        parentModuleId,
-      }),
+    if (!name) {
+        return {
+            success: false,
+            error: "O nome deve ser preenchido",
+        };
     }
-  );
 
-  if (error) {
-    return { success: false, error };
-  }
+    const { data, error } = await HttpClient.fetch<ResponseModel<ModuleModel>>(
+        "/modules",
+        {
+            method: "POST",
+            body: JSON.stringify({
+                name,
+                parentModuleId,
+            }),
+        }
+    );
 
-  if (parentModuleId) {
-    revalidatePath(`/modules/${parentModuleId}`);
-  }
+    if (error) {
+        return { success: false, error };
+    }
 
-  revalidatePath(`/modules/${data.id}`);
-  revalidateTag(CACHE_TAGS.MODULES);
+    if (parentModuleId) {
+        revalidatePath(`/modules/${parentModuleId}`);
+    }
 
-  return { success: true, error: null };
+    revalidatePath(`/modules/${data.id}`);
+    revalidateTag(CACHE_TAGS.MODULES);
+    revalidateTag(CACHE_TAGS.CHILD_MODULES);
+    revalidateTag(CACHE_TAGS.ROOT_MODULES);
+
+    return { success: true, error: null };
 }

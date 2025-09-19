@@ -1,12 +1,11 @@
-// src/ui/header/notifications.client.tsx
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { Badge, Popover, List, Spin, Empty, Button } from "antd";
 import Image from "next/image";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import { ResponseModel } from "@/model/common.model";
-
+import { ThemeProvider } from "@/app/provider";
 type Notification = {
     id: string;
     type: string;
@@ -24,6 +23,7 @@ export default function NotificationsClient() {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState<number>(0);
     const pollingRef = useRef<number | null>(null);
+    const { theme } = useContext(ThemeProvider);
 
     // o ideal seria essa função aqui estar em um server component
     async function fetchUnreadCount() {
@@ -161,7 +161,7 @@ export default function NotificationsClient() {
         >
             <Badge count={unreadCount} size="small" offset={[0, 0]}>
                 <div style={{ display: "inline-block", cursor: "pointer" }}>
-                    <Image src="/images/sino-2.png" alt="Notificações" width={28} height={28} />
+                    <Image src={theme === "dark" ? "/images/sino-b.png" : "/images/sino.png"} alt="Notificações" width={28} height={28} />
                 </div>
             </Badge>
         </Popover>

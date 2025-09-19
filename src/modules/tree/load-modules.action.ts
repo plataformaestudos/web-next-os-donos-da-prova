@@ -12,7 +12,7 @@ export async function loadChildrenModules(moduleId: string) {
     {
       method: "GET",
       next: {
-        tags: [CACHE_TAGS.MODULES],
+        tags: [CACHE_TAGS.CHILD_MODULES],
       },
     }
   ).then((response) => {
@@ -30,7 +30,7 @@ export async function queryModules(query?: string, parentModuleId?: string) {
       {
         method: "GET",
         next: {
-          tags: [CACHE_TAGS.MODULES],
+          tags: [CACHE_TAGS.ROOT_MODULES],
         },
       }
     );
