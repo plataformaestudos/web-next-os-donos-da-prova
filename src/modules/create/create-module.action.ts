@@ -34,7 +34,7 @@ export async function createModule({
   );
 
   if (error) {
-    return { success: true, error };
+    return { success: false, error };
   }
 
   if (parentModuleId) {

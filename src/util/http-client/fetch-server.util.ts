@@ -4,40 +4,41 @@ import { UnauthorizedError } from "./fetch-client.util";
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const HttpClient = Object.freeze({
-  async fetch<T>(resource: string, opts?: RequestInit) {
-    const url = baseUrl ? `${baseUrl}${resource}` : resource;
+    async fetch<T>(resource: string, opts?: RequestInit) {
+        const url = baseUrl ? `${baseUrl}${resource}` : resource;
 
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("access_token")?.value;
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get("access_token")?.value;
 
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...(opts?.headers as Record<string, string>),
-    };
+        const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+            ...(opts?.headers as Record<string, string>),
+        };
 
-    if (accessToken) {
-      headers["cookie"] = `access_token=${accessToken}`;
-    }
+        if (accessToken) {
+            headers["cookie"] = `access_token=${accessToken}`;
+        }
 
-    const response = await fetch(url, {
-      ...opts,
-      headers,
-      next: {
-        revalidate: 180,
-      },
-    });
+        const response = await fetch(url, {
+            ...opts,
+            headers,
+            next: {
+                revalidate: 300, 
+                ...(opts?.next ?? {}), 
+            },
+        });
 
-    if (response.status === 401) {
-      throw new UnauthorizedError("Unauthorized");
-    }
+        if (response.status === 401) {
+            throw new UnauthorizedError("Unauthorized");
+        }
 
-    if (!response.ok) {
-      const text = await response.text().catch(() => "");
-      throw new Error(`HTTP error! status: ${response.status} ${text}`);
-    }
+        if (!response.ok) {
+            const text = await response.text().catch(() => "");
+            throw new Error(`HTTP error! status: ${response.status} ${text}`);
+        }
 
-    return (await response.json()) as T;
-  },
+        return (await response.json()) as T;
+    },
 });
 
 export default HttpClient;

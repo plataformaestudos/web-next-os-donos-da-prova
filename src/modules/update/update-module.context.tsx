@@ -11,7 +11,7 @@ import { updateModule } from "./update-module.action";
 
 const UpdateModuleContext = createContext(
   {} as {
-    updateModule: (payload: { id: string; name: string }) => void;
+    updateModule: (payload: { id: string; name: string; parentModuleId: string | null }) => void;
     isPending: boolean;
     error: string | null;
   }

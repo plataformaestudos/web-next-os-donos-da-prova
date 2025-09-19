@@ -13,3 +13,12 @@ export interface ModuleViewModel extends ModuleModel {
   title: string;
   children?: ModuleViewModel[];
 }
+
+export interface ModuleEntitie {
+  id: string;
+  name: string;
+  parentModuleId: string | null;  
+  treeCode: string;
+  code?: number;
+}
+

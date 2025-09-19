@@ -3,39 +3,46 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 
 import { CACHE_TAGS } from "@/util/cache-tags.util";
-import { createClient } from "@/util/supabase/server";
+import HttpClient from "@/util/http-client/fetch-server.util";
+import { ResponseModel } from "@/model/common.model";
+import { ModuleModel } from "@/model/module.model";
 
 export async function updateModule(
-  _: {
-    error: string | null;
-  },
-  { id, name }: { id: string; name: string }
+    _: {
+        error: string | null;
+    },
+    { id, name, parentModuleId }: { id: string; name: string, parentModuleId?: string | null }
 ): Promise<{ error: string | null }> {
-  if (!name) {
-    return {
-      error: "O nome do módulo não pode ser vazio",
-    };
-  }
+    if (!name) {
+        return {
+            error: "O nome do módulo não pode ser vazio",
+        };
+    }
 
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("modules")
-    .update({
-      name,
-    })
-    .match({ id })
-    .select()
-    .single();
+    const { data, error } = await HttpClient.fetch<ResponseModel<ModuleModel>>(
+        `/modules/${id}`,
+        {
+            method: "PUT",
+            body: JSON.stringify({
+                name,
+                parentModuleId: parentModuleId || null,
+            }),
+        }
+    );
 
-  if (!data) {
-    return {
-      error: "Módulo não encontrado",
-    };
-  }
+    if (!data) {
+        return {
+            error: "Módulo não encontrado",
+        };
+    }
 
-  revalidateTag(CACHE_TAGS.MODULES);
-  revalidatePath("/modules");
-  revalidatePath(`/modules/${id}`);
+    if (error) {
+        return { error };
+    }
 
-  return { error: null };
+    revalidateTag(CACHE_TAGS.MODULES);
+    revalidatePath("/modules");
+    revalidatePath(`/modules/${id}`);
+
+    return { error: null };
 }
