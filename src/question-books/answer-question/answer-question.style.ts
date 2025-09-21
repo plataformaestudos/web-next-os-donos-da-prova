@@ -1,6 +1,8 @@
 "use client";
 
 import styled, { css } from "styled-components";
+import { Button } from "antd";
+
 
 export const Container = styled.div`
   -webkit-touch-callout: none;
@@ -21,6 +23,7 @@ export const Container = styled.div`
     opacity: 0.05;
     background-image: url("/images/watermark.png");
     pointer-events: none;
+    filter: ${({ theme }) => (theme.isDark ? "invert(1) brightness(0.65)" : "none")};
   }
 `;
 
@@ -113,3 +116,59 @@ export const Alternative = styled.div<{
       text-decoration: line-through;
     `}
 `;
+
+/**
+ * Props:
+ *  $enabled: controla cores (true = fundo colorido)
+ *  $variant: 'pill' | 'circle'
+ */
+export const NavButton = styled(Button)<{ $enabled?: boolean; $variant?: "pill" | "circle" }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  min-width: 55px;
+  padding: 6px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  
+
+  /* variant */
+  border-radius: ${(p) => (p.$variant === "circle" ? "50%" : "999px")};
+  ${(p) =>
+    p.$variant === "circle" &&
+    css`
+      width: 44px;
+      padding: 0;
+    `}
+
+  /* antidote: override AntD defaults when needed */
+  && {
+    background: ${(p) => (p.$enabled ? p.theme.colorPrimary : "transparent")} ;
+    color: ${(p) =>
+      p.$enabled ? p.theme.colorTextLightSolid : p.theme.colorTextDisabled};
+    box-shadow: ${(p) => (p.$enabled ? "0 6px 18px rgba(0,0,0,0.08)" : "none")};
+    transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: ${(p) => (p.$enabled ? "0 10px 22px rgba(0,0,0,0.12)" : "none")};
+    background: ${(p) => (p.$enabled ? p.theme.colorPrimaryHover ?? p.theme.colorPrimary : "transparent")};
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+    background: transparent !important;
+    color: ${(p) => p.theme.colorTextDisabled} !important;
+    border: 1px solid ${(p) => p.theme.colorBorder} !important;
+    box-shadow: none !important;
+  }
+`;
+

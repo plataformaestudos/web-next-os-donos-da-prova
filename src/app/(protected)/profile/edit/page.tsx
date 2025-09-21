@@ -12,7 +12,7 @@ import {
     Row,
     Typography,
     Tabs,
-    message,
+    App,
 } from "antd";
 import Image from "next/image";
 import styled from "styled-components";
@@ -56,39 +56,39 @@ const ButtonContent = styled.div`
 `;
 
 type UserProfileAPI = {
-  id: string;
-  roleId: string;
-  doc: string;
-  name: string;
-  nickname: string;
-  createdAt: string; // ISO date string
-  createdBy: string;
-  updatedAt: string; // ISO date string
-  updatedBy: string;
-  userId: string;
-  email: string;
-  cpfCnpj: string;
-  postalCode: string;
-  address: string;
-  addressNeighborhood: string;
-  addressNumber: string;
-  addressComplement: string;
-  avatarUrl: string | null;
-  phone: string;
+    id: string;
+    roleId: string;
+    doc: string;
+    name: string;
+    nickname: string;
+    createdAt: string; // ISO date string
+    createdBy: string;
+    updatedAt: string; // ISO date string
+    updatedBy: string;
+    userId: string;
+    email: string;
+    cpfCnpj: string;
+    postalCode: string;
+    address: string;
+    addressNeighborhood: string;
+    addressNumber: string;
+    addressComplement: string;
+    avatarUrl: string | null;
+    phone: string;
 }
 
 
 type EditProfileFormValues = {
-  nickname?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  cpfCnpj?: string;
-  postalCode?: string;
-  address?: string;
-  addressNeighborhood?: string;
-  addressNumber?: string;
-  addressComplement?: string;
+    nickname?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    cpfCnpj?: string;
+    postalCode?: string;
+    address?: string;
+    addressNeighborhood?: string;
+    addressNumber?: string;
+    addressComplement?: string;
 };
 
 const formatDate = (date: string | undefined) => {
@@ -99,7 +99,8 @@ const formatDate = (date: string | undefined) => {
 export default function EditProfilePage() {
     const [form] = Form.useForm();
     const router = useRouter();
-    const { user, loading , refreshProfile} = useUser();
+    const { user, loading, refreshProfile } = useUser();
+    const app = App.useApp?.();
 
     useEffect(() => {
         if (user) {
@@ -137,29 +138,29 @@ export default function EditProfilePage() {
     }
 
     const handleSave = async (values: EditProfileFormValues) => {
-        message.loading({ content: "Salvando...", key: "save" });
-        const payload = values;
-        return HttpClient.fetch<ResponseModel<UserProfileAPI>>('/profiles', {
-            method: "PATCH",
-            body: JSON.stringify(payload),
-        })
-            .then((response) => {
-                if (response.data) {
-                    message.success({ content: "Perfil atualizado com sucesso!", key: "save" });
-                    refreshProfile();
-                    return response.data;
-                } else {
-                    message.error({ content: response.message ?? "Erro ao salvar perfil", key: "save" });
-                    return null;
-                }
-            })
-            .catch((err) => {
-                console.error("Erro ao salvar perfil:", err);
-                message.error({ content: "Erro ao salvar perfil", key: "save" });
-                return null;
-            });
+        try {
+            const payload = values;
 
+            const response = await HttpClient.fetch<ResponseModel<UserProfileAPI>>(
+                "/profiles",
+                {
+                    method: "PATCH",
+                    body: JSON.stringify(payload),
+                },
+                false
+            );
+
+            if (response.data) {
+                app?.message.success({ content: "Perfil atualizado com sucesso!", key: "save" });
+                refreshProfile();
+                return response.data;
+            }
+        } catch (err) {
+            console.error("Erro ao salvar perfil:", err);
+            return null;
+        }
     };
+
 
     const handleCancel = () => {
         form.resetFields();

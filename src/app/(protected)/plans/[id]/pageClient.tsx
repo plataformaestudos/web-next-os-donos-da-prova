@@ -15,44 +15,57 @@ import React from "react";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
 
 export function EditPlanPageClient({ plan, rootModules }: { plan: PlanFormValues; rootModules: ModuleViewModel[] }) {
-  const { loading, allowed } = useAuthGuard({ requireRoles: [Roles.ADMIN] });
+    const { loading, allowed } = useAuthGuard({ requireRoles: [Roles.ADMIN] });
 
-  const [planModules, setPlanModules] = React.useState<ModuleViewModel[]>([]);
+    const [planModules, setPlanModules] = React.useState<ModuleViewModel[]>([]);
 
 
-  React.useEffect(() => {
-    if (plan.modules.length > 0) {
-      HttpClient.fetch<{ data: ModuleModel[] }>(
-        `/modules/tree_by_ids?ids=${plan.modules.join(",")}&show_tree_parents=true`,
-        {
-          method: "GET",
-          next: { tags: [CACHE_TAGS.MODULES] },
+    React.useEffect(() => {
+        if (plan.modules.length === 0) {
+            setPlanModules([]);
+            return;
         }
-      )
-        .then((r) => setPlanModules(r.data?.map(moduleModelToViewModelAdapter) ?? []))
-        .catch(() => setPlanModules([]));
-    }
-  }, [plan.modules]);
 
-  if (loading) return <FullPageLoading />;
+        const fetchModules = async () => {
+            try {
+                const response = await HttpClient.fetch<{ data: ModuleModel[] }>(
+                    `/modules/tree_by_ids?ids=${plan.modules.join(",")}&show_tree_parents=true`,
+                    {
+                        method: "GET",
+                        next: { tags: [CACHE_TAGS.MODULES] },
+                    },
+                    true 
+                );
 
-  if (!allowed) return null;
+                setPlanModules(response.data?.map(moduleModelToViewModelAdapter) ?? []);
+            } catch (error) {
+                console.error("Erro ao buscar módulos do plano:", error);
+                setPlanModules([]);
+            }
+        };
 
-  return (
-    <UpsertPlanProvider>
-      <PageLayout
-        title="Editar plano"
-        backHref="/plans"
-        actions={[<UpsertPlanFormSubmitButton key="save" />]}
-      >
-        <UpsertPlanForm
-          plan={plan}
-          modules={{
-            data: mergeModulesTree(rootModules, planModules),
-            loadData: loadChildrenModules,
-          }}
-        />
-      </PageLayout>
-    </UpsertPlanProvider>
-  );
+        fetchModules();
+    }, [plan.modules]);
+
+    if (loading) return <FullPageLoading />;
+
+    if (!allowed) return null;
+
+    return (
+        <UpsertPlanProvider>
+            <PageLayout
+                title="Editar plano"
+                backHref="/plans"
+                actions={[<UpsertPlanFormSubmitButton key="save" />]}
+            >
+                <UpsertPlanForm
+                    plan={plan}
+                    modules={{
+                        data: mergeModulesTree(rootModules, planModules),
+                        loadData: loadChildrenModules,
+                    }}
+                />
+            </PageLayout>
+        </UpsertPlanProvider>
+    );
 }

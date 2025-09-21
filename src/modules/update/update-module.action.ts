@@ -8,41 +8,40 @@ import { ResponseModel } from "@/model/common.model";
 import { ModuleModel } from "@/model/module.model";
 
 export async function updateModule(
-    _: {
-        error: string | null;
-    },
-    { id, name, parentModuleId }: { id: string; name: string, parentModuleId?: string | null }
-): Promise<{ error: string | null }> {
+    _: {success: boolean, error: string | null },
+    { id, name, parentModuleId }: { id: string; name: string; parentModuleId?: string | null }
+): Promise<{ success: boolean; error: string | null }> {
     if (!name) {
-        return {
-            error: "O nome do módulo não pode ser vazio",
-        };
+        return { success: false, error: "O nome do módulo não pode ser vazio" };
     }
-    const { data, error } = await HttpClient.fetch<ResponseModel<ModuleModel>>(
-        `/modules/${id}`,
-        {
+
+    try {
+        const res = await HttpClient.fetch<ResponseModel<ModuleModel>>(`/modules/${id}`, {
             method: "PUT",
             body: JSON.stringify({
                 name,
                 parentModuleId: parentModuleId || null,
             }),
+        });
+
+        const data = res.data;
+
+        if (!data) {
+            return { success: false, error: "Módulo não encontrado" };
         }
-    );
-    if (!data) {
-        return {
-            error: "Módulo não encontrado",
-        };
+
+        if (res.error) {
+            return { success: false, error: res.error };
+        }
+
+        revalidateTag(CACHE_TAGS.MODULES);
+        revalidateTag(CACHE_TAGS.CHILD_MODULES);
+        revalidateTag(CACHE_TAGS.ROOT_MODULES);
+        revalidatePath("/modules");
+        revalidatePath(`/modules/${id}`);
+
+        return { success: true, error: null };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ?  error?.message ?? "Erro ao atualizar módulo" : "Erro ao atualizar módulo"};
     }
-
-    if (error) {
-        return { error };
-    }
-
-    revalidateTag(CACHE_TAGS.MODULES);
-    revalidateTag(CACHE_TAGS.CHILD_MODULES);
-    revalidateTag(CACHE_TAGS.ROOT_MODULES);
-    revalidatePath("/modules");
-    revalidatePath(`/modules/${id}`);
-
-    return { error: null };
 }

@@ -3,7 +3,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { createClient } from "@/util/supabase/client";
 import { User } from "@supabase/supabase-js";
-import HttpClient, { UnauthorizedError } from "@/util/http-client/fetch-client.util";
+import HttpClient from "@/util/http-client/fetch-client.util";
+import { UnauthorizedError } from "@/lib/errors";
 
 export type UserExtended = User & {
     user?: User

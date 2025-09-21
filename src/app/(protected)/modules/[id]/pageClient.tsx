@@ -12,7 +12,7 @@ interface EditModulePageClientProps {
     module: { id: string; name: string, parent_module_id: string | null },
     allModules?: ModuleEntitie[],
     childrenModules: {
-        parentModuleId: string;
+        parentModuleId: string | null;
         key: string;
         title: string;
         children?: ModuleViewModel[] | undefined;

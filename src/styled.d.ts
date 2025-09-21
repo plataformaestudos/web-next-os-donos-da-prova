@@ -11,5 +11,6 @@ declare module "styled-components" {
     colorTertiary: string;
     colorTertiaryText: string;
     colorMenu: string;
+    isDark?: boolean;
   }
 }

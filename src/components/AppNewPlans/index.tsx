@@ -14,26 +14,28 @@ export const AppNewPlans = () => {
   const { message } = App.useApp();
 
   useEffect(() => {
-    async function getPayments() {
+ async function getAvailablePlans() {
       setIsLoading(true);
-      return HttpClient.fetch<ResponseModel<PlanModel[]>>(
-         "/subscription-plans/availables",
-        {
-          method: "GET",
+      try {
+        const response = await HttpClient.fetch<ResponseModel<PlanModel[]>>(
+          "/subscription-plans/availables",
+          {
+            method: "GET",
+          },
+            false
+        );
+
+        if (response.data) {
+          setPlans(response.data);
+        } else {
+          throw new Error(response.message || "Erro ao buscar os planos disponíveis");
         }
-      )
-        .then((response) => {
-          if (response.data) {
-            setPlans(response.data);
-          } else {
-            message.error(response.message || "Erro ao buscar os planos");
-          }
-        })
-        .catch(() => null)
-        .finally(() => setIsLoading(false));
+      } finally {
+        setIsLoading(false);
+      }
     }
 
-    getPayments();
+    getAvailablePlans();
   }, [message]);
   return (
     <Flex

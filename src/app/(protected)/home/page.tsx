@@ -9,7 +9,6 @@ export default function HomePage() {
   const { user, loading } = useUser();
   const router = useRouter();
   useEffect(() => {
-    console.log("Checking user authentication status in HomePage:", user);
     if (!loading && !user) {
       router.push("/login");
     }

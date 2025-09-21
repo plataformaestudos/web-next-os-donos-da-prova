@@ -5,7 +5,8 @@ import { Inter } from "next/font/google";
 import { Metadata } from "next";
 import { UserProvider } from "./context/user.context";
 import { ThemeWrapper } from "./theme-wrapper";
-
+import { ErrorBoundaryWrapper } from "@/components/ErrorBoundary/ErrorBoundaryWrapper";
+import { App as AntdApp } from "antd"; // provedor do antd
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,13 +27,18 @@ export default async function RootLayout({
     return (
         <html lang="en">
             <body className={`${inter.className} antialiased`}>
-                <ClientProviders>
-                    <ThemeWrapper>
-                        <UserProvider>
-                            {children}
-                        </UserProvider>
-                    </ThemeWrapper>
-                </ClientProviders>
+                <AntdApp>
+                    <ClientProviders>
+                        <ThemeWrapper>
+                            <ErrorBoundaryWrapper>
+
+                                <UserProvider>
+                                    {children}
+                                </UserProvider>
+                            </ErrorBoundaryWrapper>
+                        </ThemeWrapper>
+                    </ClientProviders>
+                </AntdApp>
 
             </body>
         </html>

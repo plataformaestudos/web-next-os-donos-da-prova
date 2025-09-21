@@ -1,4 +1,3 @@
-// QuestionBookPage.tsx (Server Component)
 import { getQuestionBook } from "../api";
 import { QuestionBookPageClient } from "./pageClient";
 
@@ -11,6 +10,7 @@ export default async function QuestionBookPage(props: { params: Params, searchPa
   const { seq } = await props.searchParams;
 
   const questionBook = await getQuestionBook(id);
+
 
   return <QuestionBookPageClient id={id} seq={seq} questionBook={questionBook} />;
 }

@@ -18,9 +18,7 @@ const UpdateModuleContext = createContext(
 );
 
 export const UpdateModuleProvider = ({ children }: PropsWithChildren) => {
-  const [{ error }, formAction, isPending] = useActionState(updateModule, {
-    error: null,
-  });
+  const [{ error }, formAction, isPending] = useActionState(updateModule,{ success: false, error: null });
 
   return (
     <UpdateModuleContext.Provider

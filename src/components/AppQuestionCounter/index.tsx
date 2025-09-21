@@ -2,7 +2,7 @@
 import * as S from "./styles";
 
 interface AppQuestionCounterProps {
-    question: string;
+    question: number;
     total  : number;
 }
 

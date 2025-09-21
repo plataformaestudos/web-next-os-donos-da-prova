@@ -22,29 +22,28 @@ export async function createModule({
         };
     }
 
-    const { data, error } = await HttpClient.fetch<ResponseModel<ModuleModel>>(
-        "/modules",
-        {
+
+    try {
+        const res = await HttpClient.fetch<ResponseModel<ModuleModel>>("/modules", {
             method: "POST",
             body: JSON.stringify({
                 name,
                 parentModuleId,
             }),
+        });
+        const data = res.data;
+
+        if (parentModuleId) {
+            revalidatePath(`/modules/${parentModuleId}`);
         }
-    );
 
-    if (error) {
-        return { success: false, error };
+        revalidatePath(`/modules/${data.id}`);
+        revalidateTag(CACHE_TAGS.MODULES);
+        revalidateTag(CACHE_TAGS.CHILD_MODULES);
+        revalidateTag(CACHE_TAGS.ROOT_MODULES);
+
+        return { success: true, error: null };
+    } catch (error: unknown) {
+        return { success: false, error:  error instanceof Error ? error?.message ?? "Erro ao criar módulo" : "Erro ao criar módulo"};
     }
-
-    if (parentModuleId) {
-        revalidatePath(`/modules/${parentModuleId}`);
-    }
-
-    revalidatePath(`/modules/${data.id}`);
-    revalidateTag(CACHE_TAGS.MODULES);
-    revalidateTag(CACHE_TAGS.CHILD_MODULES);
-    revalidateTag(CACHE_TAGS.ROOT_MODULES);
-
-    return { success: true, error: null };
 }

@@ -64,7 +64,6 @@ const formatCep = (cep: string | undefined) => {
 };
 
 export const AppProfileCard = ({ user }: AppProfileCardProps) => {
-  console.log("AppProfileCard render", { user });
     const items = [
     {
       key: "1",

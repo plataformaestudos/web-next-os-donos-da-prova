@@ -7,25 +7,24 @@ import { createClient } from "@/util/supabase/server";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import { ResponseModel } from "@/model/common.model";
 
-export async function deleteModule(id: string) {
+export async function deleteModule(id: string): Promise<{ success: boolean; error: string | null }> {
     try {
-        const { error } = await HttpClient.fetch<ResponseModel<null>>(
-            `/modules/${id}`,
-            {
-                method: "DELETE",
-            }
-        );
+        const res = await HttpClient.fetch<ResponseModel<null>>(`/modules/${id}`, {
+            method: "DELETE",
+        });
 
-        if (error) return false;
+        if (res.error) {
+            return { success: false, error: res.error };
+        }
 
         revalidateTag(CACHE_TAGS.MODULES);
         revalidateTag(CACHE_TAGS.CHILD_MODULES);
         revalidateTag(CACHE_TAGS.ROOT_MODULES);
         revalidatePath("/modules");
 
-        return true;
-    } catch {
-        return false;
+        return { success: true, error: null };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ?  error?.message ?? "Erro ao deletar módulo" : "Erro ao deletar módulo"};
     }
 }
 

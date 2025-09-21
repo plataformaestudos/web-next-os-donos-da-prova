@@ -30,11 +30,10 @@ export default function NotificationsClient() {
         try {
             const resp = await HttpClient.fetch<ResponseModel<number>>(
                 "/notifications/unread/count",
-                { method: "GET" }
+                { method: "GET" },
+                false
             );
-            console.log("Unread count response:", resp);
             const count = typeof resp?.data === "number" ? resp.data : Number(resp?.data) || 0;
-            console.log("Parsed unread count:", count);
 
             setUnreadCount(count);
         } catch (err) {
@@ -47,9 +46,10 @@ export default function NotificationsClient() {
         try {
             const resp = await HttpClient.fetch<ResponseModel<Notification[]>>("/notifications", {
                 method: "GET",
-            });
+            },
+                false
+        );
             setNotifications(resp.data);
-            console.log("Fetched notifications:", resp.data);
             setUnreadCount(resp.data.filter((n) => !n.isRead).length);
         } catch (err) {
             console.error("Erro ao buscar notificações", err);
@@ -62,7 +62,7 @@ export default function NotificationsClient() {
         setNotifications((prev) => prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)));
         setUnreadCount((c) => Math.max(0, c - 1));
         try {
-            await HttpClient.fetch(`/notifications/${notificationId}/read`, { method: "PATCH" });
+            await HttpClient.fetch(`/notifications/${notificationId}/read`, { method: "PATCH" }, false);
         } catch (err) {
             console.error("Falha marcar como lido", err);
             await fetchNotifications();
@@ -74,7 +74,7 @@ export default function NotificationsClient() {
         setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
         setUnreadCount(0);
         try {
-            await HttpClient.fetch(`/notifications/read/all`, { method: "PATCH" });
+            await HttpClient.fetch(`/notifications/read/all`, { method: "PATCH" }, false);
         } catch (err) {
             console.error("Falha marcar todas como lidas", err);
             await fetchNotifications();

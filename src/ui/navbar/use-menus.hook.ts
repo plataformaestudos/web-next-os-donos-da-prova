@@ -7,18 +7,16 @@ import { useQuery } from "@tanstack/react-query";
 export function useMenus() {
   const { data, isLoading } = useQuery({
     queryKey: ["menus"],
-    queryFn: async () =>
-      HttpClient.fetch<ResponseModel<MenuModel[]>>("/menu/menus", {
+    queryFn: async () => {
+      const response = await HttpClient.fetch<ResponseModel<MenuModel[]>>("/menu/menus", {
         method: "GET",
-        next: {
-          tags: [CACHE_TAGS.MENUS],
-        },
-      }).then(
-        (response) =>
-          response.data?.sort(
-            ({ order: orderA }, { order: orderB }) => orderA - orderB
-          ) as Array<MenuModel>
-      ),
+        next: { tags: [CACHE_TAGS.MENUS] },
+      });
+
+      return response.data?.sort(
+        ({ order: orderA }, { order: orderB }) => orderA - orderB
+      ) as MenuModel[];
+    },
   });
 
   return { menus: data, isLoading };

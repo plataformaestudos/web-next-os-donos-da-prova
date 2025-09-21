@@ -9,32 +9,44 @@ import { ResponseModel } from "@/model/common.model";
 import { redirect } from "next/navigation";
 
 export async function createQuestionBook(
-  _: {
+    _: {
+        success: boolean | null;
+        error: string | null;
+    },
+    { name, folderId, modules }: Omit<QuestionBookDTO, "id">
+): Promise<{
     success: boolean | null;
     error: string | null;
-  },
-  { name, folderId, modules }: Omit<QuestionBookDTO, "id">
-): Promise<{
-  success: boolean | null;
-  error: string | null;
 }> {
-  const { data, error } = await HttpClient.fetch<ResponseModel<{ id: string }>>(
-    "/question-books",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        name,
-        folderId,
-        modules,
-      }),
+
+    try {
+        if (!name) {
+            return { success: false, error: "O nome do caderno não pode ser vazio" };
+        }
+        const res = await HttpClient.fetch<ResponseModel<{ id: string }>>(
+            "/question-books",
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    name,
+                    folderId,
+                    modules,
+                }),
+            }
+        );
+        if (res.error) {
+            return { success: false, error: "err" };
+        }
+        const data = res.data;
+
+        revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
+        revalidatePath(`/question-books/${data.id}`);
+        redirect(`/question-books/${data.id}`);
+
+    } catch (error: unknown) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Erro ao criar prova"
+        };
     }
-  );
-
-  if (error) {
-    return { success: false, error: "err" };
-  }
-
-  revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
-  revalidatePath(`/question-books/${data.id}`);
-  redirect(`/question-books/${data.id}`);
 }

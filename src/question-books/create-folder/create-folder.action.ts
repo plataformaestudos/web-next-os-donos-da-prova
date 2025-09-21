@@ -8,32 +8,36 @@ import { ModuleModel } from "@/model/module.model";
 import { ResponseModel } from "@/model/common.model";
 
 export async function createFolder({ name }: { name: string }): Promise<{
-  success: boolean | null;
-  error: string | null;
+    success: boolean | null;
+    error: string | null;
 }> {
-  if (!name) {
-    return {
-      success: false,
-      error: "O nome deve ser preenchido",
-    };
-  }
+    try {
+        if (!name) {
+            return {
+                success: false,
+                error: "O nome deve ser preenchido",
+            };
+        }
 
-  const { error } = await HttpClient.fetch<ResponseModel<ModuleModel>>(
-    "/book-folders",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        name,
-      }),
+        const res = await HttpClient.fetch<ResponseModel<ModuleModel>>(
+            "/book-folders",
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    name,
+                }),
+            }
+        );
+        if (res.error) {
+            return { success: true, error: res.error };
+        }
+        revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
+        revalidatePath(`/question-books`);
+
+        return { success: true, error: null };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ?  error?.message ?? "Erro ao criar pasta"  : "Erro ao criar pasta"};
     }
-  );
 
-  if (error) {
-    return { success: true, error };
-  }
 
-  revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
-  revalidatePath(`/question-books`);
-
-  return { success: true, error: null };
 }

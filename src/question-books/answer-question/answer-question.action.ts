@@ -9,19 +9,29 @@ export async function answerQuestion({
 }: {
   questionBookQuestionId: string;
   alternativeId: string;
-}) {
-  return HttpClient.fetch<
-    ResponseModel<{ isCorrect: boolean; correctAlternativeId: string }>
-  >("/user-answers", {
-    method: "POST",
-    body: JSON.stringify({
-      questionBookQuestionId,
-      alternativeId,
-    }),
-  }).then((response) => {
-    if (response.statusCode >= 400) {
-      throw response.error ?? response.message;
+}): Promise<{
+  success: boolean;
+  data: { isCorrect: boolean; correctAlternativeId: string } | null;
+  error: string | null;
+}> {
+  try {
+    const res = await HttpClient.fetch<
+      ResponseModel<{ isCorrect: boolean; correctAlternativeId: string }>
+    >("/user-answers", {
+      method: "POST",
+      body: JSON.stringify({
+        questionBookQuestionId,
+        alternativeId,
+      }),
+    });
+
+    if (res.statusCode >= 400 || res.error) {
+      return { success: false, data: null, error: res.error ?? "Erro ao responder questão" };
     }
-    return response;
-  });
+
+    return { success: true, data: res.data ?? null, error: null };
+
+  } catch (err: unknown) {
+    return { success: false, data: null, error: err instanceof Error ? err?.message ?? "Erro ao responder questão" : "Erro ao responder questão" };
+  }
 }

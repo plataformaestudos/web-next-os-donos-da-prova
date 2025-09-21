@@ -23,6 +23,7 @@ export interface QuestionBookNextQuestionModel {
     previousOrder: number | null;
     nextOrder: number | null;
     nextUnansweredOrder: number | null;
+    previousUnansweredOrder: number | null;
   };
   questionId?: string;
 }

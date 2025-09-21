@@ -1,7 +1,17 @@
 import { cookies } from "next/headers";
-import { UnauthorizedError } from "./fetch-client.util";
+import { HttpError, UnauthorizedError } from "@/lib/errors";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+async function parseResponseBody(response: Response) {
+    const txt = await response.text().catch(() => "");
+    if (!txt) return null;
+    try {
+        return JSON.parse(txt);
+    } catch {
+        return txt; 
+    }
+}
 
 const HttpClient = Object.freeze({
     async fetch<T>(resource: string, opts?: RequestInit) {
@@ -23,18 +33,23 @@ const HttpClient = Object.freeze({
             ...opts,
             headers,
             next: {
-                revalidate: 300, 
-                ...(opts?.next ?? {}), 
+                revalidate: 0,
+                ...(opts?.next ?? {}),
             },
         });
 
         if (response.status === 401) {
-            throw new UnauthorizedError("Unauthorized");
+            throw new UnauthorizedError();
         }
 
         if (!response.ok) {
-            const text = await response.text().catch(() => "");
-            throw new Error(`HTTP error! status: ${response.status} ${text}`);
+            const body = await parseResponseBody(response);
+            const message =
+                (body && (body.error ||body.message || body?.data?.message)) ||
+                response.statusText ||
+                "Erro desconhecido";
+            const errorCode = body?.error;
+            throw new HttpError(message, response.status, body, errorCode);
         }
 
         return (await response.json()) as T;

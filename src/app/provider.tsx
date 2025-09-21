@@ -9,7 +9,7 @@ import {
     theme as antdTheme,
     theme,
 } from "antd";
-import { PropsWithChildren, createContext, useEffect, useState } from "react";
+import { PropsWithChildren, createContext, useContext, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
     ServerStyleSheet,
@@ -117,9 +117,11 @@ const { useToken } = theme;
 
 function WithAntdTheme({ children }: PropsWithChildren) {
     const { token } = useToken();
+    const { theme: currentTheme } = useContext(ThemeProvider);
 
     const styledTheme = {
         ...token,
+        isDark: currentTheme == "dark",
     } as DefaultTheme;
 
     return (

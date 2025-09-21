@@ -6,7 +6,6 @@ import { useUser } from "@/app/context/user.context";
 
 export default function UserProfile() {
   const { user, loading } = useUser();
-  console.log("UserProfile render", { user, loading });
   if (loading) {
     return (
       <Row justify="center" style={{ marginTop: "50px" }}>

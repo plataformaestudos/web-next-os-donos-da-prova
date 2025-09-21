@@ -16,149 +16,151 @@ import { ResponseModel } from "@/model/common.model";
 import { redirect } from "next/navigation";
 
 function EditQuestionButton({ id }: { id: string }) {
-  return (
-    <Link key="edit" href={`/questions/${id}`}>
-      <Flex gap={8} align="center">
-        <FaPencil />
-        <span>Editar</span>
-      </Flex>
-    </Link>
-  );
+    return (
+        <Link key="edit" href={`/questions/${id}`}>
+            <Flex gap={8} align="center">
+                <FaPencil />
+                <span>Editar</span>
+            </Flex>
+        </Link>
+    );
 }
 
 export default async function QuestionsPage({
-  searchParams,
+    searchParams,
 }: {
-  searchParams: Promise<{
-    pagina: string;
-    modulos: string;
-  }>;
+    searchParams: Promise<{
+        pagina: string;
+        modulos: string;
+    }>;
 }) {
-  let total = 0;
-  let newQuestionURL = "/questions/new";
-  const { pagina: page, modulos: modulesIds } = await searchParams;
+    let total = 0;
+    let newQuestionURL = "/questions/new";
+    const { pagina: page, modulos: modulesIds } = await searchParams;
 
-  const search = new URLSearchParams();
+    const search = new URLSearchParams();
 
-  if (modulesIds) {
-    newQuestionURL += `?modulos=${modulesIds}`;
-    search.set("modulesIds", modulesIds);
-  }
+    if (modulesIds) {
+        newQuestionURL += `?modulos=${modulesIds}`;
+        search.set("modulesIds", modulesIds);
+    }
 
-  if (page) {
-    search.set("page", page);
-  }
+    if (page) {
+        search.set("page", page);
+    }
 
-  const queryParams = search.toString() ? `?${search.toString()}` : "";
+    const queryParams = search.toString() ? `?${search.toString()}` : "";
 
-  const { questions, modules } = await HttpClient.fetch<
-    ResponseModel<{
-      questions: QuestionModel[];
-      modules: { id: string; name: string }[];
-    }>
-  >(`/questions${queryParams}`, {
-    method: "GET",
-    next: {
-      tags: [CACHE_TAGS.QUESTIONS],
-    },
-  })
-    .then((r) => {
-      total = r.total ?? 0;
-      return r.data ?? { questions: [], modules: [] };
-    })
-    .catch(() => ({ questions: [], modules: [] }));
+    let questions: QuestionModel[] = [];
+    let modules: { id: string; name: string }[] = [];
+    try {
+        const r = await HttpClient.fetch<
+            ResponseModel<{ questions: QuestionModel[]; modules: { id: string; name: string }[] }>
+        >(`/questions${queryParams}`, {
+            method: "GET",
+            next: { tags: [CACHE_TAGS.QUESTIONS] },
+        });
 
-  return (
-    <PageLayout
-      title="Questões"
-      actions={[
-        <QuestionFormModulesSelection
-          key="filter-modules"
-          defaultOptions={modules.map(({ id: value, name: label }) => ({
-            value,
-            label,
-          }))}
-          defaultValue={modulesIds?.split(",") ?? undefined}
-          onSelectModules={async function changeQuery(modules) {
-            "use server";
+        total = r.total ?? 0;
+        questions = r.data?.questions ?? [];
+        modules = r.data?.modules ?? [];
+    } catch {
+        // fallback silencioso
+        questions = [];
+        modules = [];
+    }
 
-            if (modules.length > 0) {
-              redirect(
-                `/questions?modulos=${(modules as string[]).join(",")}&pagina=1`
-              );
-            } else {
-              redirect("/questions?pagina=1");
-            }
-          }}
-        />,
-        <Link key="create" href={newQuestionURL}>
-          <Button type="primary" size="large">
-            Criar questão
-          </Button>
-        </Link>,
-      ]}
-    >
-      <Styled.ListContainer>
-        <List>
-          {questions?.map((question) => (
-            <Item
-              key={question.id}
-              actions={[
-                <EditQuestionButton key="edit" id={question.id} />,
-                <DeleteQuestionButton key="delete" questionId={question.id} />,
-              ]}
-            >
-              <Meta
-                title={
-                  <Popover
-                    mouseEnterDelay={0.5}
-                    content={
-                      <Styled.QuestionPreview>
-                        <QuestionPreview
-                          id={question.id}
-                          type={question.type}
-                          text={question.text}
-                          alternatives={[]}
-                          compact={true}
-                        />
-                        <Divider style={{ margin: "12px 0" }} />
-                        <EditQuestionButton key="edit" id={question.id} />
-                      </Styled.QuestionPreview>
-                    }
-                  >
-                    <Link href={`/questions/${question.id}`}>
-                      {question.text
-                        .replace(/<[^>]+>/g, "")
-                        .slice(0, 80)
-                        .trim()}
-                      ...
-                    </Link>
-                  </Popover>
-                }
-                description={question.id}
-              />
-            </Item>
-          ))}
-        </List>
-        <Divider />
-        <Pagination
-          defaultCurrent={1}
-          current={parseInt(page ?? "1", 10)}
-          total={total}
-          onChange={async function changeQuery(page) {
-            "use server";
+    return (
+        <PageLayout
+            title="Questões"
+            actions={[
+                <QuestionFormModulesSelection
+                    key="filter-modules"
+                    defaultOptions={modules.map(({ id: value, name: label }) => ({
+                        value,
+                        label,
+                    }))}
+                    defaultValue={modulesIds?.split(",") ?? undefined}
+                    onSelectModules={async function changeQuery(modules) {
+                        "use server";
 
-            const newSearchParams = new URLSearchParams();
-            newSearchParams.set("pagina", page.toString());
+                        if (modules.length > 0) {
+                            redirect(
+                                `/questions?modulos=${(modules as string[]).join(",")}&pagina=1`
+                            );
+                        } else {
+                            redirect("/questions?pagina=1");
+                        }
+                    }}
+                />,
+                <Link key="create" href={newQuestionURL}>
+                    <Button type="primary" size="large">
+                        Criar questão
+                    </Button>
+                </Link>,
+            ]}
+        >
+            <Styled.ListContainer>
+                <List>
+                    {questions?.map((question) => (
+                        <Item
+                            key={question.id}
+                            actions={[
+                                <EditQuestionButton key="edit" id={question.id} />,
+                                <DeleteQuestionButton key="delete" questionId={question.id} />,
+                            ]}
+                        >
+                            <Meta
+                                title={
+                                    <Popover
+                                        mouseEnterDelay={0.5}
+                                        content={
+                                            <Styled.QuestionPreview>
+                                                <QuestionPreview
+                                                    id={question.id}
+                                                    type={question.type}
+                                                    text={question.text}
+                                                    alternatives={[]}
+                                                    compact={true}
+                                                />
+                                                <Divider style={{ margin: "12px 0" }} />
+                                                <EditQuestionButton key="edit" id={question.id} />
+                                            </Styled.QuestionPreview>
+                                        }
+                                    >
+                                        <Link href={`/questions/${question.id}`}>
+                                            {question.text
+                                                .replace(/<[^>]+>/g, "")
+                                                .slice(0, 80)
+                                                .trim()}
+                                            ...
+                                        </Link>
+                                    </Popover>
+                                }
+                                description={question.id}
+                            />
+                        </Item>
+                    ))}
+                </List>
+                <Divider />
+                <Pagination
+                    defaultCurrent={1}
+                    current={parseInt(page ?? "1", 10)}
+                    total={total}
+                    onChange={async function changeQuery(page) {
+                        "use server";
 
-            if (modulesIds) {
-              newSearchParams.set("modulos", modulesIds);
-            }
+                        const newSearchParams = new URLSearchParams();
+                        newSearchParams.set("pagina", page.toString());
 
-            redirect(`/questions?${newSearchParams.toString()}`);
-          }}
-        />
-      </Styled.ListContainer>
-    </PageLayout>
-  );
+                        if (modulesIds) {
+                            newSearchParams.set("modulos", modulesIds);
+                        }
+
+                        redirect(`/questions?${newSearchParams.toString()}`);
+                    }}
+                />
+            </Styled.ListContainer>
+        </PageLayout>
+    );
 }
