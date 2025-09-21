@@ -38,12 +38,14 @@ export async function createQuestionBook(
             return { success: false, error: "err" };
         }
         const data = res.data;
-
         revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
         revalidatePath(`/question-books/${data.id}`);
         redirect(`/question-books/${data.id}`);
 
     } catch (error: unknown) {
+        if (!(error instanceof Error && (error as any)?.digest === "NEXT_REDIRECT")) {
+             throw error;
+        }
         return {
             success: false,
             error: error instanceof Error ? error.message : "Erro ao criar prova"

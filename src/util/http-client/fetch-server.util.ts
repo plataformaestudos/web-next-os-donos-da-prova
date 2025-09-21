@@ -33,7 +33,7 @@ const HttpClient = Object.freeze({
             ...opts,
             headers,
             next: {
-                revalidate: 0,
+                revalidate: 300,
                 ...(opts?.next ?? {}),
             },
         });

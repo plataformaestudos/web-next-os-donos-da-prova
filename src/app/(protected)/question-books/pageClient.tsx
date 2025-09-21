@@ -11,6 +11,7 @@ import { PageLayout } from "@/ui/page-layout/page-layout.component";
 import { CreateFolderButton } from "@/question-books/create-folder/create-folder-button.component";
 import { ListFolders } from "@/question-books/list-folders/list-folders.component";
 import { ListQuestionBooks } from "@/question-books/list/list-question-books.component";
+import { BookFolderModel, QuestionBookBookFolderModel } from "@/question-books/book-folder.model";
 
 type Folder = {
     id: string;
@@ -20,7 +21,7 @@ type Folder = {
 };
 
 interface Props {
-    initialFolders: Folder[];
+    initialFolders: BookFolderModel;
     folderId?: string;
 }
 
@@ -28,10 +29,9 @@ export function QuestionBooksClient({ initialFolders, folderId }: Props) {
     const { allowed, loading } = useAuthGuard({
         requireRoles: [Roles.ADMIN, Roles.STUDENT],
     });
-
-    const [folders] = useState(initialFolders);
-
-  if (loading) return <FullPageLoading />;
+    const [folders] = useState(initialFolders.folders);
+    const [questionBooksWithoutFolder] = useState(initialFolders.questionBooksWithoutFolder);
+    if (loading) return <FullPageLoading />;
 
     if (!allowed) return null;
 
@@ -41,7 +41,7 @@ export function QuestionBooksClient({ initialFolders, folderId }: Props) {
         { title: <Link href="/question-books">Minhas pastas</Link> },
     ];
 
-    let questionBooks: { id: string; name: string; folder_id?: string }[] = [];
+    let questionBooks: QuestionBookBookFolderModel[] = [];
 
     if (folderId && folders) {
         const folder = folders.find((f) => f.id === folderId);
@@ -54,7 +54,7 @@ export function QuestionBooksClient({ initialFolders, folderId }: Props) {
 
     const folderlessQuestionBooks = folders
         .flatMap((f) => f.questionBooks)
-        .filter((qb) => !folders.some((f) => f.id === qb.folder_id));
+        .filter((qb) => !folders.some((f) => f.id === qb.folderId));
 
     return (
         <PageLayout
@@ -68,18 +68,24 @@ export function QuestionBooksClient({ initialFolders, folderId }: Props) {
                 </Link>,
             ]}
         >
-            <Breadcrumb style={{ marginBottom: 24 }} items={breadcrumbItems} />
-            {!folderId && <ListFolders folders={folders} />}
-            {folderId && <ListQuestionBooks questionBooks={questionBooks} />}
-            {folderlessQuestionBooks.length > 0 && (
+            {folders && (
+                <>
+                    <Breadcrumb style={{ marginBottom: 24 }} items={breadcrumbItems} />
+                    {!folderId && <ListFolders folders={folders} />}
+                    {folderId && <ListQuestionBooks questionBooks={questionBooks} />}
+                </>
+
+            )}
+            {questionBooksWithoutFolder.length > 0 && !folderId && (
                 <>
                     <Breadcrumb
                         style={{ margin: "24px 0" }}
                         items={[{ title: <Link href="/question-books">Meus cadernos</Link> }]}
                     />
-                    <ListQuestionBooks questionBooks={folderlessQuestionBooks} />
+                    <ListQuestionBooks questionBooks={questionBooksWithoutFolder} />
                 </>
             )}
         </PageLayout>
     );
 }
+
