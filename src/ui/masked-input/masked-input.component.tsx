@@ -14,6 +14,7 @@ const StyledInput = styled.input`
   height: 32px;
   outline: none;
   font-size: 14px;
+  color: ${({ theme }) => theme.colorText};
 
   transition: border-color 200ms ease-in-out;
 

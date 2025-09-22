@@ -2,7 +2,7 @@
 
 import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import { Button, Divider, Form, Steps, Typography } from "antd";
-import { Card, Container, Content, Footer, Header } from "./signup.style";
+import { Card, Container, Content, Footer, Header, Span } from "./signup.style";
 import { PaymentInfo, PaymentInfoThirdStep } from "./payment-info.component";
 import {
   PersonalInfo,
@@ -210,7 +210,7 @@ export default function SignupSteps({
       </Card>
 
       <Link href="/login">
-        <span>Já tenho uma conta</span>
+        <Span>Já tenho uma conta</Span>
       </Link>
     </Container>
   );

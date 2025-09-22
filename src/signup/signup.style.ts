@@ -10,7 +10,7 @@ export const Container = styled.div`
   gap: 8px;
   height: 100vh;
   width: 100vw;
-  background-color: ${({ theme }) => theme.colorFillContent};
+  background-color: ${({ theme }) => theme.colorPrimaryBg};
 `;
 
 export const Card = styled.div`
@@ -65,8 +65,8 @@ export const PlanCard = styled.div<{ $selected: boolean }>`
   }
 
   ${({ $selected }) =>
-    $selected &&
-    css`
+        $selected &&
+        css`
       border-color: ${({ theme }) => theme.colorPrimaryActive};
       background-color: ${({ theme }) => theme.colorPrimaryActive};
       color: #fff;
@@ -138,4 +138,12 @@ export const Content = styled.div`
     border-radius: 4px;
     background-color: ${({ theme }) => theme.colorBgContainerDisabled};
   }
+`;
+
+export const Span = styled.span`
+  color: ${({ theme }) => theme.colorPrimary};
+    cursor: pointer;
+    &:hover { text-decoration: underline; }
+    font-weight: 600;
+
 `;
