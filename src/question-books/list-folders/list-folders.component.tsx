@@ -28,6 +28,7 @@ export function ListFolders({ folders }: ListFoldersProps) {
               <Title level={5}>{item.name}</Title>
             </Link>
           </Flex>
+          
           <span>{plural("caderno", "cadernos", item.nrOfQuestionBooks)}</span>
         </Folder>
       )}

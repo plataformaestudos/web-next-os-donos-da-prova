@@ -3,7 +3,9 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 
 import { CACHE_TAGS } from "@/util/cache-tags.util";
-import { createClient } from "@/util/supabase/server";
+import HttpClient from "@/util/http-client/fetch-server.util";
+import { ResponseModel } from "@/model/common.model";
+import { QuestionBookBookFolderModel } from "./book-folder.model";
 
 export async function editQuestionBook({
   id,
@@ -22,24 +24,30 @@ export async function editQuestionBook({
     };
   }
 
-  const supabase = await createClient();
+  try {
+        const res = await HttpClient.fetch<ResponseModel<QuestionBookBookFolderModel>>(`/question-books/${id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                name,
+            }),
+        });
+        if (res.error) {
+            return { success: false, error: res.error };
+        }
+        const data = res.data;
 
-  const { data, error } = await supabase
-    .from("question_books")
-    .update({
-      name,
-    })
-    .match({ id })
-    .select()
-    .single();
+        revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
+        revalidatePath(`/question-books`);
+        revalidatePath(`/question-books/${data.id}`);
 
-  if (error) {
-    return { success: true, error: error.message };
-  }
+        return { success: true, error: null };
 
-  revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
-  revalidatePath(`/question-books`);
-  revalidatePath(`/question-books/${data.id}`);
+    } catch (error: unknown) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Erro ao editar caderno de questões"
+        };
+    }
 
-  return { success: true, error: null };
+
 }

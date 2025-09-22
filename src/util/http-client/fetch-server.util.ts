@@ -33,7 +33,7 @@ const HttpClient = Object.freeze({
             ...opts,
             headers,
             next: {
-                revalidate: 300, // 5 minutes
+                revalidate: 0, // 5 minutes
                 ...(opts?.next ?? {}),
             },
         });
@@ -52,7 +52,7 @@ const HttpClient = Object.freeze({
             throw new HttpError(message, response.status, body, errorCode);
         }
 
-        return (await response.json()) as T;
+        return (await response.json().catch(() => "")) as T;
     },
 });
 

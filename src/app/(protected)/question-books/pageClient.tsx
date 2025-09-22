@@ -52,10 +52,6 @@ export function QuestionBooksClient({ initialFolders, folderId }: Props) {
         }
     }
 
-    const folderlessQuestionBooks = folders
-        .flatMap((f) => f.questionBooks)
-        .filter((qb) => !folders.some((f) => f.id === qb.folderId));
-
     return (
         <PageLayout
             title="Cadernos de questões"

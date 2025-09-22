@@ -13,7 +13,7 @@ interface GlobalHttpErrorOptions {
 export function useGlobalHttpError({ autoBack = true, backDelay = 900, messageApi }: GlobalHttpErrorOptions = {}) {
     const router = useRouter();
     const initialized = useRef(false);
-
+    
     const recent = useRef(new Map<string | number, number>());
 
     useEffect(() => {

@@ -9,9 +9,10 @@ import {
     Input,
     List,
     Modal,
+    Tooltip,
     Typography,
 } from "antd";
-import { EditOutlined, EllipsisOutlined } from "@ant-design/icons";
+import { EditOutlined, EllipsisOutlined, StarFilled, StarOutlined } from "@ant-design/icons";
 import { useState, useTransition } from "react";
 
 import { DeleteQuestionBookButton } from "../delete/delete-question-book.component";
@@ -21,6 +22,7 @@ import Title from "antd/es/typography/Title";
 import { editQuestionBook } from "../edit-question-book.action";
 import styled from "styled-components";
 import { QuestionBookBookFolderModel } from "../book-folder.model";
+import { favoriteQuestionBook } from "../update/favorite-question-book.action";
 
 interface ListQuestionBooksProps {
     questionBooks: QuestionBookBookFolderModel[];
@@ -30,10 +32,14 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
     const { message } = App.useApp();
 
     const [isPending, startTransition] = useTransition();
+    const [items, setItems] = useState(questionBooks);
 
     const [name, setName] = useState("");
     const [error, setError] = useState<string | null>(null);
 
+    const handleDelete = (id: string) => {
+        setItems((prev) => prev.filter((q) => q.id !== id));
+    };
     const [editingQuestionBook, setEditingQuestionBook] = useState<{
         id: string;
         name: string;
@@ -45,11 +51,32 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
         setError(null);
         setEditingQuestionBook(null);
     };
-    console.log({ questionBooks });
+    const toggleFavorite = (id: string) => {
+        const idx = items.findIndex((i) => i.id === id);
+        if (idx === -1) return;
+        const current = items[idx];
+        const nextFav = !current.favorite;
+
+        startTransition(async () => {
+            try {
+                const res = await favoriteQuestionBook({ questionBookId: id });
+
+                if (!res.success) {
+                    message?.error(res.error ?? "Erro ao atualizar favorito");
+                    return;
+                }
+
+                setItems((prev) => prev.map((it) => (it.id === id ? { ...it, favorite: nextFav } : it)));
+                message?.success(nextFav ? "Adicionado aos favoritos" : "Removido dos favoritos");
+            } catch (err: any) {
+                message?.error(err?.message ?? "Erro ao atualizar favorito");
+            }
+        });
+    };
     return (
         <>
             <List
-                dataSource={questionBooks}
+                dataSource={items}
                 renderItem={(item) => (
                     <QuestionBook>
                         <Flex align="center" gap={16}>
@@ -59,44 +86,58 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
                             </Link>
                         </Flex>
 
-                        <Dropdown
-                            open={dropdownOpened === item.id}
-                            onOpenChange={(open) => setDropdownOpened(open ? item.id : null)}
-                            menu={{
-                                items: [
-                                    {
-                                        key: "rename",
-                                        icon: <EditOutlined />,
-                                        label: "Renomear",
-                                        onClick: () => {
-                                            setName(item.name);
-                                            setEditingQuestionBook(item);
+                        <Flex align="center" gap={8}>
+
+                            <Tooltip title={item.favorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}>
+                                <Button
+                                    type="text"
+                                    icon={item.favorite ? <StarFilled style={{ fontSize: 18 }} /> : <StarOutlined style={{ fontSize: 18 }} />}
+                                    onClick={() => toggleFavorite(item.id)}
+                                />
+                            </Tooltip>
+
+                            <Dropdown
+                                open={dropdownOpened === item.id}
+                                onOpenChange={(open) => setDropdownOpened(open ? item.id : null)}
+                                menu={{
+                                    items: [
+                                        {
+                                            key: "rename",
+                                            icon: <EditOutlined />,
+                                            label: "Renomear",
+                                            onClick: () => {
+                                                setName(item.name);
+                                                setEditingQuestionBook(item);
+                                            },
                                         },
-                                    },
-                                    {
-                                        type: "divider",
-                                    },
-                                    {
-                                        key: "delete",
-                                        style: {
-                                            padding: 0,
+                                        {
+                                            type: "divider",
                                         },
-                                        disabled: true,
-                                        label: (
-                                            <DeleteQuestionBookButton
-                                                questionBookId={item.id}
-                                                onDelete={() => setDropdownOpened(null)}
-                                            />
-                                        ),
-                                    },
-                                ],
-                            }}
-                            trigger={["click"]}
-                        >
-                            <span>
-                                <Button size="small" icon={<EllipsisOutlined />} />
-                            </span>
-                        </Dropdown>
+                                        {
+                                            key: "delete",
+                                            style: {
+                                                padding: 0,
+                                            },
+                                            disabled: true,
+                                            label: (
+                                                <DeleteQuestionBookButton
+                                                    questionBookId={item.id}
+                                                    onDelete={() => {
+                                                        handleDelete(item.id);
+                                                        setDropdownOpened(null);
+                                                    }}
+                                                />
+                                            ),
+                                        },
+                                    ],
+                                }}
+                                trigger={["click"]}
+                            >
+                                <span>
+                                    <Button size="small" icon={<EllipsisOutlined />} />
+                                </span>
+                            </Dropdown>
+                        </Flex>
                     </QuestionBook>
                 )}
             />
@@ -130,6 +171,7 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
                                 setError(error);
                             } else {
                                 message.success("Caderno renomeado com sucesso!");
+                                setItems((prev) => prev.map((it) => (it.id === editingQuestionBook?.id ? { ...it, name } : it)));
                                 onClose();
                             }
                         });

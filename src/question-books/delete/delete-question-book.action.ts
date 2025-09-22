@@ -1,20 +1,26 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-
 import { CACHE_TAGS } from "@/util/cache-tags.util";
-import { createClient } from "@/util/supabase/server";
-import { redirect } from "next/navigation";
+import HttpClient from "@/util/http-client/fetch-server.util";
+import { ResponseModel } from "@/model/common.model";
 
 export async function deleteQuestionBook(id: string) {
-  const supabase = await createClient();
-  try {
-    await supabase.from("question_books").delete().match({ id });
+    try {
+        const res = await HttpClient.fetch<ResponseModel<null>>(`/question-books/${id}`, {
+            method: "DELETE",
+        });
 
-    revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
-    revalidatePath("/question-books");
-    redirect(`/question-books`);
-  } catch {
-    return false;
-  }
+        if (res.error) {
+            return { success: false, error: res.error };
+        }
+
+        revalidateTag(CACHE_TAGS.QUESTION_BOOKS);
+        revalidatePath("/question-books");
+
+        return { success: true, error: null };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error?.message ?? "Erro ao deletar caderno de questões" : "Erro ao deletar caderno de questões" };
+    }
 }
+
