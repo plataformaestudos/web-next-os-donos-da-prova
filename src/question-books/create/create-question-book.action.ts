@@ -8,6 +8,11 @@ import { QuestionBookDTO } from "./question-book.dto";
 import { ResponseModel } from "@/model/common.model";
 import { redirect } from "next/navigation";
 
+interface NextRedirectError extends Error {
+  digest?: string;
+}
+
+
 export async function createQuestionBook(
     _: {
         success: boolean | null;
@@ -43,9 +48,12 @@ export async function createQuestionBook(
         redirect(`/question-books/${data.id}`);
 
     } catch (error: unknown) {
-        if (!(error instanceof Error && (error as any)?.digest === "NEXT_REDIRECT")) {
-             throw error;
+        const err = error as NextRedirectError;
+
+        if (!(err instanceof Error && err.digest === "NEXT_REDIRECT")) {
+            throw error;
         }
+
         return {
             success: false,
             error: error instanceof Error ? error.message : "Erro ao criar prova"

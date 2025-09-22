@@ -68,8 +68,8 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
 
                 setItems((prev) => prev.map((it) => (it.id === id ? { ...it, favorite: nextFav } : it)));
                 message?.success(nextFav ? "Adicionado aos favoritos" : "Removido dos favoritos");
-            } catch (err: any) {
-                message?.error(err?.message ?? "Erro ao atualizar favorito");
+            } catch (err: unknown) {
+                message?.error(err instanceof Error ? err.message : "Erro ao atualizar favorito");
             }
         });
     };

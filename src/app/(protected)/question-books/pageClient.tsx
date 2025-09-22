@@ -13,12 +13,6 @@ import { ListFolders } from "@/question-books/list-folders/list-folders.componen
 import { ListQuestionBooks } from "@/question-books/list/list-question-books.component";
 import { BookFolderModel, QuestionBookBookFolderModel } from "@/question-books/book-folder.model";
 
-type Folder = {
-    id: string;
-    name: string;
-    questionBooks: { id: string; name: string; folder_id?: string }[];
-    nrOfQuestionBooks: number;
-};
 
 interface Props {
     initialFolders: BookFolderModel;
