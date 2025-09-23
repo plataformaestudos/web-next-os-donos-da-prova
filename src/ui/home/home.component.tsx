@@ -133,11 +133,11 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                                 }}
                             />
                         </S.Card>
-                        <S.Card>
-                            <S.CardTitle
-                                onClick={() => {
+                        <S.Card onClick={() => {
                                     window.location.href = "/question-books";
-                                }}
+                                }}>
+                            <S.CardTitle
+                                
                             >
                                 Questões
                             </S.CardTitle>
@@ -149,8 +149,10 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                                     : "1 questão respondida"}{" "}
                             </S.Info>
                         </S.Card>
-                        <S.Card>
-                            <S.CardTitle>Cadernos</S.CardTitle>
+                        <S.Card onClick={() => {
+                                    window.location.href = "/question-books";
+                                }}>
+                            <S.CardTitle  >Cadernos</S.CardTitle>
                             <S.Spacer />
                             <S.Flex>
                                 <S.Info

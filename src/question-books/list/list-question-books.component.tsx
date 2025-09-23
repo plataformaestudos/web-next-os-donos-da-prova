@@ -9,6 +9,7 @@ import {
     Input,
     List,
     Modal,
+    Select,
     Tooltip,
     Typography,
 } from "antd";
@@ -17,18 +18,20 @@ import { useState, useTransition } from "react";
 
 import { DeleteQuestionBookButton } from "../delete/delete-question-book.component";
 import Link from "next/link";
-import { LuBook } from "react-icons/lu";
+import { LuBook, LuFolderPen } from "react-icons/lu";
 import Title from "antd/es/typography/Title";
 import { editQuestionBook } from "../edit-question-book.action";
 import styled from "styled-components";
-import { QuestionBookBookFolderModel } from "../book-folder.model";
+import { BookFolderModel, QuestionBookBookFolderModel } from "../book-folder.model";
 import { favoriteQuestionBook } from "../update/favorite-question-book.action";
 
 interface ListQuestionBooksProps {
     questionBooks: QuestionBookBookFolderModel[];
+    folders: BookFolderModel[];
+    setQuestionBooksWithoutFolder?: React.Dispatch<React.SetStateAction<QuestionBookBookFolderModel[]>>;
 }
 
-export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
+export function ListQuestionBooks({ questionBooks, folders, setQuestionBooksWithoutFolder }: ListQuestionBooksProps) {
     const { message } = App.useApp();
 
     const [isPending, startTransition] = useTransition();
@@ -45,6 +48,51 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
         name: string;
     } | null>(null);
     const [dropdownOpened, setDropdownOpened] = useState<string | null>(null);
+
+    const [movingQuestionBook, setMovingQuestionBook] = useState<QuestionBookBookFolderModel | null>(null);
+    const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+
+    const getBookFolderId = (item: QuestionBookBookFolderModel) => {
+        return item.folderId ?? null;
+    };
+
+
+    const handleMoveSave = () => {
+        if (!movingQuestionBook) return;
+        const bookId = movingQuestionBook.id;
+        const targetFolderId = selectedFolderId ?? null;
+        startTransition(() => {
+            editQuestionBook({
+                id: bookId,
+                name: movingQuestionBook.name,
+                folderId: targetFolderId,
+            }).then(({ error }) => {
+                if (error) {
+                    setError(error);
+                } else {
+                    message.success("Caderno movido com sucesso!");
+                    const currentFolderId = getBookFolderId(movingQuestionBook);
+                    if (currentFolderId !== targetFolderId) {
+                        setItems((prev) => prev.filter((it) => it.id !== bookId));
+                        if (!targetFolderId && setQuestionBooksWithoutFolder) {
+                            if (!targetFolderId && setQuestionBooksWithoutFolder) {
+                                setQuestionBooksWithoutFolder(prev => [
+                                    ...prev,
+                                    { ...movingQuestionBook, folderId: undefined } 
+                                ]);
+                            }
+
+                        }
+                    } else {
+                        setItems((prev) => prev.map((it) => (it.id === bookId ? { ...it, bookFolderId: targetFolderId } : it)));
+                    }
+                    setMovingQuestionBook(null);
+                    setSelectedFolderId(null);
+                    setError(null);
+                }
+            });
+        });
+    };
 
     const onClose = () => {
         setName("");
@@ -101,6 +149,18 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
                                 onOpenChange={(open) => setDropdownOpened(open ? item.id : null)}
                                 menu={{
                                     items: [
+                                        {
+                                            key: "change",
+                                            icon: <LuFolderPen />,
+                                            label: "Mover",
+                                            onClick: () => {
+                                                setMovingQuestionBook(item);
+                                                setSelectedFolderId(getBookFolderId(item));
+                                            },
+                                        },
+                                        {
+                                            type: "divider",
+                                        },
                                         {
                                             key: "rename",
                                             icon: <EditOutlined />,
@@ -190,6 +250,55 @@ export function ListQuestionBooks({ questionBooks }: ListQuestionBooksProps) {
                         onChange={(ev) => setName(ev.target.value)}
                     />
                 </Flex>
+                {error && <Typography.Text type="danger">{error}</Typography.Text>}
+            </Modal>
+            <Modal
+                destroyOnHidden
+                title={
+                    <Flex vertical>
+                        <Typography.Text type="secondary" style={{ fontSize: 12, fontWeight: "normal" }}>
+                            {movingQuestionBook?.name}
+                        </Typography.Text>
+                        <Title level={5} style={{ margin: 0 }}>
+                            Mover caderno
+                        </Title>
+                    </Flex>
+                }
+                open={movingQuestionBook !== null}
+                okButtonProps={{
+                    loading: isPending,
+                    disabled: isPending,
+                }}
+                onOk={handleMoveSave}
+                onCancel={() => {
+                    setMovingQuestionBook(null);
+                    setSelectedFolderId(null);
+                    setError(null);
+                }}
+            >
+                <Divider style={{ margin: "12px 0" }} />
+                <Flex vertical gap={12}>
+                    <Title level={5} style={{ margin: 0 }}>
+                        Selecionar pasta
+                    </Title>
+
+                    <Select
+                        showSearch
+                        placeholder="Selecione uma pasta"
+                        value={selectedFolderId ?? undefined}
+                        onChange={(val) => setSelectedFolderId(val ?? null)}
+                        options={[
+                            { label: "Nenhuma", value: "" },
+                            ...folders.map((f) => ({ label: f.name, value: f.id })),
+                        ]}
+                        allowClear
+                        filterOption={(input, option) =>
+                            (option?.label ?? "").toString().toLowerCase().includes(input.toLowerCase())
+                        }
+                        style={{ width: "100%" }}
+                    />
+                </Flex>
+
                 {error && <Typography.Text type="danger">{error}</Typography.Text>}
             </Modal>
         </>

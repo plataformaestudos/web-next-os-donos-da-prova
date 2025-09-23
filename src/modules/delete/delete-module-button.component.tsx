@@ -19,7 +19,7 @@ export function DeleteModuleButton({
     const handleConfirm = () => {
         startTransition(async () => {
             try {
-                const res = await deleteModule(moduleId); // server action
+                const res = await deleteModule(moduleId);
                 if (res.success) {
                     message?.success("Módulo deletado com sucesso!");
                     onDelete?.();

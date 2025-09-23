@@ -1,4 +1,4 @@
-export interface BookFolderModel {
+export interface BookFolderWithQuestionBooksModel {
     folders:{
         id: string;
         name: string;
@@ -6,6 +6,11 @@ export interface BookFolderModel {
         nrOfQuestionBooks: number;
     }[];
     questionBooksWithoutFolder: QuestionBookBookFolderModel[];
+}
+
+export interface BookFolderModel {
+    id: string;
+    name: string;
 }
 
 export interface QuestionBookBookFolderModel {

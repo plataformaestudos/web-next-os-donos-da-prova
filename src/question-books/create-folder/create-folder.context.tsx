@@ -58,7 +58,7 @@ export const CreateFolderProvider = ({ children }: PropsWithChildren) => {
               if (error) {
                 setError(error);
               } else {
-                message.success("Pasta criado com sucesso!");
+                message.success("Pasta criada com sucesso!");
                 resetState();
               }
             });

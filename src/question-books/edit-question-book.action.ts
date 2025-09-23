@@ -8,27 +8,30 @@ import { ResponseModel } from "@/model/common.model";
 import { QuestionBookBookFolderModel } from "./book-folder.model";
 
 export async function editQuestionBook({
-  id,
-  name,
+    id,
+    name,
+    folderId,
 }: {
-  id: string;
-  name: string;
+    id: string;
+    name: string;
+    folderId?: string | null;
 }): Promise<{
-  success: boolean | null;
-  error: string | null;
+    success: boolean | null;
+    error: string | null;
 }> {
-  if (!name) {
-    return {
-      success: false,
-      error: "O nome deve ser preenchido",
-    };
-  }
+    if (!name) {
+        return {
+            success: false,
+            error: "O nome deve ser preenchido",
+        };
+    }
 
-  try {
+    try {
         const res = await HttpClient.fetch<ResponseModel<QuestionBookBookFolderModel>>(`/question-books/${id}`, {
             method: "PUT",
             body: JSON.stringify({
                 name,
+                folderId
             }),
         });
         if (res.error) {
