@@ -1,6 +1,6 @@
 "use client";
 
-import { App, Flex } from "antd";
+import { App, Empty, Flex } from "antd";
 import { AppPlan } from "../AppPlan";
 import { useEffect, useState } from "react";
 import { ResponseModel } from "@/model/common.model";
@@ -49,7 +49,7 @@ export const AppMyPlans = () => {
             }}
         >
             {plans?.length === 0 && !isLoading && (
-                <p>Você não possui planos ativos no momento.</p>
+                <Empty description="Você não possui planos ativos no momento." />
             )}
             {plans.map((plan) => (
                 <AppPlan

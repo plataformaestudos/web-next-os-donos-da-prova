@@ -3,13 +3,13 @@
 import HttpClient from "@/util/http-client/fetch-client.util";
 import * as S from "./styles";
 
-import { List } from "antd";
-// icone de comprovante
+import { List, Empty, Pagination } from "antd";
 import { FileTextOutlined } from "@ant-design/icons";
 import Item, { Meta } from "antd/es/list/Item";
 import { useEffect, useState } from "react";
 import { AppLoading } from "../AppLoading";
 import { formatDate } from "@/util/date";
+import { ResponseModel } from "@/model/common.model";
 
 interface Payment {
     id: string;
@@ -46,61 +46,86 @@ interface Payment {
 export function AppPayments() {
     const [payments, setPayments] = useState<Payment[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [page, setPage] = useState<number>(1);
+    const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+    const [totalPages, setTotalPages] = useState<number>(1);
 
+    const fetchPayments = async (pageNumber: number = 1) => {
+        setIsLoading(true);
+        try {
+            const response = await HttpClient.fetch<ResponseModel<Payment[]>>(
+                `/payments?page=${pageNumber}&itemsPerPage=${itemsPerPage}`,
+                { method: "GET" },
+                false
+            );
+
+            if (response) {
+                setPayments(response.data || []);
+                setPage(response.page || 1);
+                setItemsPerPage(response.itemsPerPage || 10);
+                setTotalPages(response.total && response.itemsPerPage ? Math.ceil(response.total / response.itemsPerPage) : 1);
+            } else {
+                setPayments([]);
+                throw new Error("Erro ao buscar os pagamentos");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        async function getPayments() {
-            setIsLoading(true);
-            try {
-                const response = await HttpClient.fetch<Payment[]>(`/payments`, {
-                    method: "GET",
-                },
-                    false
-                );
-
-                if (response) {
-                    setPayments(response);
-                } else {
-                    throw new Error("Erro ao buscar os pagamentos");
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        getPayments();
-    }, []);
+        fetchPayments(page);
+    }, [page]);
 
     return (
         <S.ListContainer>
-            <List>
-                {payments?.map((payment) => (
-                    <Item
-                        key={payment.id}
-                        actions={[
-                            <a
-                                href={payment.invoiceUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                key="view-invoice"
+            {payments.length === 0 && !isLoading ? (
+                <Empty description="Nenhum pagamento encontrado" />
+            ) : (
+                <>
+                    <List
+                        dataSource={payments}
+                        renderItem={(payment) => (
+                            <Item
+                                key={payment.id}
+                                actions={[
+                                    <a
+                                        href={payment.invoiceUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        key="view-invoice"
+                                    >
+                                        <FileTextOutlined style={{ marginLeft: 4 }} />
+                                    </a>,
+                                ]}
                             >
-                                <FileTextOutlined style={{ marginLeft: 4 }} />
-                            </a>,
-                        ]}
-                    >
-                        <Meta
-                            title="Pagamento Efetuado"
-                            description={formatDate(payment.paymentDate)}
-                        />
-                        <div>
-                            {new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
-                            }).format(Number(payment?.value ?? 0))}
-                        </div>
-                    </Item>
-                ))}
-            </List>
+                                <Meta
+                                    title={`Pagamento ${
+                                        payment.status === "paid" ? "Efetuado" : "Pendente"
+                                    }`}
+                                    description={formatDate(payment.paymentDate)}
+                                />
+                                <div>
+                                    {new Intl.NumberFormat("pt-BR", {
+                                        style: "currency",
+                                        currency: "BRL",
+                                    }).format(Number(payment?.value ?? 0))}
+                                </div>
+                            </Item>
+                        )}
+                    />
+
+                    <Pagination
+                        current={page}
+                        pageSize={itemsPerPage}
+                        total={totalPages * itemsPerPage}
+                        onChange={(p) => setPage(p)}
+                        align="center"
+                        style={{ marginTop: 16, textAlign: "center"  }}
+                    />
+                </>
+            )}
+
             {isLoading && (
                 <AppLoading
                     loadingText="Carregando pagamentos..."
