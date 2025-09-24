@@ -197,7 +197,7 @@ export function ModulesTree(props: ModulesTreeProps) {
           const newChildren = await props.loadData(key);
           setTree((origin) => updateTreeData(origin, key, newChildren));
         }}
-        titleRender={({ key, title, parentModuleId, isLeaf }) => {
+        titleRender={({ key, title, parentModuleId, isLeaf, numberQuestions }) => {
           return (
             <ModuleTreeItemTitle
               onClick={() => {
@@ -212,6 +212,7 @@ export function ModulesTree(props: ModulesTreeProps) {
               isLeaf={isLeaf}
               parentModuleId={parentModuleId}
               readonly={props.readonly}
+              numberQuestions={numberQuestions}
             />
 
           );
