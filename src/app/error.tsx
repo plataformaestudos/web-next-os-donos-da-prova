@@ -22,10 +22,11 @@ export default function GlobalAppError({
 
     useEffect(() => {
         if (!notifiedRef.current) {
+            const isNextProdError = error.message?.startsWith("An error occurred in the Server Components render");
             const friendly =
-                error.data?.error ??
-                error.message ??
-                "Ocorreu um erro.";
+                error.data?.error ||
+                (isNextProdError ? "Ops, algo deu errado ao carregar os dados." : error.message) ||
+                "Ocorreu um erro inesperado.";
 
             if (app?.message) {
                 app.message.error(friendly);
