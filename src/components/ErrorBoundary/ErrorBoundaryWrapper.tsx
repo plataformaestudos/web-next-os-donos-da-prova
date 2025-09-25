@@ -7,9 +7,9 @@ import { useGlobalHttpError } from "@/app/hooks/useGlobalErrror";
 
 
 type NotifiableError = Error & {
-  _notified?: boolean;
-  _globalErrorId?: string;
-  data?: { error?: string };
+    _notified?: boolean;
+    _globalErrorId?: string;
+    data?: { error?: string };
 };
 
 
@@ -26,8 +26,11 @@ export function ErrorBoundaryWrapper({ children }: { children: React.ReactNode }
                 console.debug("Erro já notificado — ignorando duplicate:", err._globalErrorId ?? err.message);
                 return;
             }
-
-            const friendly = err.data?.error ?? err.message ?? "Ocorreu um erro inesperado.";
+            const isNextProdError = err.message?.startsWith("An error occurred in the Server Components render");
+            const friendly =
+                err.data?.error || err.message ||
+                (isNextProdError ? "Ops, algo deu errado ao carregar os dados." : err.message) ||
+                "Ocorreu um erro inesperado.";
 
             if (messageApi && typeof messageApi.error === "function") {
                 messageApi.error(friendly);
