@@ -9,12 +9,12 @@ import { useMemo, useState } from "react";
 import { DeleteModuleButton } from "../delete/delete-module-button.component";
 import { ItemType } from "antd/es/menu/interface";
 import Link from "next/link";
-import { LuFileQuestion } from "react-icons/lu";
 import Title from "antd/es/typography/Title";
-import { UnlinkModuleButton } from "../delete/unlink-module-button.component";
 import { useCreateModule } from "../create/create-module.context";
 import { plural } from "@/util/text.util";
 import { GrFormViewHide } from "react-icons/gr";
+import { TbEyeQuestion } from "react-icons/tb";
+
 
 
 export function ModuleTreeItemTitle({
@@ -59,27 +59,27 @@ export function ModuleTreeItemTitle({
         if (isLeaf) {
             result.push({
                 key: "open-questions",
-                icon: <LuFileQuestion />,
-                label: <Link href={`/questions?modulos=${id}`}>Questões</Link>,
+                icon: <TbEyeQuestion />,
+                label: <Link href={`/questions/module/${id}`}>Ver questões</Link>,
             });
         }
 
-        if (parentModuleId) {
-            result.push({
-                key: "unlink",
-                style: {
-                    padding: 0,
-                },
-                disabled: true,
-                label: (
-                    <UnlinkModuleButton
-                        moduleId={id}
-                        parentModuleId={parentModuleId}
-                        onUnlink={() => setMenuOpened(false)}
-                    />
-                ),
-            });
-        }
+        // if (parentModuleId) {
+        //     result.push({
+        //         key: "unlink",
+        //         style: {
+        //             padding: 0,
+        //         },
+        //         disabled: true,
+        //         label: (
+        //             <UnlinkModuleButton
+        //                 moduleId={id}
+        //                 parentModuleId={parentModuleId}
+        //                 onUnlink={() => setMenuOpened(false)}
+        //             />
+        //         ),
+        //     });
+        // }
 
         result.push(
             {

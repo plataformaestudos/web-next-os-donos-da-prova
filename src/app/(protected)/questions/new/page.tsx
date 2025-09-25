@@ -1,23 +1,29 @@
 // NewQuestionPage.tsx (Server Component)
-import { createClient } from "@/util/supabase/server";
 import { NewQuestionPageClient } from "./pageClient";
+import HttpClient from "@/util/http-client/fetch-server.util";
+import { ResponseModel } from "@/model/common.model";
+import { ModuleEntitie } from "@/model/module.model";
 
-type SearchParams = Promise<{ modulos?: string }>
+type SearchParams = Promise<{ modulo?: string }>
 
 export default async function NewQuestionPage(props: { searchParams: SearchParams }) {
-  const supabase = await createClient();
-  const {modulos} = await props.searchParams;
-  const modulesParam = modulos;
+    const { modulo } = await props.searchParams;
+    const moduleParam = modulo;
 
-  let defaultSelectedModules: { id: string; name: string }[] = [];
+    const urlBack = moduleParam ? `/questions/module/${moduleParam}` : "/questions";
 
-  if (modulesParam) {
-    const { data } = await supabase
-      .from("modules")
-      .select("id, name")
-      .in("id", modulesParam.split(","));
-    if (data) defaultSelectedModules = data;
-  }
+    let defaultSelectedModule: ModuleEntitie | undefined = undefined;
 
-  return <NewQuestionPageClient defaultSelectedModules={defaultSelectedModules} />;
+    if (moduleParam) {
+        const response = await HttpClient.fetch<ResponseModel<ModuleEntitie>>(
+            `/modules/${moduleParam}`,
+            {
+                method: "GET"
+            },
+
+        );
+        defaultSelectedModule = response.data;
+    }
+
+    return <NewQuestionPageClient defaultSelectedModule={defaultSelectedModule} urlBack={urlBack} />;
 }

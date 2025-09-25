@@ -16,7 +16,7 @@ export async function upsertQuestionAndAlternatives(
     type = QuestionType.MULTIPLE_CHOICE,
     comment,
     alternatives,
-    modules,
+    module,
   }: UpsertQuestionDTO
 ) {
   if (!text) {
@@ -64,14 +64,9 @@ export async function upsertQuestionAndAlternatives(
       { defaultToNull: false }
     );
 
-    if (modules.length > 0) {
+    if (module) {
       await supabase.from("modules_questions").delete().match({ question_id });
-      await supabase.from("modules_questions").insert(
-        modules.map((module_id) => ({
-          question_id,
-          module_id,
-        }))
-      );
+      await supabase.from("modules_questions").insert({ module_id: module, question_id });
     }
 
     revalidateTag(CACHE_TAGS.QUESTIONS);

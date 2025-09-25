@@ -10,5 +10,5 @@ export interface UpsertQuestionDTO {
     text: string;
     is_correct: boolean;
   }[];
-  modules: string[];
+  module: string;
 }

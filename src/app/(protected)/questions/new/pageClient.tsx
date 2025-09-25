@@ -12,9 +12,11 @@ import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Roles } from "@/util/roles";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
 export function NewQuestionPageClient({
-  defaultSelectedModules,
+  defaultSelectedModule,
+  urlBack
 }: {
-  defaultSelectedModules: { id: string; name: string }[];
+  defaultSelectedModule: { id: string; name: string } | undefined;
+  urlBack: string;
 }) {
   const { allowed, loading } = useAuthGuard({
     requireRoles: [Roles.ADMIN, Roles.COLLABORATOR],
@@ -29,7 +31,7 @@ if (loading) return <FullPageLoading />;
       <Styled.QuestionContainer>
         <Styled.QuestionHeader>
           <Styled.QuestionTitleContainer>
-            <Link href="/questions">
+            <Link href={urlBack}>
               <Button shape="circle" icon={<LuArrowLeft />} />
             </Link>
             <Styled.Title>Nova questão</Styled.Title>
@@ -37,7 +39,7 @@ if (loading) return <FullPageLoading />;
           <QuestionFormSubmitButton />
         </Styled.QuestionHeader>
         <Divider />
-        <QuestionForm modules={defaultSelectedModules} />
+        <QuestionForm moduleSelected={defaultSelectedModule} />
       </Styled.QuestionContainer>
     </UpserQuestionProvider>
   );

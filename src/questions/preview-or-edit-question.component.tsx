@@ -44,7 +44,7 @@ export function PreviewOrEditQuestion({
           text={question?.text}
           comment={question?.comment}
           alternatives={question?.alternatives}
-          modules={question?.modules}
+          moduleSelected={question?.modules[0]}
         />
       )}
     </Flex>

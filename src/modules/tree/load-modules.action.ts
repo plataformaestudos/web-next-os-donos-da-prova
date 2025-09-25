@@ -22,7 +22,7 @@ export async function loadChildrenModules(moduleId: string): Promise<ModuleViewM
       console.warn(`Nenhum dado retornado para módulos filhos do módulo ${moduleId}`);
       return [];
     }
-
+    
     return res.data
       .map(moduleModelToViewModelAdapter)
       .map((mod) => ({

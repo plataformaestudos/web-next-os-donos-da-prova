@@ -9,6 +9,7 @@ const routeAlias: {
   "/questoes": "/questions",
   "/questoes/nova": "/questions/new",
   "/questoes/:id": "/questions/:id",
+  "/questoes/modulo/:idModule": "/questions/module/:idModule",
   "/cadernos": "/question-books",
   "/cadernos/novo": "/question-books/new",
   "/cadernos/:id": "/question-books/:id",

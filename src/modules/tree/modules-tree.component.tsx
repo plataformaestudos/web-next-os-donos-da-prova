@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  FolderOpenOutlined,
-  FolderOutlined,
+  FolderOpenFilled,
+  FolderFilled,
   LoadingOutlined,
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
@@ -39,11 +39,11 @@ function SwitcherIcon({
   return loading ? (
     <LoadingOutlined style={{ fontSize: 16, height: "100%", paddingLeft: 4 }} />
   ) : expanded ? (
-    <FolderOpenOutlined
+    <FolderOpenFilled
       style={{ fontSize: 16, height: "100%", paddingLeft: 4 }}
     />
   ) : (
-    <FolderOutlined style={{ fontSize: 16, height: "100%", paddingLeft: 4 }} />
+    <FolderFilled style={{ fontSize: 16, height: "100%", paddingLeft: 4 }} />
   );
 }
 
@@ -126,7 +126,6 @@ function setupTree(
 
 export function ModulesTree(props: ModulesTreeProps) {
   const autoExpand = props.autoExpand;
-
   const [loadedKeys, setLoadedKeys] = useState<string[]>([]);
   const [expandadedKeys, setExpandedKeys] = useState<string[]>(
     autoExpand

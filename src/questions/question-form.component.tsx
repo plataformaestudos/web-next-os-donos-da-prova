@@ -34,10 +34,10 @@ interface QuestionFormProps {
     text: string;
     is_correct: boolean;
   }[];
-  modules?: {
+  moduleSelected?: {
     id: string;
     name: string;
-  }[];
+  };
 }
 
 export function QuestionForm(props: QuestionFormProps) {
@@ -60,8 +60,8 @@ export function QuestionForm(props: QuestionFormProps) {
   const [correctAlternative, setCorrectAlternative] = useState(
     props.alternatives?.find((alt) => alt.is_correct)?.id ?? null
   );
-  const [modules, setModules] = useState(
-    props.modules?.map(({ id }) => id) ?? []
+  const [module, setModule] = useState(
+    props.moduleSelected ?? null
   );
 
   function onChangeCorrectAlternative(id: string, index: number) {
@@ -92,7 +92,7 @@ export function QuestionForm(props: QuestionFormProps) {
               text: alt.text,
               is_correct: alt._uiId === correctAlternative,
             })),
-            modules,
+            module: module?.id ?? "",
           })
         }
       >
@@ -259,14 +259,15 @@ export function QuestionForm(props: QuestionFormProps) {
           <Styled.Label>Módulos</Styled.Label>
           <QuestionFormModulesSelection
             multiple={false}
-            defaultOptions={
-              props.modules?.map(({ id, name }) => ({
-                value: id,
-                label: name,
-              })) ?? []
-            }
-            defaultValue={modules}
-            onSelectModules={(v) => setModules([v as string])}
+            defaultOptions={module ? [{ value: module.id, label: module.name }] : []}
+            defaultValue={module?.id ?? ""}
+            onSelectModules={(v) => setModule(
+              Array.isArray(v)
+                ? v.length > 0
+                  ? { id: v[0], name: "" }
+                  : null
+                : { id: v, name: "" }
+            )}
           />
         </label>
       </form>

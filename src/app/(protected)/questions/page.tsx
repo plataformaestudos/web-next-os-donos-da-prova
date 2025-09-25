@@ -9,7 +9,7 @@ import { FaPencil } from "react-icons/fa6";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import Link from "next/link";
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
-import { QuestionFormModulesSelection } from "@/questions/question-form-modules-selection.component";
+// import { QuestionFormModulesSelection } from "@/questions/question-form-modules-selection.component";
 import { QuestionModel } from "@/model/question.model";
 import { QuestionPreview } from "@/questions/question-preview.component";
 import { ResponseModel } from "@/model/common.model";
@@ -52,7 +52,7 @@ export default async function QuestionsPage({
     const queryParams = search.toString() ? `?${search.toString()}` : "";
 
     let questions: QuestionModel[] = [];
-    let modules: { id: string; name: string }[] = [];
+    // let modules: { id: string; name: string }[] = [];
     try {
         const r = await HttpClient.fetch<
             ResponseModel<{ questions: QuestionModel[]; modules: { id: string; name: string }[] }>
@@ -63,36 +63,36 @@ export default async function QuestionsPage({
 
         total = r.total ?? 0;
         questions = r.data?.questions ?? [];
-        modules = r.data?.modules ?? [];
+        // modules = r.data?.modules ?? [];
     } catch {
         // fallback silencioso
         questions = [];
-        modules = [];
+        // modules = [];
     }
 
     return (
         <PageLayout
             title="Questões"
             actions={[
-                <QuestionFormModulesSelection
-                    key="filter-modules"
-                    defaultOptions={modules.map(({ id: value, name: label }) => ({
-                        value,
-                        label,
-                    }))}
-                    defaultValue={modulesIds?.split(",") ?? undefined}
-                    onSelectModules={async function changeQuery(modules) {
-                        "use server";
+                // <QuestionFormModulesSelection
+                //     key="filter-modules"
+                //     defaultOptions={modules.map(({ id: value, name: label }) => ({
+                //         value,
+                //         label,
+                //     }))}
+                //     defaultValue={modulesIds?.split(",") ?? undefined}
+                //     onSelectModules={async function changeQuery(modules) {
+                //         "use server";
 
-                        if (modules.length > 0) {
-                            redirect(
-                                `/questions?modulos=${(modules as string[]).join(",")}&pagina=1`
-                            );
-                        } else {
-                            redirect("/questions?pagina=1");
-                        }
-                    }}
-                />,
+                //         if (modules.length > 0) {
+                //             redirect(
+                //                 `/questions?modulos=${(modules as string[]).join(",")}&pagina=1`
+                //             );
+                //         } else {
+                //             redirect("/questions?pagina=1");
+                //         }
+                //     }}
+                // />,
                 <Link key="create" href={newQuestionURL}>
                     <Button type="primary" size="large">
                         Criar questão
