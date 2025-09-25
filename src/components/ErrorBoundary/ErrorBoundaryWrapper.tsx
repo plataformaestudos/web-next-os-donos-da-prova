@@ -29,7 +29,7 @@ export function ErrorBoundaryWrapper({ children }: { children: React.ReactNode }
             const isNextProdError = err.message?.startsWith("An error occurred in the Server Components render");
             console.log("Handling error in ErrorBoundaryWrapper:", err, "isNextProdError:", isNextProdError);
             const friendly =
-                err.data?.error || err.message ||
+                err.data?.error ||
                 (isNextProdError ? "Ops, algo deu errado ao carregar os dados." : err.message) ||
                 "Ocorreu um erro inesperado.";
             console.log("Friendly error message:", friendly);
