@@ -5,10 +5,9 @@ export default async function QuestionBooks(props: { searchParams: SearchParams 
     const { pasta } = await props.searchParams;
 
     const result = await getBookFolders();
-
     return (
         <QuestionBooksClient
-            initialFolders={result || { folder: [], questionBooksWithoutFolder: [] }}
+            initialFolders={result || { folders: [], questionBooksWithoutFolder: [] }}
             folderId={pasta}
         />
     );

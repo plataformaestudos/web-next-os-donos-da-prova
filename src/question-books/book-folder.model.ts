@@ -22,6 +22,8 @@ export interface QuestionBookBookFolderModel {
     userId: string;
     folderId?: string;
     questionsCount: number;
+    nrOfAnsweredQuestions: number;
+    percentAnswered: number;
 }
  
 

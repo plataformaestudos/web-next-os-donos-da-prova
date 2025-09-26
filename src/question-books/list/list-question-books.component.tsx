@@ -9,13 +9,14 @@ import {
     Input,
     List,
     Modal,
+    Progress,
     Select,
     Tooltip,
     Typography,
 } from "antd";
 import { EditOutlined, EllipsisOutlined, StarFilled, StarOutlined } from "@ant-design/icons";
 import { useState, useTransition } from "react";
-
+import { DefaultTheme, useTheme } from "styled-components";
 import { DeleteQuestionBookButton } from "../delete/delete-question-book.component";
 import Link from "next/link";
 import { LuBook, LuFolderPen } from "react-icons/lu";
@@ -33,10 +34,10 @@ interface ListQuestionBooksProps {
 
 export function ListQuestionBooks({ questionBooks, folders, setQuestionBooksWithoutFolder }: ListQuestionBooksProps) {
     const { message } = App.useApp();
-
+    const styledTheme: DefaultTheme = useTheme();
     const [isPending, startTransition] = useTransition();
     const [items, setItems] = useState(questionBooks);
-
+    const primaryColor = styledTheme.colorPrimary;
     const [name, setName] = useState("");
     const [error, setError] = useState<string | null>(null);
 
@@ -78,7 +79,7 @@ export function ListQuestionBooks({ questionBooks, folders, setQuestionBooksWith
                             if (!targetFolderId && setQuestionBooksWithoutFolder) {
                                 setQuestionBooksWithoutFolder(prev => [
                                     ...prev,
-                                    { ...movingQuestionBook, folderId: undefined } 
+                                    { ...movingQuestionBook, folderId: undefined }
                                 ]);
                             }
 
@@ -142,6 +143,21 @@ export function ListQuestionBooks({ questionBooks, folders, setQuestionBooksWith
                                     icon={item.favorite ? <StarFilled style={{ fontSize: 18 }} /> : <StarOutlined style={{ fontSize: 18 }} />}
                                     onClick={() => toggleFavorite(item.id)}
                                 />
+                            </Tooltip>
+
+                            <Tooltip title={`${item.nrOfAnsweredQuestions} de ${item.questionsCount} questões (${item.percentAnswered}%)`}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <Progress
+                                        percent={Math.max(0, Math.min(100, Number(item.percentAnswered || 0)))}
+                                        strokeColor={item.percentAnswered === 100 ? '#52c41a' : primaryColor}
+                                        showInfo={false}
+                                        strokeWidth={8}
+                                        style={{ width: 120 }}
+                                    />
+                                    <Typography.Text style={{ minWidth: 40, textAlign: 'center', fontSize: 14, fontWeight: '700' }}>
+                                        {item.questionsCount > 0 ? `${item.percentAnswered}%` : "0%"}
+                                    </Typography.Text>
+                                </div>
                             </Tooltip>
 
                             <Dropdown
