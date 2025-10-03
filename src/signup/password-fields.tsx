@@ -50,7 +50,7 @@ export function PasswordField({ form }: { form: FormInstance<PersonalInfo> }) {
                     <div
                         key={rule.label}
                         style={{
-                            color: rule.valid ? "green" : "red",
+                            
                             fontSize: 12,
                             display: "flex",
                             alignItems: "center",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/app/context/user.context";
 import {
@@ -13,11 +13,13 @@ import {
     Typography,
     Tabs,
     App,
+    Flex,
 } from "antd";
 import Image from "next/image";
 import styled from "styled-components";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import { ResponseModel } from "@/model/common.model";
+import { MaskedInput } from "@/ui/masked-input/masked-input.component";
 
 const { Title } = Typography;
 
@@ -71,6 +73,9 @@ type UserProfileAPI = {
     postalCode: string;
     address: string;
     addressNeighborhood: string;
+    addressCity: string;
+    addressState: string;
+    addressCountry: string;
     addressNumber: string;
     addressComplement: string;
     avatarUrl: string | null;
@@ -87,6 +92,9 @@ type EditProfileFormValues = {
     postalCode?: string;
     address?: string;
     addressNeighborhood?: string;
+    addressCity?: string;
+    addressState?: string;
+    addressCountry?: string;
     addressNumber?: string;
     addressComplement?: string;
 };
@@ -96,11 +104,28 @@ const formatDate = (date: string | undefined) => {
     return new Date(date).toLocaleDateString("pt-BR");
 };
 
+async function fetchAddressByCep(cep: string) {
+    const cleaned = cep.replace(/\D/g, "");
+    if (cleaned.length !== 8) {
+      throw new Error("CEP inválido");
+    }
+    const resp = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
+    if (!resp.ok) {
+      throw new Error("Falha na requisição CEP");
+    }
+    const data = await resp.json();
+    if (data.erro) {
+      throw new Error("CEP não encontrado");
+    }
+    return data; 
+  }
+
 export default function EditProfilePage() {
     const [form] = Form.useForm();
     const router = useRouter();
     const { user, loading, refreshProfile } = useUser();
     const app = App.useApp?.();
+    const [addressDisabled, setAddressDisabled] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -111,6 +136,9 @@ export default function EditProfilePage() {
                 postalCode: user.profile?.postal_code ?? user.user_metadata?.postalCode ?? "",
                 address: user.profile?.address ?? user.user_metadata?.address ?? "",
                 addressNeighborhood: user.profile?.address_neighborhood ?? user.user_metadata?.addressNeighborhood ?? "",
+                addressCity: user.profile?.address_city ?? user.user_metadata?.addressCity ?? "",
+                addressState: user.profile?.address_state ?? user.user_metadata?.addressState ?? "",
+                addressCountry: user.profile?.address_country ?? user.user_metadata?.addressCountry ?? "",
                 addressNumber: user.profile?.address_number ?? user.user_metadata?.addressNumber ?? "",
                 addressComplement: user.profile?.address_complement ?? user.user_metadata?.addressComplement ?? "",
                 nickname: user.profile?.nickname ?? "",
@@ -120,6 +148,39 @@ export default function EditProfilePage() {
             form.resetFields();
         }
     }, [user, form]);
+
+    const cepValue = Form.useWatch("postalCode", form);
+    useEffect(() => {
+        if (!cepValue) return;
+    
+        const cleaned = cepValue.replace(/\D/g, "");
+        if (cleaned.length === 8) {
+          fetchAddressByCep(cleaned)
+            .then((data) => {
+              form.setFieldsValue({
+                address: data.logradouro,
+                addressNeighborhood: data.bairro,
+                addressCity: data.localidade,
+                addressState: data.uf,
+                addressCountry: "Brasil",
+              });
+              setAddressDisabled(true);
+            })
+            .catch((err) => {
+              console.error("Erro ao buscar CEP:", err);
+              form.setFieldsValue({
+                address: "",
+                addressNeighborhood: "",
+                addressCity: "",
+                addressState: "",
+                addressCountry: "",
+              });
+              setAddressDisabled(false);
+            });
+        }else{
+            setAddressDisabled(false);
+        }
+      }, [cepValue, form]);
 
     if (loading) {
         return (
@@ -173,17 +234,21 @@ export default function EditProfilePage() {
             label: "Meu Perfil",
             children: (
                 <>
+                 <Flex gap={12}>
                     <Form.Item
                         label="Apelido"
                         name="nickname"
+                        style={{ flex: 3 }}
                         rules={[{ required: true, message: "Por favor, insira seu apelido" }]}
                     >
                         <Input />
                     </Form.Item>
 
-                    <Form.Item label="Usuário desde">
+                    <Form.Item label="Usuário desde" style={{ flex: 2 }}>
+                        
                         <Input value={formatDate(user.profile?.created_at)} disabled />
                     </Form.Item>
+                    </Flex>
                 </>
             ),
         },
@@ -192,17 +257,29 @@ export default function EditProfilePage() {
             label: "Dados Cadastrais",
             children: (
                 <>
+                <Flex gap={12}>
                     <Form.Item
                         label="Nome Completo"
                         name="name"
+                        style={{ flex: 2 }}
                         rules={[{ required: true, message: "Por favor, insira o nome completo" }]}
                     >
                         <Input />
                     </Form.Item>
 
+                    <Form.Item label="CPF / CNPJ" name="cpfCnpj" style={{ flex: 1 }}>
+                        <Input disabled />
+                    </Form.Item>
+
+                   
+                    </Flex>
+
+                    <Flex gap={12}>
+
                     <Form.Item
                         label="Email"
                         name="email"
+                        style={{ flex: 2 }}
                         rules={[
                             { required: true, message: "Por favor, insira o email" },
                             { type: "email", message: "Email inválido" },
@@ -210,19 +287,18 @@ export default function EditProfilePage() {
                     >
                         <Input />
                     </Form.Item>
-
                     <Form.Item
                         label="Telefone"
                         name="phone"
+                        style={{ flex: 2 }}
                         rules={[{ required: false, message: "Por favor, insira o telefone" }]}
                     >
                         <Input />
                     </Form.Item>
 
 
-                    <Form.Item label="CPF / CNPJ" name="cpfCnpj">
-                        <Input />
-                    </Form.Item>
+                   
+                    </Flex>
                 </>
             ),
         },
@@ -231,30 +307,44 @@ export default function EditProfilePage() {
             label: "Endereço",
             children: (
                 <>
-                    <Form.Item label="CEP" name="postalCode">
-                        <Input />
+                <Flex gap={12}>
+
+                    <Form.Item  style={{ flex: 2 }} label="CEP" name="postalCode">
+                        <MaskedInput mask="_____-___" replacement={{ _: /\d/ }} />
                     </Form.Item>
 
-                    <Form.Item label="Endereço" name="address">
-                        <Input />
+                    <Form.Item style={{ flex: 3 }} label="Endereço" name="address">
+                        <Input disabled={addressDisabled}/>
                     </Form.Item>
 
-                    <Form.Item label="Bairro" name="addressNeighborhood">
-                        <Input />
-                    </Form.Item>
-
-                    <Row gutter={12}>
-                        <Col span={16}>
-                            <Form.Item label="Número" name="addressNumber">
+                    <Form.Item style={{ flex: 1 }} label="Número" name="addressNumber">
                                 <Input />
                             </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item label="Complemento" name="addressComplement">
+
+                    <Form.Item style={{ flex: 2 }} label="Bairro" name="addressNeighborhood">
+                        <Input disabled={addressDisabled}/>
+                    </Form.Item>
+
+                    </Flex>
+                    <Flex gap={12}>
+                    <Form.Item style={{ flex: 2 }} label="Complemento" name="addressComplement">
                                 <Input />
                             </Form.Item>
-                        </Col>
-                    </Row>
+                    <Form.Item style={{ flex: 2 }} label="Cidade" name="addressCity">
+                        <Input disabled={addressDisabled}/>
+                    </Form.Item>
+
+                    <Form.Item style={{ flex: 1 }} label="Estado" name="addressState">
+                        <Input disabled={addressDisabled}/>
+                    </Form.Item>
+
+                    <Form.Item style={{ flex: 2 }} label="País" name="addressCountry">
+                        <Input disabled={addressDisabled}/>
+                    </Form.Item>
+
+
+                    </Flex>
+
                 </>
             ),
         },

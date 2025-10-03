@@ -127,6 +127,15 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
             <Descriptions.Item label="Complemento">
               {user?.profile?.address_complement ?? user?.user_metadata?.addressComplement}
             </Descriptions.Item>
+            <Descriptions.Item label="Cidade">
+              {user?.profile?.address_city ?? user?.user_metadata?.addressCity}
+            </Descriptions.Item>
+            <Descriptions.Item label="Estado">
+              {user?.profile?.address_state ?? user?.user_metadata?.addressState}
+            </Descriptions.Item>
+            <Descriptions.Item label="País">
+              {user?.profile?.address_country ?? user?.user_metadata?.addressCountry}
+            </Descriptions.Item>
           </Descriptions>
         </>
       ),
