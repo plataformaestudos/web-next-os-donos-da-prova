@@ -10,14 +10,21 @@ import {
     Statistic,
     Row,
     theme,
-    Typography
+    Typography,
+    Button,
+    Space,
+    Spin
 } from "antd";
 import {
     QuestionCircleOutlined,
     BarChartOutlined,
     WechatOutlined,
+    PauseOutlined,
+    PlayCircleFilled,
+    LoadingOutlined,
 } from "@ant-design/icons";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
+import { useQuestionBookTimer } from "@/app/hooks/useQuestionBookTimer";
 import { Roles } from "@/util/roles";
 import { Container, TabContainer } from "./page.style";
 import { AppForum } from "@/components/AppForum";
@@ -38,10 +45,11 @@ export function QuestionBookPageClient({
     const { user, loading, allowed } = useAuthGuard({
         requireRoles: [Roles.ADMIN, Roles.STUDENT],
     });
-
+    
     const { token } = theme.useToken();
 
     const [question, setQuestion] = useState(questionBook?.nextQuestion);
+    const timer = useQuestionBookTimer(id);
 
     if (loading) return <FullPageLoading />;
 
@@ -66,6 +74,7 @@ export function QuestionBookPageClient({
 
     return (
         <Container>
+            
             <AppQuestionCounter question={question.orderDetails.questionOrder} total={questionBook.questionsCount} />
                 {questionBook.nextQuestion.module.name && (
                     <Typography.Paragraph
@@ -80,7 +89,28 @@ export function QuestionBookPageClient({
                         #Módulo: {questionBook.nextQuestion.module.name}
                     </Typography.Paragraph>
                 )}
-            <Breadcrumb items={breadcrumbItems} />
+            
+            <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
+                <Breadcrumb onClick={() => timer.saveProgress()} items={breadcrumbItems}  />
+                {timer.isLoaded ? (
+            <Space>
+                <Typography.Text strong style={{ fontSize: 18, color: token.colorPrimary }}>
+                    {timer.formattedTime}
+                </Typography.Text>
+                <Button
+                    icon={timer.isRunning ? <PauseOutlined /> : <PlayCircleFilled />}
+                    onClick={timer.isRunning ? timer.pause : timer.start}
+                    type="primary"
+                    size="small"
+                >
+                </Button>
+            </Space>
+                ) : (
+                    <div style={{ fontSize: 16, color: token.colorTextSecondary }}>
+                        <Spin size="small" indicator={<LoadingOutlined />} />
+                    </div>
+                )}
+            </Flex>
             <TabContainer>
                 <Tabs
                     items={[
