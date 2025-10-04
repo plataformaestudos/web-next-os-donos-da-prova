@@ -20,8 +20,10 @@ import {
     BarChartOutlined,
     WechatOutlined,
     PauseOutlined,
-    PlayCircleFilled,
+    CaretRightOutlined,
     LoadingOutlined,
+    EyeOutlined,
+    EyeInvisibleOutlined,
 } from "@ant-design/icons";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useQuestionBookTimer } from "@/app/hooks/useQuestionBookTimer";
@@ -49,7 +51,8 @@ export function QuestionBookPageClient({
     const { token } = theme.useToken();
 
     const [question, setQuestion] = useState(questionBook?.nextQuestion);
-    const timer = useQuestionBookTimer(id);
+    const timer = useQuestionBookTimer(id); // Timer is per question book, not per question
+    const [isTimerVisible, setIsTimerVisible] = useState(true);
 
     if (loading) return <FullPageLoading />;
 
@@ -100,16 +103,28 @@ export function QuestionBookPageClient({
                 <Breadcrumb items={breadcrumbItems} />
                 {timer.isLoaded ? (
             <Space>
-                <Typography.Text strong style={{ fontSize: 18, color: token.colorPrimary }}>
-                    {timer.formattedTime}
-                </Typography.Text>
                 <Button
-                    icon={timer.isRunning ? <PauseOutlined /> : <PlayCircleFilled />}
+                    icon={isTimerVisible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+                    onClick={() => setIsTimerVisible(!isTimerVisible)}
+                    type="text"
+                    size="small"
+                    title={isTimerVisible ? "Esconder tempo" : "Mostrar tempo"}
+                >
+                </Button>
+                {isTimerVisible && (
+                    <Typography.Text strong style={{ fontSize: 18, color: token.colorPrimary }}>
+                        {timer.formattedTime}
+                    </Typography.Text>
+                )}
+                                <Button
+                    icon={timer.isRunning ? <PauseOutlined /> : <CaretRightOutlined />}
                     onClick={timer.isRunning ? timer.pause : timer.start}
                     type="primary"
                     size="small"
+                    title={timer.isRunning ? "Pausar timer" : "Iniciar timer"}
                 >
                 </Button>
+
             </Space>
                 ) : (
                     <div style={{ fontSize: 16, color: token.colorTextSecondary }}>
@@ -233,3 +248,4 @@ export function QuestionBookPageClient({
         </Container>
     );
 }
+
