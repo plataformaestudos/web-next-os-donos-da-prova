@@ -69,7 +69,13 @@ export function QuestionBookPageClient({
             : []),
         { title: questionBook?.name },
     ].map((item) => ({
-        title: item.href ? <a href={item.href}>{item.title}</a> : item.title,
+        title: item.href ? (
+            <span onClick={() => timer.saveProgress()}>
+                <a href={item.href}>{item.title}</a>
+            </span>
+        ) : (
+            <span onClick={() => timer.saveProgress()}>{item.title}</span>
+        ),
     }));
 
     return (
@@ -91,7 +97,7 @@ export function QuestionBookPageClient({
                 )}
             
             <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
-                <Breadcrumb onClick={() => timer.saveProgress()} items={breadcrumbItems}  />
+                <Breadcrumb items={breadcrumbItems} />
                 {timer.isLoaded ? (
             <Space>
                 <Typography.Text strong style={{ fontSize: 18, color: token.colorPrimary }}>
