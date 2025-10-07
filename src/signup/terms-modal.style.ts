@@ -109,18 +109,6 @@ export const ContentText = styled.div`
   }
 `;
 
-export const TermsLink = styled.span`
-  color: ${({ theme }) => theme.colorPrimary};
-  text-decoration: none;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    color: ${({ theme }) => theme.colorPrimaryHover};
-    text-decoration: none;
-  }
-`;
 
 export const CloseButton = styled.button`
   background: ${({ theme }) => theme.colorPrimary} !important;

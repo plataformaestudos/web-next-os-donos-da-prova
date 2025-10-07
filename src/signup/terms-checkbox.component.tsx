@@ -9,7 +9,6 @@ import {
   ModalHeader, 
   ModalContent, 
   ContentText, 
-  TermsLink, 
   ResponsiveWrapper 
 } from "./terms-modal.style";
 
@@ -86,13 +85,17 @@ export function TermsCheckbox({ onAcceptanceChange }: TermsCheckboxProps) {
       >
         <Text>
           Aceito os{" "}
-          <TermsLink onClick={() => setShowTermsModal(true)}>
+          <Button
+            type="link"
+            onClick={() => setShowTermsModal(true)}
+            style={{ padding: 0 }}
+          >
             termos de uso
-          </TermsLink>{" "}
-          e a{" "}
-          <TermsLink onClick={() => setShowPrivacyModal(true)}>
+          </Button>
+          {" "} e a{" "}
+          <Button type="link" onClick={() => setShowPrivacyModal(true)} style={{ padding: 0 }}>
             política de privacidade
-          </TermsLink>
+          </Button>
         </Text>
       </Checkbox>
 
