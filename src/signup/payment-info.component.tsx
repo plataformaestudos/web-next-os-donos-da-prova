@@ -80,7 +80,7 @@ export function PaymentInfoThirdStep({
           <Input />
         </Form.Item>
 
-        <Form.Item name="saveCard" valuePropName="checked" label={null}>
+        <Form.Item name="saveCard" valuePropName="checked" label={null} style={{ marginBottom: 10 }}>
           <Checkbox>Salvar cartão para compras futuras</Checkbox>
         </Form.Item>
       </Form>

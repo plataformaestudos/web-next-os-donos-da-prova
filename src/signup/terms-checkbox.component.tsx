@@ -72,13 +72,12 @@ export function TermsCheckbox({ onAcceptanceChange }: TermsCheckboxProps) {
         description="Não foi possível carregar os termos de uso. Tente novamente."
         type="error"
         showIcon
-        style={{ marginTop: "20px" }}
       />
     );
   }
 
   return (
-    <div style={{ marginTop: "20px" }}>
+    <div>
       <Checkbox
         checked={termsAccepted}
         onChange={(e) => handleCheckboxChange(e.target.checked)}
