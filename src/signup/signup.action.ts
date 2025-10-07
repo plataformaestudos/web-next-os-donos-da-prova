@@ -1,7 +1,5 @@
 import { SignupDTO } from "./signup.dto";
-
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+import HttpClient from "@/util/http-client/fetch-client.util";
 
 export interface SignupData {
   id: string;
@@ -25,33 +23,27 @@ export interface DefaultResponse<T> {
 }
 
 export async function signUpClient(dto: SignupDTO): Promise<{ success: boolean; error: string | null; payload?: DefaultResponse<SignupData> }> {
-  const res = await fetch(`${API_BASE}/subscription/new-user`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(dto),
-  });
+  try {
+    const payload = await HttpClient.fetch<DefaultResponse<SignupData>>('/subscription/new-user', {
+      method: "POST",
+      body: JSON.stringify(dto),
+    });
 
-  const payload: DefaultResponse<SignupData> | null = await res.json().catch(() => null);
-  if (!res.ok) {
-    throw new Error(payload?.message || `Signup failed: ${res.status}`);
+    await HttpClient.fetch('/auth/login', {
+      method: "POST",
+      body: JSON.stringify({
+        username: dto.userInfo.email,
+        password: dto.userInfo.password,
+      }),
+    });
+
+    return { success: true, error: null, payload };
+  } catch (error: unknown) {
+    console.error("Erro no cadastro:", error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Erro desconhecido no cadastro" 
+    };
   }
-
-  const loginRes = await fetch(`${API_BASE}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({
-      username: dto.userInfo.email,
-      password: dto.userInfo.password,
-    }),
-  });
-
-  if (!loginRes.ok) {
-    const loginPayload = await loginRes.text().catch(() => "");
-    return { success: false, error: `Login after signup failed: ${loginRes.status} ${loginPayload}` };
-  }
-
-  return { success: true, error: null, payload: payload ?? undefined };
 }
 

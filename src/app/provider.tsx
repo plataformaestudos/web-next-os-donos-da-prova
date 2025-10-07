@@ -105,6 +105,7 @@ const themes = {
             colorPrimaryText: "#EDEFF0",
             colorText: "#EDEFF0",
             colorPrimaryBg: "#163658",
+            colorBgContainer: "#1A1A1A",
             colorSecondary: "#1A1A1A",
             colorTertiary: "#af2615",
             colorTertiaryText: "#FFFFFF",

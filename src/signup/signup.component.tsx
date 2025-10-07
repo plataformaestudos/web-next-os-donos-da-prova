@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { ChoosePlanFirstStep } from "./choose-plan.component";
+import { TermsCheckbox } from "./terms-checkbox.component";
 import Link from "next/link";
 import Title from "antd/es/typography/Title";
 import { signUpClient } from "./signup.action";
@@ -69,13 +70,15 @@ export default function SignupSteps({
     isValid: paymentInfoFormValid,
   } = useForm<PaymentInfo>();
 
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
   const isDisabled = useMemo(() => {
     return (
       (currentStep === 1 && !selectedPlan) ||
       (currentStep === 2 && !personalInfoFormValid) ||
-      (currentStep === 3 && !paymentInfoFormValid)
+      (currentStep === 3 && (!paymentInfoFormValid || !termsAccepted))
     );
-  }, [currentStep, selectedPlan, personalInfoFormValid, paymentInfoFormValid]);
+  }, [currentStep, selectedPlan, personalInfoFormValid, paymentInfoFormValid, termsAccepted]);
 
   return (
     <Container>
@@ -140,6 +143,9 @@ export default function SignupSteps({
             }}
           >
             <PaymentInfoThirdStep formV={paymentInfoForm} />
+            <TermsCheckbox 
+              onAcceptanceChange={setTermsAccepted}
+            />
           </div>
 
           {error && <Typography.Text type="danger">{error}</Typography.Text>}
@@ -185,6 +191,8 @@ export default function SignupSteps({
                           expiryYear: paymentInfo.expiryDate.split("/")[1],
                           ccv: paymentInfo.cvv,
                         },
+                        termsAccepted: termsAccepted,
+                        privacyAccepted: termsAccepted,
                       });
 
                       if (result.success) {

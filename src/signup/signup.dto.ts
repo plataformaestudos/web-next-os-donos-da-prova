@@ -17,4 +17,6 @@ export interface SignupDTO {
     password: string;
     cpfCnpj: string;
   };
+  termsAccepted: boolean;
+  privacyAccepted: boolean;
 }

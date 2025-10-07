@@ -57,7 +57,6 @@ export function AppQuestionLoader({
         if (seq && parseInt(seq) !== question.orderDetails.questionOrder) {
             getQuestionBookQuestion(id, seq)
                 .then((data) => setQuestion(data ?? questionBook?.nextQuestion));
-            // Se der erro, cai no global error handler, não precisa do catch local
         }
     }, [id, seq, questionBook]);
 

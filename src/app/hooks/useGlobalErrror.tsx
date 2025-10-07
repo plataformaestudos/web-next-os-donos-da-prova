@@ -35,8 +35,6 @@ export function useGlobalHttpError({ autoBack = true, backDelay = 900, messageAp
             if (messageApi?.error) {
                 messageApi.error(message);
             } else {
-                // fallback
-                // eslint-disable-next-line no-alert
                 alert(message);
             }
             const autoBackForThisError = custom?.detail?.autoBack ?? autoBack;
