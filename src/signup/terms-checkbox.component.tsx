@@ -36,7 +36,6 @@ export function TermsCheckbox({ onAcceptanceChange }: TermsCheckboxProps) {
           setError(result.error || "Erro ao carregar termos de uso");
           return;
         }
-        console.log("result", result);
         setTermsOfUse(result.termsOfUse);
         setPrivacyPolicy(result.privacyPolicy);
       } catch (err) {

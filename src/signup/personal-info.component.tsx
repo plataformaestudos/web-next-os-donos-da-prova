@@ -34,7 +34,6 @@ async function fetchAddressByCep(cep: string) {
     if (data.erro) {
       throw new Error("CEP não encontrado");
     }
-    console.log(data)
     return data; 
   }
 
