@@ -7,6 +7,7 @@ import { App } from "antd";
 import { useEffect, useState, Fragment } from "react";
 
 import { ForumService } from "@/@domain/services/forum.service";
+import { QuestionSubscriptionsService } from "@/@domain/services/question-subscriptions.service";
 import {
     ForumOrderBy,
     ForumPostModel,
@@ -53,6 +54,8 @@ export const AppForum = ({ questionId, userId }: IAppForumProps) => {
         postId: "",
         isAnswering: false,
     });
+    const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+    const [isLoadingSubscription, setIsLoadingSubscription] = useState<boolean>(false);
     const itemsPerPage = 20;
 
     const getData = async (noLoading?: boolean) => {
@@ -218,15 +221,61 @@ export const AppForum = ({ questionId, userId }: IAppForumProps) => {
         }
     };
 
+    const checkSubscription = async () => {
+        try {
+            const subscriptionService = new QuestionSubscriptionsService();
+            const response = await subscriptionService.checkSubscription(questionId);
+            setIsSubscribed(response.data || false);
+        } catch (error) {
+            console.error("Erro ao verificar inscrição:", error);
+        }
+    };
+
+    const handleToggleSubscription = async () => {
+        setIsLoadingSubscription(true);
+        try {
+            const subscriptionService = new QuestionSubscriptionsService();
+            
+            if (isSubscribed) {
+                await subscriptionService.delete(questionId);
+                setIsSubscribed(false);
+                message.success("Você parou de acompanhar esta questão!");
+            } else {
+                await subscriptionService.create({ questionId });
+                setIsSubscribed(true);
+                message.success("Você está acompanhando esta questão!");
+            }
+        } catch (error) {
+            console.error("Erro ao alterar inscrição:", error);
+            // message.error("Erro ao alterar inscrição. Tente novamente.");
+        } finally {
+            setIsLoadingSubscription(false);
+        }
+    };
+
     useEffect(() => {
         getData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        checkSubscription();
     }, [orderBy, currentPage]);
 
     return (
         <S.Container>
             <S.Header>
-                <S.HeaderAction>Acompanhar Questão</S.HeaderAction>
+                <S.HeaderAction 
+                    onClick={handleToggleSubscription}
+                    style={{ 
+                        cursor: 'pointer',
+                        opacity: isLoadingSubscription ? 0.6 : 1,
+                        pointerEvents: isLoadingSubscription ? 'none' : 'auto'
+                    }}
+                >
+                    {isLoadingSubscription 
+                        ? "Carregando..." 
+                        : isSubscribed 
+                            ? "Parar de Acompanhar" 
+                            : "Acompanhar Questão"
+                    }
+                </S.HeaderAction>
                 <S.FilterContainer>
                     <S.FilterTitle>Ordenar por: </S.FilterTitle>
                     {filterOptions.map((option, index) => (

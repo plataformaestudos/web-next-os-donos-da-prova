@@ -128,7 +128,7 @@ export default function NotificationsClient() {
                             onClick={() => {
                                 if (!item.isRead) markAsRead(item.id);
                                 if (item.url) window.location.href = item.url;
-                                else window.location.href = `/questions/${item.referenceId}`;
+                                else window.location.href = `/questions/view/${item.referenceId}`;
                                 setPopoverOpen(false);
                             }}
                         >
