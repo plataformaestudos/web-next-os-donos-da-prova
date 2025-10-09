@@ -96,6 +96,7 @@ export function QuestionViewPageClient({ question }: { question: QuestionData })
                         <TiptapEditor
                             editable={false}
                             defaultValue={question.text}
+                            fontSize="15px"
                         />
 
                         {question.alternatives.length > 0 && (
@@ -161,6 +162,7 @@ export function QuestionViewPageClient({ question }: { question: QuestionData })
                             <TiptapEditor
                                 editable={false}
                                 defaultValue={question.comment}
+                                fontSize="15px"
                             />
                         </Card>
                     )}

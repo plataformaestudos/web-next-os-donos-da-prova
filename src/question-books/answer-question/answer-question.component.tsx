@@ -20,7 +20,7 @@ import {
     TbPlayerTrackNext,
     TbPlayerTrackPrev
 } from "react-icons/tb";
-import { useState, useTransition } from "react";
+import { useState, useTransition, Fragment } from "react";
 
 import { QuestionBookNextQuestionModel } from "../question-book.model";
 import { QuestionType } from "@/model/question.model";
@@ -94,6 +94,7 @@ export function AnswerQuestion({
                 <TiptapEditor
                     editable={false}
                     defaultValue={text}
+                    fontSize="15px"
                 />
                 {alternatives.length > 0 && (
                     <AlternativesContainer>
@@ -148,7 +149,7 @@ export function AnswerQuestion({
                 disabled={!selectedAlternative || isPending || isAlternativesDisabled}
                 type="primary"
                 onClick={() => {
-                    setError(false);                    
+                    setError(false);
                     startTransition(async () => {
                         const result = await answerQuestion({
                             questionBookQuestionId,
@@ -171,52 +172,55 @@ export function AnswerQuestion({
             <br />
 
             {correctAlternative && selectedAlternative && !error && (
-                <Flex
-                    vertical
-                    gap={16}
-                    align="center"
-                >
-                    <Typography.Text
-                        type={
-                            correctAlternative === selectedAlternative ? "success" : "danger"
-                        }
-                        style={{
-                            fontSize: 18,
-                            fontWeight: 700,
-                        }}
+                <Fragment>
+                    <Flex
+                        vertical
+                        gap={16}
+                        align="center"
                     >
-                        {correctAlternative === selectedAlternative ? (
-                            <span>Você acertou!</span>
-                        ) : (
-                            <span>
-                                Você errou!{" "}
-                                <b>
-                                    Gabarito:{" "}
-                                    {String.fromCharCode(
-                                        65 +
-                                        (alternatives.findIndex(
-                                            (alt) => alt.id === correctAlternative
-                                        ) as number)
-                                    )}
-                                </b>
-                            </span>
-                        )}
-                    </Typography.Text>
-                    {comment && (
-                        <Button
-                            onClick={() => setShowComment(!showComment)}
-                            icon={showComment ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                        <Typography.Text
+                            type={
+                                correctAlternative === selectedAlternative ? "success" : "danger"
+                            }
+                            style={{
+                                fontSize: 18,
+                                fontWeight: 700,
+                            }}
                         >
-                            {showComment ? "Esconder" : "Ver"} resolução
-                        </Button>
-                    )}
+                            {correctAlternative === selectedAlternative ? (
+                                <span>Você acertou!</span>
+                            ) : (
+                                <span>
+                                    Você errou!{" "}
+                                    <b>
+                                        Gabarito:{" "}
+                                        {String.fromCharCode(
+                                            65 +
+                                            (alternatives.findIndex(
+                                                (alt) => alt.id === correctAlternative
+                                            ) as number)
+                                        )}
+                                    </b>
+                                </span>
+                            )}
+                        </Typography.Text>
+                        {comment && (
+                            <Button
+                                onClick={() => setShowComment(!showComment)}
+                                icon={showComment ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                            >
+                                {showComment ? "Esconder" : "Ver"} resolução
+                            </Button>
+                        )}
+                    </Flex>
                     {comment && showComment && (
                         <TiptapEditor
                             editable={false}
                             defaultValue={comment}
+                            fontSize="15px"
                         />
                     )}
-                </Flex>
+                </Fragment>
             )}
             <div
                 style={{

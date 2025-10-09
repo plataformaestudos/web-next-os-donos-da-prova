@@ -5,6 +5,7 @@ import { EditorContent } from "@tiptap/react";
 export const StyledEditorContent = styled(EditorContent)<{
   $focused: boolean;
   $disabled: boolean;
+  $fontSize?: string;
 }>`
   padding: 4px;
   transition: border-color 300ms ease-in-out;
@@ -21,5 +22,13 @@ export const StyledEditorContent = styled(EditorContent)<{
     css`
       border: none;
       padding: 0;
+    `}
+
+  ${({ $fontSize }) =>
+    $fontSize &&
+    css`
+      .ProseMirror {
+        font-size: ${$fontSize};
+      }
     `}
 `;

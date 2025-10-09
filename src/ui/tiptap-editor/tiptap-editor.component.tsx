@@ -69,12 +69,14 @@ export function TiptapEditor({
   placeholder,
   onFocus,
   onChange,
+  fontSize,
 }: {
   editable?: boolean;
   defaultValue?: string;
   placeholder?: string;
   onFocus?: (editor: Editor | null) => void;
   onChange?: (value: string) => void;
+  fontSize?: string;
 }) {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -183,6 +185,7 @@ export function TiptapEditor({
       editor={editor}
       $focused={isFocused}
       $disabled={!editable}
+      $fontSize={fontSize}
     />
   );
 }
