@@ -11,19 +11,13 @@ import {
     Row,
     theme,
     Typography,
-    Button,
-    Space,
     Spin
 } from "antd";
 import {
     QuestionCircleOutlined,
     BarChartOutlined,
     WechatOutlined,
-    PauseOutlined,
-    CaretRightOutlined,
     LoadingOutlined,
-    EyeOutlined,
-    EyeInvisibleOutlined,
 } from "@ant-design/icons";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useQuestionBookTimer } from "@/app/hooks/useQuestionBookTimer";
@@ -34,7 +28,8 @@ import { AppQuestionLoader } from "@/components/AppQuestionLoader";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
 import { QuestionBookModel } from "@/question-books/question-book.model";
 import { AppQuestionCounter } from "@/components/AppQuestionCounter";
-import { useState } from "react";
+import { OwlTimer } from "@/components/OwlTimer";
+import { useState, useEffect } from "react";
 export function QuestionBookPageClient({
     id,
     seq,
@@ -53,6 +48,18 @@ export function QuestionBookPageClient({
     const [question, setQuestion] = useState(questionBook?.nextQuestion);
     const timer = useQuestionBookTimer(id); // Timer is per question book, not per question
     const [isTimerVisible, setIsTimerVisible] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkScreenSize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
 
     if (loading) return <FullPageLoading />;
 
@@ -101,38 +108,51 @@ export function QuestionBookPageClient({
             
             <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
                 <Breadcrumb items={breadcrumbItems} />
-                {timer.isLoaded ? (
-            <Space>
-                <Button
-                    icon={isTimerVisible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-                    onClick={() => setIsTimerVisible(!isTimerVisible)}
-                    type="text"
-                    size="small"
-                    title={isTimerVisible ? "Esconder tempo" : "Mostrar tempo"}
-                >
-                </Button>
-                {isTimerVisible && (
-                    <Typography.Text strong style={{ fontSize: 18, color: token.colorPrimary }}>
-                        {timer.formattedTime}
-                    </Typography.Text>
-                )}
-                                <Button
-                    icon={timer.isRunning ? <PauseOutlined /> : <CaretRightOutlined />}
-                    onClick={timer.isRunning ? timer.pause : timer.start}
-                    type="primary"
-                    size="small"
-                    title={timer.isRunning ? "Pausar timer" : "Iniciar timer"}
-                >
-                </Button>
-
-            </Space>
-                ) : (
+                {/* Timer para mobile - aparece apenas em telas pequenas */}
+                {isMobile && timer.isLoaded ? (
+                    <OwlTimer
+                        formattedTime={timer.formattedTime}
+                        isRunning={timer.isRunning}
+                        isVisible={isTimerVisible}
+                        onToggleVisibility={() => setIsTimerVisible(!isTimerVisible)}
+                        onToggleTimer={timer.isRunning ? timer.pause : timer.start}
+                    />
+                ) : isMobile && !timer.isLoaded ? (
                     <div style={{ fontSize: 16, color: token.colorTextSecondary }}>
                         <Spin size="small" indicator={<LoadingOutlined />} />
                     </div>
-                )}
+                ) : null}
             </Flex>
-            <TabContainer>
+            
+            {/* Container para timer grudado no TabContainer */}
+            <div style={{ position: 'relative' }}>
+                {/* Timer grudado no TabContainer - apenas em telas grandes */}
+                {!isMobile && (
+                    <div style={{
+                        position: 'absolute',
+                        top: '-145px',
+                        right: '15px',
+                        zIndex: 1000
+                    }}>
+                        {timer.isLoaded ? (
+                            <OwlTimer
+                                formattedTime={timer.formattedTime}
+                                isRunning={timer.isRunning}
+                                isVisible={isTimerVisible}
+                                onToggleVisibility={() => setIsTimerVisible(!isTimerVisible)}
+                                onToggleTimer={timer.isRunning ? timer.pause : timer.start}
+                            />
+                        ) : (
+                            <div style={{ 
+                                fontSize: 'clamp(12px, 2.5vw, 16px)', 
+                                color: token.colorTextSecondary 
+                            }}>
+                                <Spin size="small" indicator={<LoadingOutlined />} />
+                            </div>
+                        )}
+                    </div>
+                )}
+                <TabContainer>
                 <Tabs
                     items={[
                         {
@@ -245,6 +265,7 @@ export function QuestionBookPageClient({
                     ]}
                 />
             </TabContainer>
+            </div>
         </Container>
     );
 }

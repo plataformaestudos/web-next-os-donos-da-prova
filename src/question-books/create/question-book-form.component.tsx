@@ -55,14 +55,14 @@ export function QuestionBookForm({ questionBook, modules, folders }: Props) {
           createQuestionBook({
             name: name as string,
             folderId: folderId as string,
-            modules: Array.from(modulesQuantities.entries()).map(
-              ([moduleId, quantityQuestions]) => ({
+            modules: Array.from(modulesQuantities.entries())
+              .filter(([moduleId]) => checkedModulesIds.includes(moduleId))
+              .map(([moduleId, quantityQuestions]) => ({
                 moduleId,
                 treeCode: checkedModules.find(({ id }) => id === moduleId)
                   ?.treeCode as string,
                 quantityQuestions,
-              })
-            ),
+              })),
           })
         }
       >
@@ -84,14 +84,20 @@ export function QuestionBookForm({ questionBook, modules, folders }: Props) {
                   readonly
                   checkable
                   onCheck={({ checkedLeaves: modules }) => {
-                    modules.map((module) => {
-                      if (!modulesQuantities.has(module.id)) {
-                        modulesQuantities.set(
-                          module.id,
-                          module.numberQuestions
-                        );
-                      }
+                    // Criar um novo Map baseado nos módulos selecionados
+                    const newModulesQuantities = new Map();
+                    
+                    // Adicionar apenas os módulos que estão selecionados
+                    modules.forEach((module) => {
+                      // Manter o valor existente se já existir, senão usar o número total de questões
+                      const existingValue = modulesQuantities.get(module.id);
+                      newModulesQuantities.set(
+                        module.id,
+                        existingValue !== undefined ? existingValue : module.numberQuestions
+                      );
                     });
+                    
+                    setModulesQuantities(newModulesQuantities);
                     setCheckedModules(modules);
                   }}
                 />

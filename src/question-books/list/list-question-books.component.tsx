@@ -15,7 +15,7 @@ import {
     Typography,
 } from "antd";
 import { EditOutlined, EllipsisOutlined, StarFilled, StarOutlined } from "@ant-design/icons";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { DefaultTheme, useTheme } from "styled-components";
 import { DeleteQuestionBookButton } from "../delete/delete-question-book.component";
 import Link from "next/link";
@@ -40,6 +40,19 @@ export function ListQuestionBooks({ questionBooks, folders, setQuestionBooksWith
     const primaryColor = styledTheme.colorPrimary;
     const [name, setName] = useState("");
     const [error, setError] = useState<string | null>(null);
+
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkScreenSize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
 
     const handleDelete = (id: string) => {
         setItems((prev) => prev.filter((q) => q.id !== id));
@@ -144,22 +157,22 @@ export function ListQuestionBooks({ questionBooks, folders, setQuestionBooksWith
                                     onClick={() => toggleFavorite(item.id)}
                                 />
                             </Tooltip>
-
-                            <Tooltip title={`${item.nrOfAnsweredQuestions} de ${item.questionsCount} questões (${item.percentAnswered}%)`}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                    <Progress
-                                        percent={Math.max(0, Math.min(100, Number(item.percentAnswered || 0)))}
-                                        strokeColor={item.percentAnswered === 100 ? '#52c41a' : primaryColor}
-                                        showInfo={false}
-                                        strokeWidth={8}
-                                        style={{ width: 120 }}
-                                    />
-                                    <Typography.Text style={{ minWidth: 40, textAlign: 'center', fontSize: 14, fontWeight: '700' }}>
-                                        {item.questionsCount > 0 ? `${item.percentAnswered}%` : "0%"}
-                                    </Typography.Text>
-                                </div>
-                            </Tooltip>
-
+                            {!isMobile && (
+                                <Tooltip title={`${item.nrOfAnsweredQuestions} de ${item.questionsCount} questões (${item.percentAnswered}%)`}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <Progress
+                                            percent={Math.max(0, Math.min(100, Number(item.percentAnswered || 0)))}
+                                            strokeColor={item.percentAnswered === 100 ? '#52c41a' : primaryColor}
+                                            showInfo={false}
+                                            strokeWidth={8}
+                                            style={{ width: 120 }}
+                                        />
+                                        <Typography.Text style={{ minWidth: 40, textAlign: 'center', fontSize: 14, fontWeight: '700' }}>
+                                            {item.questionsCount > 0 ? `${item.percentAnswered}%` : "0%"}
+                                        </Typography.Text>
+                                    </div>
+                                </Tooltip>
+                            )}
                             <Dropdown
                                 open={dropdownOpened === item.id}
                                 onOpenChange={(open) => setDropdownOpened(open ? item.id : null)}
