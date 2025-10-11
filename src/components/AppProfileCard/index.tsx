@@ -1,10 +1,14 @@
 "use client";
 
 import { UserExtended } from "@/app/context/user.context";
-import { Button, Card, Descriptions, Tabs, Typography } from "antd";
+import { Button, Card, Descriptions, Tabs, Typography, App } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import styled from "styled-components";
+import { useState, useTransition } from "react";
+import { DeleteAccountModal } from "@/profile/delete-account/delete-account-modal.component";
+import { deleteAccountClient } from "@/profile/delete-account/delete-account.action";
+import { useRouter } from "next/navigation";
 
 interface AppProfileCardProps {
   user: UserExtended | null;
@@ -64,6 +68,39 @@ const formatCep = (cep: string | undefined) => {
 };
 
 export const AppProfileCard = ({ user }: AppProfileCardProps) => {
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const [isPending, startTransition] = useTransition();
+    const app = App.useApp?.();
+    const message = app?.message;
+    const router = useRouter();
+
+    const handleDeleteAccount = () => {
+        setIsDeleteModalVisible(true);
+    };
+
+    const handleConfirmDelete = (reason?: string) => {
+        startTransition(async () => {
+            try {
+                const res = await deleteAccountClient({ deletionReason: reason });
+                if (res.success) {
+                    message?.success("Conta excluída com sucesso!");
+                    router.push("/login")
+                } else {
+                    message?.error(res.error ?? "Erro ao excluir conta");
+                }
+            } catch (err: unknown) {
+                const text = err instanceof Error ? err.message : "Erro inesperado ao excluir conta";
+                message?.error(text);
+            } finally {
+                setIsDeleteModalVisible(false);
+            }
+        });
+    };
+
+    const handleCancelDelete = () => {
+        setIsDeleteModalVisible(false);
+    };
+
     const items = [
     {
       key: "1",
@@ -77,11 +114,22 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
             </Descriptions.Item>
           </Descriptions>
           <ButtonContent>
-            <Link href="/subscription">
-              <Button type="primary" size="large">
-                Gerenciar Assinatura
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}>
+              <Link href="/subscription">
+                <Button type="primary" size="large">
+                  Gerenciar Assinatura
+                </Button>
+              </Link>
+              <Button 
+                type="default" 
+                size="large" 
+                danger
+                onClick={handleDeleteAccount}
+                disabled={isPending}
+              >
+                Excluir Conta
               </Button>
-            </Link>
+            </div>
           </ButtonContent>
         </>
       ),
@@ -165,6 +213,13 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
       <ProfileTitle level={2}>{user?.profile?.name}</ProfileTitle>
 
       <Tabs defaultActiveKey="1" items={items} />
+      
+      <DeleteAccountModal
+        visible={isDeleteModalVisible}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        loading={isPending}
+      />
     </ProfileCard>
   );
 };
