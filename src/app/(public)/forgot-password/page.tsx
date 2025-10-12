@@ -4,7 +4,7 @@ import * as Styled from "./page.style";
 
 import { App, Button, Form, Input, Typography, Alert } from "antd";
 import { forgotPasswordClient } from "@/auth/forgot-password/forgot-password.action";
-import { useRecaptcha } from "@/hooks/useRecaptcha";
+import { executeRecaptcha } from "@/hooks/useRecaptcha";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -16,7 +16,6 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [emailSent, setEmailSent] = useState(false);
-  const { executeRecaptcha } = useRecaptcha();
   const router = useRouter();
 
   const onFinish = async (values: { email: string }) => {
