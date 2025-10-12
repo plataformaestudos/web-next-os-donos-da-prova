@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
             description="Enviamos um link para redefinir sua senha para o email cadastrado. Verifique sua caixa de entrada e siga as instruções."
             type="success"
             showIcon
-            style={{ marginBottom: 24, backgroundColor: "#f0f0f0" }}
+            style={{ marginBottom: 24}}
           />
           <Button
             type="primary"

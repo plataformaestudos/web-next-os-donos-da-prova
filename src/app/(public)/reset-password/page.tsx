@@ -100,7 +100,7 @@ export default function ResetPasswordPage() {
             description="Sua senha foi alterada com sucesso. Você pode fazer login com sua nova senha."
             type="success"
             showIcon
-            style={{ marginBottom: 24, backgroundColor: "#f0f0f0" }}
+            style={{ marginBottom: 24 }}
           />
           <Button
             type="primary"
