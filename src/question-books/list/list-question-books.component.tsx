@@ -231,7 +231,7 @@ export function ListQuestionBooks({ questionBooks, folders, setQuestionBooksWith
                 )}
             />
             <Modal
-                destroyOnHidden
+                destroyOnClose
                 title={
                     <Flex vertical>
                         <Typography.Text
@@ -282,7 +282,7 @@ export function ListQuestionBooks({ questionBooks, folders, setQuestionBooksWith
                 {error && <Typography.Text type="danger">{error}</Typography.Text>}
             </Modal>
             <Modal
-                destroyOnHidden
+                destroyOnClose
                 title={
                     <Flex vertical>
                         <Typography.Text type="secondary" style={{ fontSize: 12, fontWeight: "normal" }}>

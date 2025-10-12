@@ -103,7 +103,7 @@ export function ListFolders({ folders }: ListFoldersProps) {
                 )}
             />
             <Modal
-                destroyOnHidden
+                destroyOnClose
                 title={
                     <Flex vertical>
                         <Typography.Text

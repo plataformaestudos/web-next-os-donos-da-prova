@@ -93,15 +93,26 @@ useEffect(() => {
             </Button>
           </Form.Item>
 
-          <div>
-            <span>Não tem uma conta? </span>
-            <Button
-              type="link"
-              onClick={() => router.push("/signup")}
-              style={{ padding: 0 }}
-            >
-              Cadastre-se
-            </Button>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
+            <div>
+              <span>Não tem uma conta? </span>
+              <Button
+                type="link"
+                onClick={() => router.push("/signup")}
+                style={{ padding: 0 }}
+              >
+                Cadastre-se
+              </Button>
+            </div>
+            <div>
+              <Button
+                type="link"
+                onClick={() => router.push("/forgot-password")}
+                style={{ padding: 0 }}
+              >
+                Esqueci minha senha
+              </Button>
+            </div>
           </div>
         </Form>
       </Styled.Card>
