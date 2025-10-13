@@ -6,7 +6,7 @@ export const Container = styled.div<{ $collapsed: boolean }>`
   background-color: ${({ theme }) => theme.colorMenu};
   position: absolute;
   height: 100%;
-  width: 75%;
+  width: 60%;
 
   transition: left 300ms ease-in-out, width 300ms ease-in-out;
   z-index: 20;
@@ -24,7 +24,7 @@ export const Container = styled.div<{ $collapsed: boolean }>`
 
   @media (min-width: 640px) {
     position: static;
-    width: 320px;
+    width: 270px;
 
     ${({ $collapsed }) =>
       $collapsed &&

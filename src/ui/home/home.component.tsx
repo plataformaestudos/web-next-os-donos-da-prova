@@ -141,9 +141,9 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                                 strokeColor={{ from: "#af2615", to: "#af2615" }}
                                 size={{ height: 10 }}
                                 style={{
-                                    fontSize: "16px",
+                                    fontSize: "clamp(12px, 2.5vw, 16px)",
                                     fontWeight: "bold",
-                                    marginTop: "-6px",
+                                    marginTop: "clamp(0px, 1vw, 6px)",
                                 }}
                             />
                         </S.Card>
@@ -197,8 +197,6 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                                 />{" "}
                             </S.CardTitle>
                         </S.Card>
-                    </S.Content>
-                    <S.RightContent>
                         <S.CardPerformance $large>
                             <S.CardTitle>Meu Desempenho</S.CardTitle>
                             <S.Spacer />
@@ -246,6 +244,9 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                                 height={100}
                             />
                         </S.CardPerformance>
+                    </S.Content>
+                    <S.RightContent>
+                        {/* Desktop only  */}
                     </S.RightContent>
                 </S.Container>
             )}

@@ -8,11 +8,15 @@ export const Title = styled.h1``;
 
 export const Container = styled.div`
   display: flex;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 export const CardPerformance = styled.div<{ $large?: boolean }>`
   display: flex;
-    position: relative;
+  position: relative;
   flex-direction: column;
   justify-content: center;
   background-color: ${({ theme }) => theme.colorSecondary};
@@ -22,10 +26,46 @@ export const CardPerformance = styled.div<{ $large?: boolean }>`
   padding: 18px;
   gap: 8px;
   transition: filter 0.15s ease-in-out;
+  flex: 0 0 auto;
+  min-width: fit-content;
 
   &:hover {
     filter: brightness(0.95);
     cursor: pointer;
+  }
+  
+  /* iPad e tablets - esconder mascote e usar grid */
+  @media (max-width: 1024px) and (min-width: 769px) {
+    width: 100%;
+    height: clamp(350px, 25vw, 380px);
+    min-height: clamp(350px, 25vw, 380px);
+    max-height: clamp(350px, 25vw, 380px);
+    padding: clamp(16px, 3vw, 20px);
+    gap: clamp(8px, 1.5vw, 10px);
+    grid-area: performance;
+    flex: none;
+    min-width: auto;
+    
+    img {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    height: clamp(250px, 35vw, 400px);
+    min-height: clamp(300px, 35vw, 400px);
+    max-height: clamp(250px, 35vw, 400px);
+    padding: clamp(16px, 4vw, 24px);
+    gap: clamp(8px, 2vw, 12px);
+    grid-area: performance;
+    flex: none;
+    min-width: auto;
+    
+    /* Esconder a imagem da mascote no mobile */
+    img {
+      display: none;
+    }
   }
 `;
 
@@ -35,16 +75,41 @@ export const Card = styled.div`
   flex-direction: column;
   justify-content: center;
   background-color: ${({ theme }) => theme.colorSecondary};
-  border-radius: 8px;
+  border-radius: clamp(6px, 2vw, 12px);
   height: 100%;
   max-height: 200px;
-  padding: 18px;
-  gap: 8px;
+  padding: clamp(12px, 3vw, 24px);
+  gap: clamp(6px, 1.5vw, 12px);
   transition: filter 0.15s ease-in-out;
+  flex: 0 0 auto;
+  min-width: fit-content;
 
   &:hover {
     filter: brightness(0.95);
     cursor: pointer;
+  }
+  
+  /* iPad e tablets - usar grid */
+  @media (max-width: 1024px) and (min-width: 769px) {
+    width: 100%;
+    height: clamp(160px, 20vw, 200px);
+    min-height: clamp(160px, 20vw, 200px);
+    max-height: clamp(160px, 20vw, 200px);
+    padding: clamp(12px, 3vw, 18px);
+    gap: clamp(6px, 1.5vw, 8px);
+    flex: none;
+    min-width: auto;
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    height: clamp(160px, 25vw, 200px);
+    min-height: clamp(160px, 25vw, 200px);
+    max-height: clamp(160px, 25vw, 200px);
+    padding: clamp(12px, 4vw, 20px);
+    gap: clamp(6px, 2vw, 10px);
+    flex: none;
+    min-width: auto;
   }
 `;
 
@@ -53,26 +118,75 @@ export const CardTitle = styled.h2`
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: clamp(4px, 1vw, 12px);
+  font-size: clamp(14px, 3vw, 20px);
+  line-height: 1.2;
+  
+  @media (max-width: 768px) {
+    font-size: clamp(12px, 3.5vw, 18px);
+    gap: clamp(4px, 1.5vw, 8px);
+  }
 `;
 
 export const CardText = styled.span`
   color: ${({ theme }) => theme.colorPrimaryText};
+  font-size: clamp(12px, 2.5vw, 16px);
+  
+  @media (max-width: 768px) {
+    font-size: clamp(10px, 2.8vw, 14px);
+  }
 `;
 
 export const Info = styled.span<InfoProps>`
   color: ${({ theme, $tertiary }) =>
     $tertiary ? theme.colorTertiary : theme.colorTextPrimary};
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 16px);
   font-weight: 600;
+  line-height: 1.3;
+  
+  @media (max-width: 768px) {
+    font-size: clamp(10px, 2.8vw, 14px);
+  }
 `;
 
 export const Content = styled.div`
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 16px;
   margin-top: 40px;
+  
+  /* iPad e tablets - layout 2x3 sem mascote */
+  @media (max-width: 1024px) and (min-width: 769px) {
+    margin-top: 20px;
+    gap: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas: 
+      "card1 card2 card3"
+      "card4 performance performance";
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  @media (max-width: 768px) {
+    margin-top: 20px;
+    gap: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas: 
+      "card1 card2"
+      "card3 card4"
+      "performance performance";
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 `;
 
 export const RightContent = styled.div`
@@ -81,6 +195,10 @@ export const RightContent = styled.div`
   gap: 16px;
   margin-top: 40px;
   margin-left: 16px;
+  
+  @media (max-width: 1024px) {
+    display: none;
+  }
 `;
 
 export const SubContent = styled.div`
@@ -93,15 +211,27 @@ export const Button = styled.button`
   background-color: ${({ theme }) => theme.colorTertiary};
   color: ${({ theme }) => theme.colorTertiaryText};
   border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: clamp(6px, 2vw, 12px) clamp(12px, 3vw, 20px);
+  border-radius: clamp(3px, 1vw, 6px);
   font-weight: 700;
+  font-size: clamp(12px, 2.5vw, 16px);
   width: fit-content;
   transition: filter 0.15s ease-in-out;
+  line-height: 1.2;
 
   &:hover {
     filter: brightness(0.95);
     cursor: pointer;
+  }
+
+  @media (max-width: 1024px) {
+    font-size: clamp(10px, 2.8vw, 14px);
+    padding: clamp(6px, 2.5vw, 10px) clamp(10px, 3.5vw, 16px);
+  }
+  
+  @media (max-width: 768px) {
+    font-size: clamp(10px, 2.8vw, 14px);
+    padding: clamp(6px, 2.5vw, 10px) clamp(10px, 3.5vw, 16px);
   }
 `;
 
@@ -149,8 +279,14 @@ export const PerformanceHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 16px);
   color: #333;
+  gap: clamp(8px, 2vw, 16px);
+  
+  @media (max-width: 768px) {
+    font-size: clamp(10px, 2.8vw, 14px);
+    gap: clamp(6px, 2.5vw, 12px);
+  }
 `;
 
 export const DaysGrid = styled.div`
@@ -173,6 +309,20 @@ export const DaysGrid = styled.div`
   overflow-x: auto;
   padding-bottom: 4px;
   overflow: visible;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(7, clamp(24px, 6vw, 32px));
+    gap: clamp(4px, 1.5vw, 8px);
+    justify-content: center;
+    margin-top: clamp(6px, 2vw, 10px);
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(7, clamp(24px, 6vw, 32px));
+    gap: clamp(4px, 1.5vw, 8px);
+    justify-content: center;
+    margin-top: clamp(6px, 2vw, 10px);
+  }
 `;
 
 export const DayDot = styled.div<{ $active?: boolean, $currentDay?: boolean }>`
@@ -195,6 +345,12 @@ export const DayDot = styled.div<{ $active?: boolean, $currentDay?: boolean }>`
   box-sizing: border-box;
   z-index: 0;
   position: relative;
+  
+  @media (max-width: 768px) {
+    width: clamp(20px, 5vw, 28px);
+    height: clamp(20px, 5vw, 28px);
+    font-size: clamp(9px, 2.2vw, 12px);
+  }
 
   &::before {
     content: attr(data-tooltip);
@@ -221,7 +377,6 @@ export const DayDot = styled.div<{ $active?: boolean, $currentDay?: boolean }>`
     text-align: center;
     pointer-events: none;
   }
-
 
   &:hover::before {
     opacity: 1;
