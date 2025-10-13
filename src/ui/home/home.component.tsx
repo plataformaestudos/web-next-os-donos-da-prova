@@ -9,10 +9,16 @@ import { Progress } from "antd";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
+export interface UserAnswersCurrentMonthDto {
+    answeredAt: Date;
+    count: number;
+}
+
 interface DashboardData {
     loginsInCurrentMonth: string[];
     totalAnswers: number;
     totalBooksFavorited: number;
+    answersByDayInCurrentMonth: UserAnswersCurrentMonthDto[];
     statsLastBookAnswered: {
         percentAnswered: string;
         nameBook: string;
@@ -31,6 +37,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
         loginsInCurrentMonth: [],
         totalAnswers: 0,
         totalBooksFavorited: 0,
+        answersByDayInCurrentMonth: [],
         statsLastBookAnswered: {
             percentAnswered: "0%",
             nameBook: "Nenhum caderno respondido",
@@ -85,6 +92,13 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                 activeDaysSet.add(parsed.getDate());
             }
         }
+    });
+
+    const answersByDayMap = new Map<number, number>();
+    (dashData.answersByDayInCurrentMonth || []).forEach((answer) => {
+        const answerDate = new Date(answer.answeredAt);
+        const day = answerDate.getDate();
+        answersByDayMap.set(day, answer.count);
     });
 
     const activeCount = activeDaysSet.size;
@@ -200,11 +214,17 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                                 <S.DaysGrid aria-label="Dias do mês">
                                     {daysArray.map((day) => {
                                         const isActive = activeDaysSet.has(day);
+                                        const questionsCount = answersByDayMap.get(day) || 0;
+                                        const tooltipText = questionsCount > 0 
+                                            ? `${questionsCount} ${questionsCount !== 1 ? 'questões' : 'questão'} respondida${questionsCount !== 1 ? 's' : ''}`
+                                            : "";
+                                        
                                         return (
                                             <S.DayDot
                                                 key={day}
-                                                title={`Dia ${day} - ${isActive ? "ativo" : "inativo"}`}
+                                                data-tooltip={tooltipText}
                                                 $active={isActive}
+                                                $currentDay={day === today.getDate()}
                                             >
                                                 {day}
                                             </S.DayDot>

@@ -142,6 +142,7 @@ export const Performance = styled.div`
   flex-direction: column;
   gap: 8px;
   width: 100%;
+  overflow: visible;
 `;
 
 export const PerformanceHeader = styled.div`
@@ -171,9 +172,10 @@ export const DaysGrid = styled.div`
   /* permitir scroll horizontal em telas muito pequenas */
   overflow-x: auto;
   padding-bottom: 4px;
+  overflow: visible;
 `;
 
-export const DayDot = styled.div<{ $active?: boolean }>`
+export const DayDot = styled.div<{ $active?: boolean, $currentDay?: boolean }>`
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -186,10 +188,64 @@ export const DayDot = styled.div<{ $active?: boolean }>`
   user-select: none;
   flex: 0 0 auto;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  background: ${({ $active, theme }) =>
-    $active ? theme.colorTertiary : "#f2f2f2"};
+  background: ${({ $active, $currentDay, theme }) =>
+    $currentDay ? "#163658" : $active ? theme.colorTertiary : "#f2f2f2"};
   color: ${({ $active, theme }) =>
     $active ? theme.colorTertiaryText : "#163658"};
   box-sizing: border-box;
   z-index: 0;
+  position: relative;
+
+  &::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: max-content;
+    max-width: 200px;
+    word-wrap: break-word;
+    white-space: normal;
+    text-align: center;
+    pointer-events: none;
+  }
+
+
+  &:hover::before {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &:not([data-tooltip=""]):hover::before {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &[data-tooltip=""]:hover::before {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  &:not([data-tooltip=""]):nth-child(7n+1)::before {
+    left: 0;
+    transform: translateX(0);
+  }
+
+  &:not([data-tooltip=""]):nth-child(7n)::before {
+    left: auto;
+    right: 0;
+    transform: translateX(0);
+  }
 `;
