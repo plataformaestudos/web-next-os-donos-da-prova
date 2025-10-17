@@ -75,10 +75,7 @@ export async function loadUserPlanModules() {
     const res = await HttpClient.fetch<ResponseModel<ModuleModel[]>>(
       `/modules/plans/user`,
       {
-        method: "GET",
-        next: {
-          tags: [CACHE_TAGS.MODULES],
-        },
+        method: "GET"
       }
     );
     if (!res.data) {
