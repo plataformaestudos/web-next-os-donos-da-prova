@@ -94,7 +94,6 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
   }, [debounceTimeout]);
 
 
-  // Obter todos os módulos que pertencem ao plano
   const getSelectedModules = () => {
     const existingModules = modules.data.filter(module => 
       values.modules.includes(module.id)
@@ -316,8 +315,8 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
             loadData={modules.loadData}
             readonly
             checkable
-            onCheck={({ checkedLeaves }) => {
-              handleChange("modules", checkedLeaves.map(m => m.id));
+            onCheck={({ checkedRoots }) => {
+              handleChange("modules", checkedRoots.map(m => m.id));
             }}
           />
         )}
