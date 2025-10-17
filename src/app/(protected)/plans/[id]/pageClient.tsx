@@ -14,7 +14,7 @@ import HttpClient from "@/util/http-client/fetch-client.util";
 import React from "react";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
 
-export function EditPlanPageClient({ plan, rootModules }: { plan: PlanFormValues; rootModules: ModuleViewModel[] }) {
+export function EditPlanPageClient({ plan }: { plan: PlanFormValues;  }) {
     const { loading, allowed } = useAuthGuard({ requireRoles: [Roles.ADMIN] });
 
     const [planModules, setPlanModules] = React.useState<ModuleViewModel[]>([]);
@@ -64,7 +64,6 @@ export function EditPlanPageClient({ plan, rootModules }: { plan: PlanFormValues
                         data: planModules, // Usar apenas os módulos do plano (todos eles)
                         loadData: loadChildrenModules,
                     }}
-                    onModulesChange={fetchModules}
                 />
             </PageLayout>
         </UpsertPlanProvider>

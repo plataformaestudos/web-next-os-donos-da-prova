@@ -30,10 +30,9 @@ interface UpsertPlanFormProps {
     loadData: (key: string) => Promise<Array<ModuleViewModel>>;
     data: Array<ModuleViewModel>;
   };
-  onModulesChange?: () => void;
 }
 
-export function UpsertPlanForm({ plan, modules, onModulesChange }: UpsertPlanFormProps) {
+export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
   const { upsertPlan, error } = useUpsertPlan();
 
   const [values, setValues] = useState<PlanFormValues>({

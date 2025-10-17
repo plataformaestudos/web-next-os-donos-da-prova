@@ -1,15 +1,11 @@
 // EditPlanPage.tsx (Server Component)
 import { createClient } from "@/util/supabase/server";
-import { queryModules } from "@/modules/tree/load-modules.action";
 import { EditPlanPageClient } from "./pageClient";
 import { PlanFormValues } from "@/plans/upsert/upsert-plan-form.component";
 
 export default async function EditPlanPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
   const { id } = await params;
-
-  // Busca módulos raiz
-  const rootModules = await queryModules();
 
   // Busca plano
   const { data } = await supabase
@@ -42,5 +38,5 @@ export default async function EditPlanPage({ params }: { params: Promise<{ id: s
 
   if (!plan) return null;
 
-  return <EditPlanPageClient plan={plan} rootModules={rootModules} />;
+  return <EditPlanPageClient plan={plan}/>;
 }

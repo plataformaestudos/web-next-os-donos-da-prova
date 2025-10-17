@@ -13,7 +13,7 @@ export default async function NewQuestionBookPage(props: { searchParams: SearchP
   const folderId = pasta
 
   const userPlanModules = await loadUserPlanModules();
-
+  
   const { data: folders } = await supabase
     .from("book_folders")
     .select("id, name, questionBooks:question_books(id, name)");
