@@ -6,7 +6,7 @@ import { UpsertPlanFormSubmitButton } from "@/plans/upsert/upsert-plan-form-subm
 import { UpsertPlanProvider } from "@/plans/upsert/upsert-plan.context";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Roles } from "@/util/roles";
-import { mergeModulesTree, moduleModelToViewModelAdapter } from "@/modules/modules.util";
+import { moduleModelToViewModelAdapter } from "@/modules/modules.util";
 import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { loadChildrenModules } from "@/modules/tree/load-modules.action";
 import { ModuleViewModel, ModuleModel } from "@/model/module.model";
@@ -19,33 +19,33 @@ export function EditPlanPageClient({ plan, rootModules }: { plan: PlanFormValues
 
     const [planModules, setPlanModules] = React.useState<ModuleViewModel[]>([]);
 
-
-    React.useEffect(() => {
+    const fetchModules = React.useCallback(async () => {
         if (plan.modules.length === 0) {
             setPlanModules([]);
             return;
         }
 
-        const fetchModules = async () => {
-            try {
-                const response = await HttpClient.fetch<{ data: ModuleModel[] }>(
-                    `/modules/tree_by_ids?ids=${plan.modules.join(",")}&show_tree_parents=true`,
-                    {
-                        method: "GET",
-                        next: { tags: [CACHE_TAGS.MODULES] },
-                    },
-                    true 
-                );
+        try {
+            const response = await HttpClient.fetch<{ data: ModuleModel[] }>(
+                `/plans-modules/by-plan/${plan.id}`,
+                {
+                    method: "GET",
+                    next: { tags: [CACHE_TAGS.MODULES] },
+                },
+                true 
+            );
 
-                setPlanModules(response.data?.map(moduleModelToViewModelAdapter) ?? []);
-            } catch (error) {
-                console.error("Erro ao buscar módulos do plano:", error);
-                setPlanModules([]);
-            }
-        };
+            const modules = response.data?.map(moduleModelToViewModelAdapter) ?? [];
+            setPlanModules(modules);
+        } catch (error) {
+            console.error("Erro ao buscar módulos do plano:", error);
+            setPlanModules([]);
+        }
+    }, [plan.id, plan.modules.length]);
 
+    React.useEffect(() => {
         fetchModules();
-    }, [plan.modules]);
+    }, [fetchModules]);
 
     if (loading) return <FullPageLoading />;
 
@@ -61,9 +61,10 @@ export function EditPlanPageClient({ plan, rootModules }: { plan: PlanFormValues
                 <UpsertPlanForm
                     plan={plan}
                     modules={{
-                        data: mergeModulesTree(rootModules, planModules),
+                        data: planModules, // Usar apenas os módulos do plano (todos eles)
                         loadData: loadChildrenModules,
                     }}
+                    onModulesChange={fetchModules}
                 />
             </PageLayout>
         </UpsertPlanProvider>

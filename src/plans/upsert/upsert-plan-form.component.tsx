@@ -1,12 +1,13 @@
 "use client";
 
-import { Divider, Flex, Input, InputNumber, Typography, Checkbox } from "antd";
+import { Divider, Flex, Input, InputNumber, Typography, Checkbox, Tag, Space, AutoComplete, Tooltip } from "antd";
 import styled from "styled-components";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ModuleViewModel } from "@/model/module.model";
 import { ModulesTree } from "@/modules/tree/modules-tree.component";
 import { UPSERT_PLAN_FORM_ID } from "./upsert-plan-form.constant";
 import { useUpsertPlan } from "./upsert-plan.context";
+import { queryModules } from "@/modules/tree/load-modules.action";
 
 export interface PlanFormValues {
   id?: string;
@@ -29,9 +30,10 @@ interface UpsertPlanFormProps {
     loadData: (key: string) => Promise<Array<ModuleViewModel>>;
     data: Array<ModuleViewModel>;
   };
+  onModulesChange?: () => void;
 }
 
-export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
+export function UpsertPlanForm({ plan, modules, onModulesChange }: UpsertPlanFormProps) {
   const { upsertPlan, error } = useUpsertPlan();
 
   const [values, setValues] = useState<PlanFormValues>({
@@ -49,6 +51,11 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
     modules: plan?.modules || []
   });
 
+  const [searchValue, setSearchValue] = useState("");
+  const [filteredModules, setFilteredModules] = useState<ModuleViewModel[]>([]);
+  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [addedModules, setAddedModules] = useState<ModuleViewModel[]>([]);
+
   const handleChange = <K extends keyof PlanFormValues>(
     field: K,
     value: PlanFormValues[K]
@@ -56,6 +63,75 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
     setValues(v => ({ ...v, [field]: value }));
   };
 
+  const searchModules = (query: string) => {
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+
+    if (!query.trim()) {
+      setFilteredModules([]);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        const modules = await queryModules(query);
+        setFilteredModules(modules);
+      } catch (error) {
+        console.error("Erro ao buscar módulos:", error);
+        setFilteredModules([]);
+      }
+    }, 300); // 300ms de debounce
+
+    setDebounceTimeout(timeout);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+      }
+    };
+  }, [debounceTimeout]);
+
+
+  // Obter todos os módulos que pertencem ao plano
+  const getSelectedModules = () => {
+    const existingModules = modules.data.filter(module => 
+      values.modules.includes(module.id)
+    );
+    
+    const newlyAddedModules = addedModules.filter(module => 
+      values.modules.includes(module.id) && 
+      !modules.data.some(existing => existing.id === module.id)
+    );
+    
+    return [...existingModules, ...newlyAddedModules];
+  };
+
+  const handleAddModule = (moduleId: string) => {
+    if (!values.modules.includes(moduleId)) {
+      handleChange("modules", [...values.modules, moduleId]);
+      
+      const moduleToAdd = filteredModules.find(m => m.id === moduleId);
+      if (moduleToAdd && !modules.data.some(existing => existing.id === moduleId)) {
+        setAddedModules(prev => [...prev, moduleToAdd]);
+      }
+    }
+    setSearchValue("");
+  };
+
+  const handleRemoveModule = (moduleId: string) => {
+    const newModules = values.modules.filter(id => id !== moduleId);
+    handleChange("modules", newModules);
+    
+    setAddedModules(prev => prev.filter(m => m.id !== moduleId));
+  };
+
+  const truncateModuleName = (name: string, maxLength: number = 50) => {
+    if (name.length <= maxLength) return name;
+    return name.substring(0, maxLength) + "...";
+  };
 
   const handleSubmit = () => {
     upsertPlan(values);
@@ -192,17 +268,60 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
         <Divider />
 
         <Label>Módulos</Label>
-        <ModulesTree
-          modules={modules.data}
-          loadData={modules.loadData}
-          readonly
-          checkable
-          autoExpand
-          defaultCheckedKeys={values.modules}
-          onCheck={({ checkedRoots }) => {
-            handleChange("modules", checkedRoots.map(m => m.id));
-          }}
-        />
+        
+        {values.id ? (
+          // Modo de edição 
+          <Flex vertical style={{ gap: 16, marginTop: 16 }}>
+            <Space wrap>
+              {getSelectedModules().map(module => (
+                <Tooltip key={module.id} title={module.name}>
+                  <Tag 
+                    color="blue" 
+                    style={{ fontSize: '14px', padding: '4px 8px', maxWidth: '450px' }}
+                    closable
+                    onClose={() => handleRemoveModule(module.id)}
+                  >
+                    {truncateModuleName(module.name)}
+                  </Tag>
+                </Tooltip>
+              ))}
+              {getSelectedModules().length === 0 && (
+                <Typography.Text type="secondary">
+                  Nenhum módulo selecionado
+                </Typography.Text>
+              )}
+            </Space>
+            
+            <div>
+              <Typography.Text strong>Adicionar módulo:</Typography.Text>
+              <AutoComplete
+                style={{ width: '100%', marginTop: 8 }}
+                value={searchValue}
+                onChange={(value) => {
+                  setSearchValue(value);
+                  searchModules(value);
+                }}
+                placeholder="Digite o nome do módulo..."
+                options={filteredModules.map(module => ({
+                  value: module.id,
+                  label: module.name,
+                }))}
+                onSelect={(value) => handleAddModule(value)}
+              />
+            </div>
+          </Flex>
+        ) : (
+          // Modo de criação 
+          <ModulesTree
+            modules={modules.data}
+            loadData={modules.loadData}
+            readonly
+            checkable
+            onCheck={({ checkedLeaves }) => {
+              handleChange("modules", checkedLeaves.map(m => m.id));
+            }}
+          />
+        )}
       </form>
 
       {error && <Typography.Text type="danger">{error}</Typography.Text>}
