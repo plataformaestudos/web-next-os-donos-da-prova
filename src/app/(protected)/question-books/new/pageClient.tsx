@@ -20,11 +20,11 @@ interface FoldersProps {
 export function NewQuestionBookPageClient({
     folderId,
     folders,
-    rootModules,
+    userPlanModules,
   }: {
     folderId: string | undefined;
     folders: FoldersProps[];
-    rootModules: ModuleViewModel[];
+    userPlanModules: ModuleViewModel[];
   }) {
   const { allowed, loading } = useAuthGuard({
     requireRoles: [Roles.ADMIN, Roles.STUDENT],
@@ -46,7 +46,7 @@ export function NewQuestionBookPageClient({
         <QuestionBookForm
           questionBook={{ folderId }}
           folders={folders}
-          modules={{ data: rootModules, loadData: loadChildrenModules }}
+          modules={{ data: userPlanModules, loadData: loadChildrenModules }}
         />
       </PageLayout>
     </CreateQuestionProvider>

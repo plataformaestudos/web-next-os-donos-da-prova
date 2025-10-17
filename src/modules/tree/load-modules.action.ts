@@ -69,3 +69,27 @@ export async function queryModules(query?: string, parentModuleId?: string) {
     response.data.map(moduleModelToViewModelAdapter)
   );
 }
+
+export async function loadUserPlanModules() {
+  try {
+    const res = await HttpClient.fetch<ResponseModel<ModuleModel[]>>(
+      `/modules/plans/user`,
+      {
+        method: "GET",
+        next: {
+          tags: [CACHE_TAGS.MODULES],
+        },
+      }
+    );
+    if (!res.data) {
+      console.warn("Nenhum dado retornado para módulos do plano do usuário");
+      return [];
+    }
+    
+    return res.data.map(moduleModelToViewModelAdapter);
+
+  } catch (error: unknown) {
+    console.error("Erro ao carregar módulos do plano do usuário", error);
+    return [];
+  }
+}
