@@ -25,3 +25,11 @@ export interface FullQuestion extends QuestionModel {
   alternatives: QuestionAlternativeModel[];
   modules: QuestionModuleModel[];
 }
+
+export interface QuestionGeneralStats {
+  totalAnswers: number;
+  correctAnswers: number;
+  incorrectAnswers: number;
+  accuracyPercentage: number;
+  difficulty: number;
+}

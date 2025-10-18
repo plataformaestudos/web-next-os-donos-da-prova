@@ -4,20 +4,24 @@ import {
     Tabs,
     Breadcrumb,
     Col,
-    Divider,
     Flex,
     Progress,
     Statistic,
     Row,
     theme,
     Typography,
-    Spin
+    Spin,
+    Card
 } from "antd";
 import {
     QuestionCircleOutlined,
     BarChartOutlined,
     WechatOutlined,
     LoadingOutlined,
+    CheckCircleOutlined,
+    CloseCircleOutlined,
+    ThunderboltOutlined,
+    UserOutlined,
 } from "@ant-design/icons";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useQuestionBookTimer } from "@/app/hooks/useQuestionBookTimer";
@@ -30,6 +34,8 @@ import { QuestionBookModel } from "@/question-books/question-book.model";
 import { AppQuestionCounter } from "@/components/AppQuestionCounter";
 import { OwlTimer } from "@/components/OwlTimer";
 import { useState, useEffect } from "react";
+import { QuestionGeneralStats } from "@/model/question.model";
+import { getQuestionGeneralStats } from "../question-stats.api";
 export function QuestionBookPageClient({
     id,
     seq,
@@ -46,9 +52,11 @@ export function QuestionBookPageClient({
     const { token } = theme.useToken();
 
     const [question, setQuestion] = useState(questionBook?.nextQuestion);
-    const timer = useQuestionBookTimer(id); // Timer is per question book, not per question
+    const timer = useQuestionBookTimer(id); 
     const [isTimerVisible, setIsTimerVisible] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
+    const [questionStats, setQuestionStats] = useState<QuestionGeneralStats | null>(null);
+    const [isLoadingStats, setIsLoadingStats] = useState(false);
 
     useEffect(() => {
         const checkScreenSize = () => {
@@ -60,6 +68,25 @@ export function QuestionBookPageClient({
 
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
+
+    useEffect(() => {
+        const fetchQuestionStats = async () => {
+            if (!question?.questionId) return;
+            
+            setIsLoadingStats(true);
+            try {
+                const stats = await getQuestionGeneralStats(question.questionId);
+                setQuestionStats(stats);
+            } catch (error) {
+                console.error('Erro ao buscar estatísticas da questão:', error);
+                setQuestionStats(null);
+            } finally {
+                setIsLoadingStats(false);
+            }
+        };
+
+        fetchQuestionStats();
+    }, [question?.questionId]);
 
     if (loading) return <FullPageLoading />;
 
@@ -173,82 +200,206 @@ export function QuestionBookPageClient({
                             key: "2",
                             label: "Estatísticas",
                             icon: <BarChartOutlined />,
-                            children: questionBook?.questionBookStats ? (
-                                <Row gutter={[16, 16]}>
-                                    <Col
-                                        span={24}
-                                        sm={{ span: 10 }}
+                            children: isLoadingStats ? (
+                                <div style={{ 
+                                    textAlign: 'center', 
+                                    padding: 'clamp(40px, 8vw, 80px)' 
+                                }}>
+                                    <Spin size="large" />
+                                    <Typography.Text 
+                                        style={{ 
+                                            marginTop: 'clamp(16px, 4vw, 24px)',
+                                            fontSize: 'clamp(16px, 4vw, 18px)',
+                                            display: 'block',
+                                            color: token.colorTextSecondary
+                                        }}
                                     >
-                                        <Flex
-                                            align="center"
-                                            gap={24}
-                                        >
-                                            <Flex vertical>
-                                                <Statistic
-                                                    title="Total de questões respondidas"
-                                                    value={questionBook?.questionBookStats.totalAnswers}
+                                        Carregando estatísticas...
+                                    </Typography.Text>
+                                </div>
+                            ) : questionStats ? (
+                                <div style={{ padding: 'clamp(16px, 4vw, 24px)' }}>
+                                    {/* Header com título e progresso principal */}
+                                    <Card 
+                                        style={{ 
+                                            marginBottom: 'clamp(16px, 4vw, 24px)',
+                                            background: `linear-gradient(135deg, ${token.colorPrimaryBg} 0%, ${token.colorBgContainer} 100%)`,
+                                            border: `1px solid ${token.colorBorderSecondary}`,
+                                            borderRadius: 'clamp(8px, 2vw, 12px)'
+                                        }}
+                                        styles={{ body: { padding: 'clamp(16px, 4vw, 24px)' } }}
+                                    >
+                                        <Flex justify="space-between" align="center" wrap="wrap" gap="clamp(16px, 4vw, 24px)">
+                                            <div>
+                                                <Typography.Title 
+                                                    level={3} 
+                                                    style={{ 
+                                                        margin: 0,
+                                                        fontSize: 'clamp(18px, 4vw, 24px)',
+                                                        color: token.colorTextHeading
+                                                    }}
+                                                >
+                                                    📊 Estatísticas da Questão
+                                                </Typography.Title>
+                                                <Typography.Text 
+                                                    type="secondary"
+                                                    style={{ fontSize: 'clamp(14px, 3vw, 16px)' }}
+                                                >
+                                                    Dados de performance desta questão
+                                                </Typography.Text>
+                                            </div>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <Progress
+                                                    type="circle"
+                                                    percent={Math.round(questionStats.accuracyPercentage)}
+                                                    size={120}
+                                                    strokeColor={{
+                                                        '0%': token.colorSuccess,
+                                                        '100%': token.colorPrimary,
+                                                    }}
+                                                    trailColor={token.colorBorderSecondary}
                                                 />
-                                                <Statistic
-                                                    title="Total de questões no caderno"
-                                                    value={questionBook?.questionBookStats.totalQuestions}
-                                                />
-                                            </Flex>
-                                            <Progress
-                                                type="circle"
-                                                percent={Math.round(
-                                                    (questionBook?.questionBookStats.totalAnswers /
-                                                        questionBook?.questionBookStats.totalQuestions) *
-                                                    100
-                                                )}
-                                                size="small"
-                                            />
+                                                <Typography.Text 
+                                                    strong 
+                                                    style={{ 
+                                                        display: 'block',
+                                                        marginTop: 8,
+                                                        fontSize: 'clamp(14px, 3vw, 16px)',
+                                                        color: token.colorTextHeading
+                                                    }}
+                                                >
+                                                    Taxa de Acerto
+                                                </Typography.Text>
+                                            </div>
                                         </Flex>
-                                    </Col>
-                                    <Col
-                                        span={0}
-                                        sm={{ span: 2 }}
-                                        offset={1}
-                                    >
-                                        <Divider type="vertical" />
-                                    </Col>
-                                    <Col
-                                        span={24}
-                                        sm={{ span: 0 }}
-                                    >
-                                        <Divider type="horizontal" />
-                                    </Col>
-                                    <Col
-                                        span={24}
-                                        sm={{ span: 10 }}
-                                    >
-                                        <Flex
-                                            align="center"
-                                            gap={24}
-                                        >
-                                            <Flex vertical>
+                                    </Card>
+
+                                    {/* Cards de estatísticas */}
+                                    <Row gutter={[12, 12]}>
+                                        <Col xs={24} sm={12} md={8} lg={6}>
+                                            <Card
+                                                style={{
+                                                    height: '100%',
+                                                    background: `linear-gradient(135deg, ${token.colorInfoBg} 0%, ${token.colorBgContainer} 100%)`,
+                                                    border: `1px solid ${token.colorInfoBorder}`,
+                                                    borderRadius: 'clamp(8px, 2vw, 12px)'
+                                                }}
+                                                styles={{ body: { padding: 'clamp(12px, 3vw, 16px)' } }}
+                                            >
                                                 <Statistic
-                                                    title="Total de questões acertadas"
-                                                    value={questionBook?.questionBookStats.correctAnswers}
+                                                    title={
+                                                        <Flex align="center" gap={6}>
+                                                            <UserOutlined style={{ color: token.colorInfo, fontSize: 'clamp(14px, 3vw, 16px)' }} />
+                                                            <span style={{ fontSize: 'clamp(12px, 2.5vw, 14px)' }}>Total de Respostas</span>
+                                                        </Flex>
+                                                    }
+                                                    value={questionStats.totalAnswers}
+                                                    valueStyle={{ 
+                                                        fontSize: 'clamp(18px, 4vw, 24px)',
+                                                        color: token.colorInfo,
+                                                        fontWeight: 'bold'
+                                                    }}
                                                 />
+                                            </Card>
+                                        </Col>
+
+                                        <Col xs={24} sm={12} md={8} lg={6}>
+                                            <Card
+                                                style={{
+                                                    height: '100%',
+                                                    background: `linear-gradient(135deg, ${token.colorSuccessBg} 0%, ${token.colorBgContainer} 100%)`,
+                                                    border: `1px solid ${token.colorSuccessBorder}`,
+                                                    borderRadius: 'clamp(8px, 2vw, 12px)'
+                                                }}
+                                                styles={{ body: { padding: 'clamp(12px, 3vw, 16px)' } }}
+                                            >
                                                 <Statistic
-                                                    title="Total de questões respondidas"
-                                                    value={questionBook?.questionBookStats.totalAnswers}
+                                                    title={
+                                                        <Flex align="center" gap={6}>
+                                                            <CheckCircleOutlined style={{ color: token.colorSuccess, fontSize: 'clamp(14px, 3vw, 16px)' }} />
+                                                            <span style={{ fontSize: 'clamp(12px, 2.5vw, 14px)' }}>Respostas Corretas</span>
+                                                        </Flex>
+                                                    }
+                                                    value={questionStats.correctAnswers}
+                                                    valueStyle={{ 
+                                                        fontSize: 'clamp(18px, 4vw, 24px)',
+                                                        color: token.colorSuccess,
+                                                        fontWeight: 'bold'
+                                                    }}
                                                 />
-                                            </Flex>
-                                            <Progress
-                                                type="circle"
-                                                percent={Math.round(
-                                                    (questionBook?.questionBookStats.correctAnswers /
-                                                        questionBook?.questionBookStats.totalAnswers) *
-                                                    100
-                                                )}
-                                                size="small"
-                                            />
-                                        </Flex>
-                                    </Col>
-                                </Row>
+                                            </Card>
+                                        </Col>
+
+                                        <Col xs={24} sm={12} md={8} lg={6}>
+                                            <Card
+                                                style={{
+                                                    height: '100%',
+                                                    background: `linear-gradient(135deg, ${token.colorErrorBg} 0%, ${token.colorBgContainer} 100%)`,
+                                                    border: `1px solid ${token.colorErrorBorder}`,
+                                                    borderRadius: 'clamp(8px, 2vw, 12px)'
+                                                }}
+                                                styles={{ body: { padding: 'clamp(12px, 3vw, 16px)' } }}
+                                            >
+                                                <Statistic
+                                                    title={
+                                                        <Flex align="center" gap={6}>
+                                                            <CloseCircleOutlined style={{ color: token.colorError, fontSize: 'clamp(14px, 3vw, 16px)' }} />
+                                                            <span style={{ fontSize: 'clamp(12px, 2.5vw, 14px)' }}>Respostas Incorretas</span>
+                                                        </Flex>
+                                                    }
+                                                    value={questionStats.incorrectAnswers}
+                                                    valueStyle={{ 
+                                                        fontSize: 'clamp(18px, 4vw, 24px)',
+                                                        color: token.colorError,
+                                                        fontWeight: 'bold'
+                                                    }}
+                                                />
+                                            </Card>
+                                        </Col>
+
+                                        <Col xs={24} sm={12} md={8} lg={6}>
+                                            <Card
+                                                style={{
+                                                    height: '100%',
+                                                    background: `linear-gradient(135deg, ${token.colorWarningBg} 0%, ${token.colorBgContainer} 100%)`,
+                                                    border: `1px solid ${token.colorWarningBorder}`,
+                                                    borderRadius: 'clamp(8px, 2vw, 12px)'
+                                                }}
+                                                styles={{ body: { padding: 'clamp(12px, 3vw, 16px)' } }}
+                                            >
+                                                <Statistic
+                                                    title={
+                                                        <Flex align="center" gap={6}>
+                                                            <ThunderboltOutlined style={{ color: token.colorWarning, fontSize: 'clamp(14px, 3vw, 16px)' }} />
+                                                            <span style={{ fontSize: 'clamp(12px, 2.5vw, 14px)' }}>Nível de Dificuldade</span>
+                                                        </Flex>
+                                                    }
+                                                    value={questionStats.difficulty.toFixed(1)}
+                                                    valueStyle={{ 
+                                                        fontSize: 'clamp(18px, 4vw, 24px)',
+                                                        color: token.colorWarning,
+                                                        fontWeight: 'bold'
+                                                    }}
+                                                />
+                                            </Card>
+                                        </Col>
+                                    </Row>
+                                </div>
                             ) : (
-                                <p>Nenhuma estatística encontrada!</p>
+                                <div style={{ 
+                                    textAlign: 'center', 
+                                    padding: 'clamp(40px, 8vw, 80px)' 
+                                }}>
+                                    <Typography.Text 
+                                        type="secondary"
+                                        style={{ 
+                                            fontSize: 'clamp(16px, 4vw, 18px)',
+                                            lineHeight: 1.5
+                                        }}
+                                    >
+                                        📊 Nenhuma estatística encontrada para esta questão!
+                                    </Typography.Text>
+                                </div>
                             ),
                         },
                         {
