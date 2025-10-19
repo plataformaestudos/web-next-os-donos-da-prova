@@ -12,6 +12,7 @@ import { UpserQuestionProvider } from "@/questions/upsert/upsert-question.contex
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Roles } from "@/util/roles";
 import { QuestionType } from "@/model/question.model";
+import { useRouter } from "next/navigation";
 interface QuestionProps {
   id: string;
   text: string;
@@ -29,6 +30,7 @@ interface QuestionProps {
 }
 
 export function EditQuestionPageClient({ question }: { question: QuestionProps }) {
+  const router = useRouter();
   const { loading, allowed } = useAuthGuard({
     requireRoles: [Roles.ADMIN, Roles.COLLABORATOR],
   });
@@ -42,9 +44,11 @@ export function EditQuestionPageClient({ question }: { question: QuestionProps }
       <Styled.QuestionContainer>
         <Styled.QuestionHeader>
           <Styled.QuestionTitle>
-            <Link href="/questions">
-              <Button shape="circle" icon={<LuArrowLeft />} />
-            </Link>
+            <Button
+              shape="circle"
+              icon={<LuArrowLeft />}
+              onClick={() => router.back()} 
+            />
             <QuestionTitle id={question.id} />
           </Styled.QuestionTitle>
           <QuestionFormSubmitButton />
