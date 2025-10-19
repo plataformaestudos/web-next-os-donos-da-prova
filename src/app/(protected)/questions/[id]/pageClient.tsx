@@ -2,7 +2,6 @@
 
 import * as Styled from "./page.style";
 import { Button, Divider } from "antd";
-import Link from "next/link";
 import { LuArrowLeft } from "react-icons/lu";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
 import { QuestionTitle } from "@/questions/question-title.component";
