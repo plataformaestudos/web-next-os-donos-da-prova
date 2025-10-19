@@ -51,7 +51,7 @@ const FlipCardContainer = styled.div`
   width: 100%;
   min-width: 350px;
   max-width: 350px;
-  height: fit-content
+  height: fit-content;
   margin: 10px;
 `;
 
@@ -162,7 +162,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
                         <strong>{planData.name}</strong> no valor de{" "}
                         <strong>
                             {Number(
-                                planData.month_value ?? planData.billingValue ?? 0
+                                planData.subscriptionPlan?.monthValue ?? planData.billingValue ?? 0
                             ).toLocaleString("pt-BR", {
                                 style: "currency",
                                 currency: "BRL",
@@ -318,7 +318,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
                         column={1}
                     >
                         <Descriptions.Item label="Valor">
-                            {Number(plan?.month_value ?? plan?.billingValue ?? 0).toLocaleString(
+                            {Number(plan?.subscriptionPlan?.monthValue ?? plan?.billingValue ?? 0).toLocaleString(
                                 "pt-BR",
                                 {
                                     style: "currency",
@@ -327,7 +327,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
                             )}
                         </Descriptions.Item>
                         <Descriptions.Item label="Limite de questões">
-                            {plan?.question_limit || 0}
+                            {plan?.subscriptionPlan?.questionLimit || 0}
                         </Descriptions.Item>
                     </Descriptions>
                     <ButtonContent>

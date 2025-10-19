@@ -114,12 +114,11 @@ export function QuestionBookPageClient({
             <span onClick={() => timer.saveProgress()}>{item.title}</span>
         ),
     }));
-
     return (
         <Container>
             
             <AppQuestionCounter question={question.orderDetails.questionOrder} total={questionBook.questionsCount} />
-                {questionBook.nextQuestion.module.name && (
+                {question.module.name && (
                     <Typography.Paragraph
                         style={{
                             marginBottom: 12,
@@ -129,7 +128,7 @@ export function QuestionBookPageClient({
                         }}
                         type="secondary"
                     >
-                        #Módulo: {questionBook.nextQuestion.module.name}
+                        #Módulo: {question.module.name}
                     </Typography.Paragraph>
                 )}
             

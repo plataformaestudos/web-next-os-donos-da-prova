@@ -73,6 +73,7 @@ export function AppQuestionLoader({
                 alternatives={question.alternatives}
                 orderDetails={question.orderDetails}
                 userAnswer={question.userAnswer}
+                totalQuestions={questionBook.questionBookStats.totalQuestions}
             />
             {isLoading && (
                 <AppLoading

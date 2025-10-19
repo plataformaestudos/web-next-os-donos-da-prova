@@ -1,27 +1,27 @@
 export interface PlanModel {
-  allow_lifetime: boolean;
   billingRecurrencyType: string;
-  annual_value: number | null;
+  billingValue: number | null;
   created_at: string;
   created_by: string;
   description: string;
-  duration_days: number | null;
   id: string;
-  is_free: boolean;
-  lifetime_value: number | null;
-  month_value?: number;
-  billingValue?: number;
   name: string;
-  quarterly_value: number | null;
   question_limit: number | null;
-  semiannual_value: number | null;
   status: string | null;
-  unique_value: string | null;
   updated_at: string;
   updated_by: string;
   subscriptionPlan?: {
     name: string;
     description: string;
+    questionLimit: number | null;
+    monthValue: number | null;
+    quarterlyValue: number | null;
+    semiannualValue: number | null;
+    yearlyValue: number | null;
+    lifetimeValue: number | null;
+    durationDays: number | null;
+    isFree: boolean;
+    allowLifetime: boolean;
   };
   modules?: {
     id: string;

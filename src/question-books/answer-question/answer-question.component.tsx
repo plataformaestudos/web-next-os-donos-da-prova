@@ -8,11 +8,12 @@ import {
     QuestionContainer,
     NavButton
 } from "./answer-question.style";
-import { Button, Flex, Tooltip, Typography, App } from "antd";
+import { Button, Flex, Tooltip, Typography, App, Input, Space } from "antd";
 import {
     EyeInvisibleOutlined,
     EyeOutlined,
     StrikethroughOutlined,
+    SearchOutlined,
 } from "@ant-design/icons";
 import {
     TbArrowNarrowLeft,
@@ -20,6 +21,9 @@ import {
     TbPlayerTrackNext,
     TbPlayerTrackPrev
 } from "react-icons/tb";
+import { LiaRandomSolid } from "react-icons/lia";
+
+
 import { useState, useTransition, Fragment } from "react";
 
 import { QuestionBookNextQuestionModel } from "../question-book.model";
@@ -41,6 +45,7 @@ interface AnswerQuestionProps {
     }[];
     orderDetails: QuestionBookNextQuestionModel["orderDetails"];
     userAnswer: QuestionBookNextQuestionModel["userAnswer"];
+    totalQuestions: number;
 }
 
 export function AnswerQuestion({
@@ -52,6 +57,7 @@ export function AnswerQuestion({
     alternatives,
     userAnswer,
     orderDetails,
+    totalQuestions,
 }: AnswerQuestionProps) {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<boolean>(false);
@@ -67,6 +73,7 @@ export function AnswerQuestion({
     const [discardedAlternatives, setDiscardedAlternatives] = useState<
         Set<string>
     >(new Set());
+    const [navigationInput, setNavigationInput] = useState<string>("");
 
     function toggleDiscard(id: string) {
         if (discardedAlternatives.has(id)) {
@@ -77,9 +84,25 @@ export function AnswerQuestion({
         setDiscardedAlternatives(new Set(discardedAlternatives));
     }
     const router = useRouter();
-    const goTo = (seq?: number | null) => {
+    const goTo = (seq?: number | null | "random") => {
+        if (seq === "random") {
+            const randomSeq = Math.floor(Math.random() * totalQuestions);
+            router.push(`/question-books/${questionBookId}?seq=${randomSeq}`);
+            return;
+        }
         if (!seq && seq !== 0) return;
         router.push(`/question-books/${questionBookId}?seq=${seq}`);
+    };
+
+    const goToSpecificQuestion = () => {
+        const questionNumber = parseInt(navigationInput);
+        if (isNaN(questionNumber) || questionNumber < 1 || questionNumber > totalQuestions) {
+            app?.message.error(`Por favor, insira um número entre 1 e ${totalQuestions}`);
+            return;
+        }
+        const seq = questionNumber;
+        router.push(`/question-books/${questionBookId}?seq=${seq}`);
+        setNavigationInput("");
     };
 
     const isAlternativesDisabled = correctAlternative !== null;
@@ -250,6 +273,33 @@ export function AnswerQuestion({
                         </NavButton>
                     </Tooltip>
                 </Flex>
+                
+                {/* Campo de navegação direta */}
+                <Flex align="center" gap={8}>
+                    <Typography.Text style={{ fontSize: 14 }}>
+                        Ir para:
+                    </Typography.Text>
+                    <Space.Compact>
+                        <Input
+                            placeholder="Ex: 35"
+                            value={navigationInput}
+                            onChange={(e) => setNavigationInput(e.target.value)}
+                            onPressEnter={goToSpecificQuestion}
+                            style={{ width: 80 }}
+                            min={1}
+                            max={totalQuestions}
+                        />
+                        <Button
+                            type="primary"
+                            icon={<SearchOutlined />}
+                            onClick={goToSpecificQuestion}
+                            disabled={!navigationInput.trim()}
+                        >
+                            Ir
+                        </Button>
+                    </Space.Compact>
+                </Flex>
+
                 <Flex gap={16}>
                     <Tooltip title="Próxima questão">
                         <NavButton
@@ -259,6 +309,16 @@ export function AnswerQuestion({
                             onClick={() => goTo(orderDetails.nextOrder)}
                         >
                             <TbArrowNarrowRight size={22} />
+                        </NavButton>
+                    </Tooltip>
+                    <Tooltip title="Próxima questão aleatória">
+                        <NavButton
+                            $enabled={!!shouldShowNext}
+                            $variant="pill"
+                            disabled={!shouldShowNext}
+                            onClick={() => goTo("random")}
+                        >
+                            <LiaRandomSolid size={22} />
                         </NavButton>
                     </Tooltip>
                     <Tooltip title="Próxima não resolvida">
