@@ -8,7 +8,7 @@ import {
     QuestionContainer,
     NavButton
 } from "./answer-question.style";
-import { Button, Flex, Tooltip, Typography, App, Input, Space } from "antd";
+import { Button, Flex, Tooltip, Typography, App, Input, Space, Divider } from "antd";
 import {
     EyeInvisibleOutlined,
     EyeOutlined,
@@ -24,13 +24,71 @@ import {
 import { LiaRandomSolid } from "react-icons/lia";
 
 
-import { useState, useTransition, Fragment } from "react";
+import { useState, useTransition, Fragment, useEffect } from "react";
 
 import { QuestionBookNextQuestionModel } from "../question-book.model";
 import { QuestionType } from "@/model/question.model";
 import { TiptapEditor } from "@/ui/tiptap-editor/tiptap-editor.component";
 import { answerQuestion } from "./answer-question.action";
 import { useRouter } from "next/navigation";
+
+// Componente reutilizável para o campo de navegação
+const NavigationField = ({ 
+    isMobile = false, 
+    navigationInput, 
+    setNavigationInput, 
+    goToSpecificQuestion, 
+    totalQuestions 
+}: { 
+    isMobile?: boolean;
+    navigationInput: string;
+    setNavigationInput: (value: string) => void;
+    goToSpecificQuestion: () => void;
+    totalQuestions: number;
+}) => (
+    <Flex 
+        align="center" 
+        gap="clamp(6px, 2vw, 12px)"
+        justify="center"
+        style={isMobile ? { 
+            width: "100%", 
+            padding: "clamp(8px, 3vw, 16px) 0" 
+        } : undefined}
+    >
+        <Typography.Text style={{ 
+            fontSize: "clamp(12px, 3vw, 14px)", 
+            color: "#666" 
+        }}>
+            Ir para:
+        </Typography.Text>
+        <Space.Compact>
+            <Input
+                placeholder="Ex: 35"
+                value={navigationInput}
+                onChange={(e) => setNavigationInput(e.target.value)}
+                onPressEnter={goToSpecificQuestion}
+                style={{ 
+                    width: "clamp(70px, 15vw, 100px)",
+                    fontSize: "clamp(12px, 3vw, 14px)"
+                }}
+                min={1}
+                max={totalQuestions}
+            />
+            <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                onClick={goToSpecificQuestion}
+                disabled={!navigationInput.trim()}
+                style={{
+                    fontSize: "clamp(12px, 3vw, 14px)",
+                    padding: "clamp(4px, 2vw, 8px) clamp(8px, 3vw, 16px)"
+                }}
+            >
+                Ir
+            </Button>
+        </Space.Compact>
+    </Flex>
+);
 
 interface AnswerQuestionProps {
     questionBookId: string;
@@ -46,6 +104,7 @@ interface AnswerQuestionProps {
     orderDetails: QuestionBookNextQuestionModel["orderDetails"];
     userAnswer: QuestionBookNextQuestionModel["userAnswer"];
     totalQuestions: number;
+    onAnswerSubmitted?: () => void;
 }
 
 export function AnswerQuestion({
@@ -58,6 +117,7 @@ export function AnswerQuestion({
     userAnswer,
     orderDetails,
     totalQuestions,
+    onAnswerSubmitted,
 }: AnswerQuestionProps) {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<boolean>(false);
@@ -66,7 +126,7 @@ export function AnswerQuestion({
         (userAnswer && alternatives.find(({ isCorrect }) => isCorrect)?.id) ?? null
     );
     const [showComment, setShowComment] = useState<boolean>(false);
-
+    const [isMobile, setIsMobile] = useState(false);
     const [selectedAlternative, setSelectedAlternative] = useState<string | null>(
         userAnswer?.alternativeId ?? null
     );
@@ -75,6 +135,13 @@ export function AnswerQuestion({
     >(new Set());
     const [navigationInput, setNavigationInput] = useState<string>("");
 
+    useEffect(() => {
+        const checkScreenSize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+    }, []);
     function toggleDiscard(id: string) {
         if (discardedAlternatives.has(id)) {
             discardedAlternatives.delete(id);
@@ -104,6 +171,7 @@ export function AnswerQuestion({
         router.push(`/question-books/${questionBookId}?seq=${seq}`);
         setNavigationInput("");
     };
+
 
     const isAlternativesDisabled = correctAlternative !== null;
     const shouldShowPrev = orderDetails.previousOrder !== null;
@@ -185,6 +253,8 @@ export function AnswerQuestion({
                         } else {
                             setCorrectAlternative(result.data?.correctAlternativeId ?? null);
                             app?.message.success("Resposta enviada com sucesso!");
+
+                            onAnswerSubmitted?.();
                         }
                     });
                 }}
@@ -217,12 +287,15 @@ export function AnswerQuestion({
                                     Você errou!{" "}
                                     <b>
                                         Gabarito:{" "}
-                                        {String.fromCharCode(
-                                            65 +
-                                            (alternatives.findIndex(
-                                                (alt) => alt.id === correctAlternative
-                                            ) as number)
-                                        )}
+                                        {type === QuestionType.RIGHT_OR_WRONG
+                                            ? (alternatives.find((alt) => alt.id === correctAlternative)?.text.toLowerCase().includes("certo") ? "Certo" : "Errado")
+                                            : String.fromCharCode(
+                                                65 +
+                                                (alternatives.findIndex(
+                                                    (alt) => alt.id === correctAlternative
+                                                ) as number)
+                                            )
+                                        }
                                     </b>
                                 </span>
                             )}
@@ -231,6 +304,7 @@ export function AnswerQuestion({
                             <Button
                                 onClick={() => setShowComment(!showComment)}
                                 icon={showComment ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                                style={{ marginBottom: 16 }}
                             >
                                 {showComment ? "Esconder" : "Ver"} resolução
                             </Button>
@@ -245,92 +319,109 @@ export function AnswerQuestion({
                     )}
                 </Fragment>
             )}
+
+            {/* Divider para separar resolução da navegação */}
+            <Divider style={{ margin: "24px 0 16px 0" }} />
+
             <div
                 style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    margin: "16px 0 0",
+                    margin: "clamp(12px, 3vw, 16px) 0 0",
+                    flexWrap: "wrap",
+                    gap: isMobile ? "clamp(4px, 1.5vw, 8px)" : "clamp(8px, 2vw, 16px)",
+                    alignItems: "center"
                 }}
             >
-                <Flex gap={16}>
+                <Flex gap={isMobile ? "clamp(4px, 1.5vw, 8px)" : "clamp(8px, 2vw, 16px)"}>
                     <Tooltip title="Questão anterior não resolvida">
                         <NavButton
                             $enabled={!!shouldShowPrevUnanswered}
                             $variant="pill"
+                            $compact={isMobile}
                             disabled={!shouldShowPrevUnanswered}
                             onClick={() => goTo(orderDetails.previousUnansweredOrder)}
-                            icon={<TbPlayerTrackPrev size={22} />}
+                            icon={<TbPlayerTrackPrev size={isMobile ? "clamp(14px, 3vw, 18px)" : "clamp(18px, 4vw, 22px)"} />}
                         />
                     </Tooltip>
                     <Tooltip title="Questão anterior">
                         <NavButton
                             $enabled={!!shouldShowPrev}
                             $variant="pill"
+                            $compact={isMobile}
                             disabled={!shouldShowPrev}
                             onClick={() => goTo(orderDetails.previousOrder)}
+                            icon={<TbArrowNarrowLeft size={isMobile ? "clamp(14px, 3vw, 18px)" : "clamp(18px, 4vw, 22px)"} />}
                         >
-                            <TbArrowNarrowLeft size={22} />
+                            {/* <TbArrowNarrowLeft size={isMobile ? "clamp(14px, 3vw, 18px)" : "clamp(18px, 4vw, 22px)"} /> */}
                         </NavButton>
                     </Tooltip>
                 </Flex>
-                
-                {/* Campo de navegação direta */}
-                <Flex align="center" gap={8}>
-                    <Typography.Text style={{ fontSize: 14 }}>
-                        Ir para:
-                    </Typography.Text>
-                    <Space.Compact>
-                        <Input
-                            placeholder="Ex: 35"
-                            value={navigationInput}
-                            onChange={(e) => setNavigationInput(e.target.value)}
-                            onPressEnter={goToSpecificQuestion}
-                            style={{ width: 80 }}
-                            min={1}
-                            max={totalQuestions}
-                        />
-                        <Button
-                            type="primary"
-                            icon={<SearchOutlined />}
-                            onClick={goToSpecificQuestion}
-                            disabled={!navigationInput.trim()}
-                        >
-                            Ir
-                        </Button>
-                    </Space.Compact>
-                </Flex>
 
-                <Flex gap={16}>
+                {/* Campo de navegação direta - Desktop */}
+                {!isMobile && (
+                    <NavigationField 
+                        navigationInput={navigationInput}
+                        setNavigationInput={setNavigationInput}
+                        goToSpecificQuestion={goToSpecificQuestion}
+                        totalQuestions={totalQuestions}
+                    />
+                )}
+                
+
+
+                <Flex gap={isMobile ? "clamp(4px, 1.5vw, 8px)" : "clamp(8px, 2vw, 16px)"}>
                     <Tooltip title="Próxima questão">
                         <NavButton
                             $enabled={!!shouldShowNext}
                             $variant="pill"
+                            $compact={isMobile}
                             disabled={!shouldShowNext}
                             onClick={() => goTo(orderDetails.nextOrder)}
+                            icon={<TbArrowNarrowRight size={isMobile ? "clamp(14px, 3vw, 18px)" : "clamp(18px, 4vw, 22px)"} />}
                         >
-                            <TbArrowNarrowRight size={22} />
+                            {/* <TbArrowNarrowRight size={isMobile ? "clamp(14px, 3vw, 18px)" : "clamp(18px, 4vw, 22px)"} /> */}
                         </NavButton>
                     </Tooltip>
                     <Tooltip title="Próxima questão aleatória">
                         <NavButton
                             $enabled={!!shouldShowNext}
                             $variant="pill"
+                            $compact={isMobile}
                             disabled={!shouldShowNext}
                             onClick={() => goTo("random")}
+                            icon={<LiaRandomSolid size={isMobile ? "clamp(14px, 3vw, 18px)" : "clamp(18px, 4vw, 22px)"} />}
                         >
-                            <LiaRandomSolid size={22} />
+                            {/* <LiaRandomSolid size={isMobile ? "clamp(14px, 3vw, 18px)" : "clamp(18px, 4vw, 22px)"} /> */}
                         </NavButton>
                     </Tooltip>
                     <Tooltip title="Próxima não resolvida">
                         <NavButton
                             $enabled={!!shouldShowNextUnanswered}
                             $variant="pill"
+                            $compact={isMobile}
                             disabled={!shouldShowNextUnanswered}
                             onClick={() => goTo(orderDetails.nextUnansweredOrder)}
-                            icon={<TbPlayerTrackNext size={22} />}
+                            icon={<TbPlayerTrackNext size={isMobile ? "clamp(14px, 3vw, 18px)" : "clamp(18px, 4vw, 22px)"} />}
                         />
                     </Tooltip>
                 </Flex>
+
+
+
+            {/* Campo de navegação direta - Mobile */}
+            {isMobile && (
+                <>
+                    <Divider style={{ margin: "clamp(16px, 4vw, 24px) 0 clamp(12px, 3vw, 16px) 0" }} />
+                    <NavigationField 
+                        isMobile={true}
+                        navigationInput={navigationInput}
+                        setNavigationInput={setNavigationInput}
+                        goToSpecificQuestion={goToSpecificQuestion}
+                        totalQuestions={totalQuestions}
+                    />
+                </>
+            )}
             </div>
         </Container>
     );

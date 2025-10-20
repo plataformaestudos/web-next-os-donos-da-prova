@@ -117,29 +117,25 @@ export const Alternative = styled.div<{
     `}
 `;
 
-/**
- * Props:
- *  $enabled: controla cores (true = fundo colorido)
- *  $variant: 'pill' | 'circle'
- */
-export const NavButton = styled(Button)<{ $enabled?: boolean; $variant?: "pill" | "circle" }>`
+
+export const NavButton = styled(Button)<{ $enabled?: boolean; $variant?: "pill" | "circle"; $compact?: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 44px;
-  min-width: 55px;
-  padding: 6px 12px;
+  gap: ${(p) => (p.$compact ? "4px" : "8px")};
+  height: ${(p) => (p.$compact ? "38px" : "44px")};
+  min-width: ${(p) => (p.$compact ? "38px" : "55px")};
+  padding: ${(p) => (p.$compact ? "4px 8px" : "6px 12px")};
   font-weight: 600;
   cursor: pointer;
   
 
   /* variant */
-  border-radius: ${(p) => (p.$variant === "circle" ? "50%" : "999px")};
+  border-radius: ${(p) => (p.$variant === "pill" ? "50%" : "999px")};
   ${(p) =>
     p.$variant === "circle" &&
     css`
-      width: 44px;
+      width: ${p.$compact ? "38px" : "44px"};
       padding: 0;
     `}
 

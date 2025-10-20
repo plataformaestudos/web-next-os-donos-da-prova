@@ -17,6 +17,7 @@ interface AppQuestionLoaderProps {
     questionBook: QuestionBookModel;
     question: QuestionBookNextQuestionModel;
     setQuestion: (q: QuestionBookNextQuestionModel) => void;
+    onAnswerSubmitted?: () => void;
 }
 
 export function AppQuestionLoader({
@@ -25,6 +26,7 @@ export function AppQuestionLoader({
     questionBook,
     question,
     setQuestion,
+    onAnswerSubmitted,
 }: AppQuestionLoaderProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -74,6 +76,7 @@ export function AppQuestionLoader({
                 orderDetails={question.orderDetails}
                 userAnswer={question.userAnswer}
                 totalQuestions={questionBook.questionBookStats.totalQuestions}
+                onAnswerSubmitted={onAnswerSubmitted}
             />
             {isLoading && (
                 <AppLoading
