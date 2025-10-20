@@ -2,12 +2,13 @@ import { getQuestionBook } from "../api";
 import { QuestionBookPageClient } from "./pageClient";
 
 type Params = Promise<{ id: string }>
-type SearchParams = Promise<{ seq: string }>
+type SearchParams = Promise<{ seq: string, seqRandom: boolean }>
 
 
 export default async function QuestionBookPage(props: { params: Params, searchParams: SearchParams }) {
   const { id } = await props.params;
   let { seq } = await props.searchParams;
+  const { seqRandom } = await props.searchParams;
 
   const questionBook = await getQuestionBook(id);
 
@@ -16,5 +17,5 @@ export default async function QuestionBookPage(props: { params: Params, searchPa
   }
 
 
-  return <QuestionBookPageClient id={id} seq={seq} questionBook={questionBook} />;
+  return <QuestionBookPageClient id={id} seq={seq} seqRandom={seqRandom} questionBook={questionBook} />;
 }

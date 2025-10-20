@@ -14,6 +14,7 @@ import { AppLoading } from "../AppLoading";
 interface AppQuestionLoaderProps {
     id: string;
     seq?: string;
+    seqRandom?: boolean;
     questionBook: QuestionBookModel;
     question: QuestionBookNextQuestionModel;
     setQuestion: (q: QuestionBookNextQuestionModel) => void;
@@ -23,6 +24,7 @@ interface AppQuestionLoaderProps {
 export function AppQuestionLoader({
     id,
     seq,
+    seqRandom,
     questionBook,
     question,
     setQuestion,
@@ -34,7 +36,7 @@ export function AppQuestionLoader({
         async function getQuestionBookQuestion(id: string, seq: string) {
             const params = new URLSearchParams();
             if (seq !== undefined) params.set("seq", seq);
-
+            if (seqRandom) params.set("seqRandom", "true");
             params.set("onlyNotAnswered", "false");
 
             setIsLoading(true);
@@ -55,9 +57,9 @@ export function AppQuestionLoader({
                 setIsLoading(false);
             }
         }
-
-        if (seq && parseInt(seq) !== question.orderDetails.questionOrder) {
-            getQuestionBookQuestion(id, seq)
+        console.log(seq, question.orderDetails.questionOrder, seqRandom);
+        if ((seq && parseInt(seq) !== question.orderDetails.questionOrder) || seqRandom) {
+            getQuestionBookQuestion(id, seq ?? "")
                 .then((data) => setQuestion(data ?? questionBook?.nextQuestion));
         }
     }, [id, seq, questionBook]);

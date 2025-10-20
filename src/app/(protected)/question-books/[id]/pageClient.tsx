@@ -46,10 +46,12 @@ import { ResponseModel } from "@/model/common.model";
 export function QuestionBookPageClient({
     id,
     seq,
+    seqRandom,
     questionBook,
 }: {
     id: string;
     seq: string;
+    seqRandom: boolean;
     questionBook: QuestionBookModel;
 }) {
     const { user, loading, allowed } = useAuthGuard({
@@ -268,6 +270,7 @@ export function QuestionBookPageClient({
                                         id={id}
                                         seq={seq}
                                         questionBook={questionBook}
+                                        seqRandom={seqRandom}
                                         question={question}
                                         setQuestion={setQuestion}
                                         onAnswerSubmitted={handleAnswerSubmitted}

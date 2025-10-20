@@ -151,13 +151,12 @@ export function AnswerQuestion({
         setDiscardedAlternatives(new Set(discardedAlternatives));
     }
     const router = useRouter();
-    const goTo = (seq?: number | null | "random") => {
-        if (seq === "random") {
-            const randomSeq = Math.floor(Math.random() * totalQuestions);
-            router.push(`/question-books/${questionBookId}?seq=${randomSeq}`);
+    const goTo = (seq?: number | null, seqRandom?: boolean) => {
+        if (!seq && seq !== 0 && !seqRandom) return;
+        if (seqRandom) {
+            router.push(`/question-books/${questionBookId}?seqRandom=true`);
             return;
         }
-        if (!seq && seq !== 0) return;
         router.push(`/question-books/${questionBookId}?seq=${seq}`);
     };
 
@@ -385,11 +384,11 @@ export function AnswerQuestion({
                     </Tooltip>
                     <Tooltip title="Próxima questão aleatória">
                         <NavButton
-                            $enabled={!!shouldShowNext}
+                            $enabled={true}
                             $variant="pill"
                             $compact={isMobile}
-                            disabled={!shouldShowNext}
-                            onClick={() => goTo("random")}
+                            disabled={false}
+                            onClick={() => goTo(orderDetails.nextOrder, true)}
                             icon={<LiaRandomSolid size={isMobile ? "clamp(14px, 3vw, 18px)" : "clamp(18px, 4vw, 22px)"} />}
                         >
                             {/* <LiaRandomSolid size={isMobile ? "clamp(14px, 3vw, 18px)" : "clamp(18px, 4vw, 22px)"} /> */}
