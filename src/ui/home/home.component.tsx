@@ -3,6 +3,7 @@
 import * as S from "./home.style";
 
 import { AppLoading } from "@/components/AppLoading";
+import { WhatsAppFloatButton } from "@/components/WhatsAppFloatButton";
 import { ResponseModel } from "@/model/common.model";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import { Progress } from "antd";
@@ -196,6 +197,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                                     height={30}
                                 />{" "}
                             </S.CardTitle>
+                                <S.CardText style={{ fontSize: 13, color: "#999", textAlign: "center" }}>Em breve..</S.CardText>
                         </S.Card>
                         <S.CardPerformance $large>
                             <S.CardTitle>Meu Desempenho</S.CardTitle>
@@ -250,6 +252,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                     </S.RightContent>
                 </S.Container>
             )}
+            <WhatsAppFloatButton />
         </div>
     );
 }
