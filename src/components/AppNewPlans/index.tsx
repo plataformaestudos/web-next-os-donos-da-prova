@@ -40,7 +40,7 @@ export const AppNewPlans = () => {
   return (
     <Flex
       wrap="wrap"
-      justify="start"
+      justify="center"
       style={{
         width: "100%",
         gap: "20px",

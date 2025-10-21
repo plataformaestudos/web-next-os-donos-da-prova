@@ -9,7 +9,7 @@ interface WhatsAppFloatButtonProps {
 }
 
 export function WhatsAppFloatButton({ 
-  phoneNumber = "5531992183642",
+  phoneNumber = "5531971466327",
   message = "Olá! Gostaria de saber mais sobre a plataforma." 
 }: WhatsAppFloatButtonProps) {
   

@@ -4,10 +4,10 @@ import { PlanModel } from "@/model/plan.model";
 import {
     Button,
     Descriptions,
-    message,
     Typography,
     Form,
-    Flex,
+    FormInstance,
+    App,
 } from "antd";
 import { ReactNode, useEffect, useState } from "react";
 import styled from "styled-components";
@@ -51,14 +51,16 @@ const FlipCardContainer = styled.div`
   width: 100%;
   min-width: 350px;
   max-width: 350px;
-  height: fit-content;
   margin: 10px;
+  flex: 0 0 auto;
 `;
 
 
 const FlipCardInner = styled.div<{ flipped: boolean }>`
   position: relative;
   width: 100%;
+  height: fit-content;
+  min-height: 400px;
   transform-style: preserve-3d;
   transition: transform 0.6s;
   transform: ${({ flipped }) => (flipped ? "rotateY(180deg)" : "rotateY(0deg)")};
@@ -67,6 +69,10 @@ const FlipCardInner = styled.div<{ flipped: boolean }>`
 const FlipCardFace = styled.div<{ back?: boolean }>`
   position: absolute;
   width: 100%;
+  height: fit-content;
+  min-height: 400px;
+  top: 0;
+  left: 0;
   backface-visibility: hidden;
   background: ${({ theme }) => (theme.colorBgContainer)};
   border-radius: 10px;
@@ -74,7 +80,6 @@ const FlipCardFace = styled.div<{ back?: boolean }>`
   padding: 20px;
   display: flex;
   flex-direction: column;
-  min-height: 250px;
   justify-content: space-between;
   transform: ${({ back }) => (back ? "rotateY(180deg)" : "none")};
 `;
@@ -91,19 +96,23 @@ interface ModalProps {
 }
 
 export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
+    const app = App.useApp?.();
+    const message = app?.message;
     const useForm = <T,>() => {
         const [isValid, setIsFormValid] = useState<boolean | null>(null);
         const [form] = Form.useForm<T>();
         const formValues = Form.useWatch([], form);
 
         useEffect(() => {
-            form
-                .validateFields({ validateOnly: true })
-                .then(() => {
-                    setIsFormValid(true);
-                })
-                .catch(() => setIsFormValid(false));
-        }, [form, formValues, isValid]);
+            if (formValues) {
+                form
+                    .validateFields({ validateOnly: true })
+                    .then(() => {
+                        setIsFormValid(true);
+                    })
+                    .catch(() => setIsFormValid(false));
+            }
+        }, [form, formValues]);
 
         return {
             form,
@@ -174,7 +183,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
                     <PaymentInfoThirdStep formV={paymentInfoForm} />
                 </div>
             ),
-            onConfirm: () => subscribePlan(planData),
+            onConfirm: () => subscribePlan(planData, paymentInfoForm),
             onCancel: () => setModalProps({ ...modalProps, visible: false }),
             confirmText: "Sim, assinar",
             cancelText: "Não",
@@ -224,29 +233,34 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
         }
     }
 
-    async function subscribePlan(planData: PlanModel) {
+    async function subscribePlan(planData: PlanModel, paymentInfoForm: FormInstance<PaymentInfo>) {
         setIsLoading(true);
         if (!isPaymentInfoValid) {
             message.error("Por favor, preencha os dados de pagamento corretamente");
             setIsLoading(false);
             return;
         }
+        const paymentData = paymentInfoForm.getFieldsValue() as PaymentInfo;
+        if (!paymentData || !paymentData.expiryDate) {
+            message.error("Por favor, preencha todos os dados de pagamento");
+            setIsLoading(false);
+            return;
+        }
 
         const payload = {
             planId: planData.id,
-            saveCard: paymentInfoValues.saveCard,
+            saveCard: paymentData.saveCard || false,
             billingType: "CREDIT_CARD",
             cycle: planData.billingRecurrencyType ?? "MONTHLY",
             description: planData?.description ?? "",
             creditCard: {
-                holderName: paymentInfoValues.holderName,
-                number: paymentInfoValues.number,
-                expiryMonth: paymentInfoValues.expiryDate.split("/")[0],
-                expiryYear: paymentInfoValues.expiryDate.split("/")[1],
-                ccv: paymentInfoValues.cvv,
+                holderName: paymentData.holderName,
+                number: paymentData.number,
+                expiryMonth: paymentData.expiryDate.split("/")[0],
+                expiryYear: paymentData.expiryDate.split("/")[1],
+                ccv: paymentData.cvv,
             },
         };
-
         try {
             await HttpClient.fetch(`/subscription`, {
                 method: "POST",
@@ -270,9 +284,16 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
             return;
         }
 
+        const paymentData = paymentInfoValues as PaymentInfo;
+        if (!paymentData || !paymentData.expiryDate) {
+            message.error("Por favor, preencha todos os dados de pagamento");
+            setIsLoading(false);
+            return;
+        }
+
         const payload = {
             planId: planData.id,
-            saveCard: paymentInfoValues.saveCard,
+            saveCard: paymentData.saveCard || false,
             billingType: "CREDIT_CARD",
             cycle: planData.billingRecurrencyType ?? "MONTHLY",
             description: planData?.description ?? "",
@@ -295,7 +316,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
             message.success("Dados de pagamento atualizados com sucesso");
             setModalProps({ ...modalProps, visible: false });
             setTimeout(() => window.location.reload(), 200);
-        }  finally {
+        } finally {
             setIsLoading(false);
         }
     }
@@ -332,7 +353,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
                     </Descriptions>
                     <ButtonContent>
                         {myPlan ? (
-                            <Flex
+                            <div
                                 style={{
                                     display: "flex",
                                     flexDirection: "column",
@@ -354,9 +375,9 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
                                 >
                                     Gerenciar pagamento
                                 </Button>
-                            </Flex>
+                            </div>
                         ) : (
-                            <Flex
+                            <div
                                 style={{
                                     display: "flex",
                                     flexDirection: "column",
@@ -371,7 +392,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
                                     Assinar Plano
                                 </Button>
                                 <Button type="default" size="large" onClick={handleFlip}>Ver Módulos</Button>
-                            </Flex>
+                            </div>
                         )}
                     </ButtonContent>
                 </FlipCardFace>

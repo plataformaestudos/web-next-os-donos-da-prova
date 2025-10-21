@@ -50,7 +50,7 @@ const UserProfile = async () => {
             <Tabs
                 defaultActiveKey="1"
                 items={items}
-                style={{ width: "100%", maxWidth: "1200px", padding: "20px" }}
+                style={{ width: "100%", maxWidth: "1300px", padding: "20px" }}
                 tabBarStyle={{ fontSize: "20px", fontWeight: 600 }}
             />
         </div>
