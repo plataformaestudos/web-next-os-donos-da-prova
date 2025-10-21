@@ -1,12 +1,12 @@
 "use client";
 
 import * as Styled from "./page.style";
-import { Button, Flex, List } from "antd";
+import { Button, Flex, List, Tag } from "antd";
 import Item, { Meta } from "antd/es/list/Item";
 import { FaPencil } from "react-icons/fa6";
 import Link from "next/link";
 import { PageLayout } from "@/ui/page-layout/page-layout.component";
-import { DeletePlanButton } from "@/plans/delete/delete-plan-button.component";
+import { TogglePlanStatusButton } from "@/plans/toggle-status/toggle-plan-status-button.component";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Roles } from "@/util/roles";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
@@ -36,8 +36,7 @@ export function PlansPageClient({ plans }: { plans: SubscriptionPlan[] }) {
 
   if (loading) return <FullPageLoading />;
 
-  if (!allowed) return null; // usuário sem permissão
-
+  if (!allowed) return null; 
   return (
     <PageLayout
       title="Planos"
@@ -63,16 +62,23 @@ export function PlansPageClient({ plans }: { plans: SubscriptionPlan[] }) {
                     </Flex>
                   </Link>
                 </Button>,
-                <DeletePlanButton key="delete" planId={plan.id} />,
+                <TogglePlanStatusButton key="toggle" planId={plan.id} currentStatus={plan.status || 'INACTIVE'} />,
               ]}
             >
               <Meta title={plan.name} description={plan.id} />
-              <div>
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(plan.month_value)}
-              </div>
+              <Tag 
+                color={plan.status === 'ACTIVE' ? 'green' : 'red'}
+                style={{ 
+                  fontWeight: 600,
+                  borderRadius: '12px',
+                  padding: '2px 10px',
+                  fontSize: '12px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.3px'
+                }}
+              >
+                {plan.status === 'ACTIVE' ? '✓ Ativo' : '✗ Inativo'}
+              </Tag>
             </Item>
           ))}
         </List>

@@ -12,6 +12,7 @@ import { PageLayout } from "@/ui/page-layout/page-layout.component";
 // import { QuestionFormModulesSelection } from "@/questions/question-form-modules-selection.component";
 import { QuestionModel } from "@/model/question.model";
 import { QuestionPreview } from "@/questions/question-preview.component";
+import { QuestionTextSearch } from "@/questions/question-text-search.component";
 import { ResponseModel } from "@/model/common.model";
 import { redirect } from "next/navigation";
 
@@ -32,17 +33,22 @@ export default async function QuestionsPage({
     searchParams: Promise<{
         pagina: string;
         modulos: string;
+        texto: string;
     }>;
 }) {
     let total = 0;
     let newQuestionURL = "/questions/new";
-    const { pagina: page, modulos: modulesIds } = await searchParams;
+    const { pagina: page, modulos: modulesIds, texto: searchText } = await searchParams;
 
     const search = new URLSearchParams();
 
     if (modulesIds) {
         newQuestionURL += `?modulos=${modulesIds}`;
         search.set("modulesIds", modulesIds);
+    }
+
+    if (searchText) {
+        search.set("text", searchText);
     }
 
     if (page) {
@@ -74,30 +80,32 @@ export default async function QuestionsPage({
         <PageLayout
             title="Questões"
             actions={[
-                // <QuestionFormModulesSelection
-                //     key="filter-modules"
-                //     defaultOptions={modules.map(({ id: value, name: label }) => ({
-                //         value,
-                //         label,
-                //     }))}
-                //     defaultValue={modulesIds?.split(",") ?? undefined}
-                //     onSelectModules={async function changeQuery(modules) {
-                //         "use server";
+                <Flex key="search-and-create" gap={16} align="center" style={{ width: "100%" }}>
+                    <QuestionTextSearch
+                        defaultValue={searchText || ""}
+                        onSearch={async function changeQuery(text) {
+                            "use server";
 
-                //         if (modules.length > 0) {
-                //             redirect(
-                //                 `/questions?modulos=${(modules as string[]).join(",")}&pagina=1`
-                //             );
-                //         } else {
-                //             redirect("/questions?pagina=1");
-                //         }
-                //     }}
-                // />,
-                <Link key="create" href={newQuestionURL}>
-                    <Button type="primary" size="large">
-                        Criar questão
-                    </Button>
-                </Link>,
+                            const newSearchParams = new URLSearchParams();
+                            newSearchParams.set("pagina", "1");
+
+                            if (modulesIds) {
+                                newSearchParams.set("modulos", modulesIds);
+                            }
+
+                            if (text) {
+                                newSearchParams.set("texto", text);
+                            }
+
+                            redirect(`/questions?${newSearchParams.toString()}`);
+                        }}
+                    />
+                    <Link href={newQuestionURL}>
+                        <Button type="primary" size="large">
+                            Criar questão
+                        </Button>
+                    </Link>
+                </Flex>,
             ]}
         >
             <Styled.ListContainer>
@@ -155,6 +163,10 @@ export default async function QuestionsPage({
 
                         if (modulesIds) {
                             newSearchParams.set("modulos", modulesIds);
+                        }
+
+                        if (searchText) {
+                            newSearchParams.set("texto", searchText);
                         }
 
                         redirect(`/questions?${newSearchParams.toString()}`);

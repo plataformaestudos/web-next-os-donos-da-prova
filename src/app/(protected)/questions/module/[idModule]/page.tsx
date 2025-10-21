@@ -14,6 +14,7 @@ import { QuestionPreview } from "@/questions/question-preview.component";
 import { QuestionModel } from "@/model/question.model";
 import { ResponseModel } from "@/model/common.model";
 import { redirect } from "next/navigation";
+import { QuestionTextSearch } from "@/questions/question-text-search.component";
 
 function EditQuestionButton({ id }: { id: string }) {
     return (
@@ -27,11 +28,12 @@ function EditQuestionButton({ id }: { id: string }) {
 }
 
 type Params = Promise<{ idModule: string }>
-type SearchParams = Promise<{ pagina?: string }>
+type SearchParams = Promise<{ pagina?: string,  texto: string; }>
 
 export default async function QuestionsByModulePage(props: { params: Params, searchParams: SearchParams }) {
     const params = await props.params;
     const searchParams = await props.searchParams;
+    const { texto: searchText } = await searchParams;
     const { idModule } = params;
     const { pagina: page = "1" } = searchParams;
 
@@ -43,6 +45,10 @@ export default async function QuestionsByModulePage(props: { params: Params, sea
     search.set("modulesIds", idModule);
     if (page) {
         search.set("page", page.toString());
+    }
+
+    if (searchText) {
+        search.set("text", searchText);
     }
 
     const queryParams = `?${search.toString()}`;
@@ -70,11 +76,30 @@ export default async function QuestionsByModulePage(props: { params: Params, sea
             title={`${currentModule.name || ""}`}
             backHref="/modules"
             actions={[
-                <Link key="create" href={newQuestionURL}>
-                    <Button type="primary" size="large">
-                        Criar questão
-                    </Button>
-                </Link>,
+                <Flex key="search-and-create" gap={16} align="center" style={{ width: "100%" }}>
+                    <QuestionTextSearch
+                        defaultValue={searchText || ""}
+                        onSearch={async function changeQuery(text) {
+                            "use server";
+
+                            const newSearchParams = new URLSearchParams();
+                            newSearchParams.set("pagina", "1");
+
+                            newSearchParams.set("modulos", idModule);
+
+                            if (text) {
+                                newSearchParams.set("texto", text);
+                            }
+
+                            redirect(`/questions/module/${idModule}?${newSearchParams.toString()}`);
+                        }}
+                    />
+                    <Link key="create" href={newQuestionURL}>
+                        <Button type="primary" size="large">
+                            Criar questão
+                        </Button>
+                    </Link>
+                </Flex>,
             ]}
         >
             {questions && questions.length === 0 ? (
@@ -132,6 +157,9 @@ export default async function QuestionsByModulePage(props: { params: Params, sea
                                 "use server";
                                 const newSearchParams = new URLSearchParams();
                                 newSearchParams.set("pagina", newPage.toString());
+                                if (searchText) {
+                                    newSearchParams.set("texto", searchText);
+                                }
                                 redirect(`/questions/module/${idModule}?${newSearchParams.toString()}`);
                             }}
                         />

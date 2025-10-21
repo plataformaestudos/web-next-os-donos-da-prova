@@ -51,7 +51,7 @@ export async function upsertPlan(
     revalidateTag(CACHE_TAGS.PLANS);
     revalidatePath("/plans");
     revalidatePath(`/plans/${plan.id}`);
-    redirect(`/plans/${plan.id}`);
+    redirect(`/plans`);
   } else {
     return { error: error?.message ?? null };
   }

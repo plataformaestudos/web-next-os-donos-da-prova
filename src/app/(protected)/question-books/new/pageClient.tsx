@@ -15,7 +15,16 @@ interface FoldersProps {
   questionBooks: {
     id: string;
     name: string;
-  }[]
+    createdAt: string;
+    isPublic: boolean;
+    favorite: boolean;
+    userId: string;
+    folderId?: string;
+    questionsCount: number;
+    nrOfAnsweredQuestions: number;
+    percentAnswered: number;
+  }[];
+  nrOfQuestionBooks: number;
 }
 export function NewQuestionBookPageClient({
     folderId,

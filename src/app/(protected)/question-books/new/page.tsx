@@ -1,6 +1,6 @@
 // NewQuestionBookPage.tsx (Server Component)
-import { createClient } from "@/util/supabase/server";
 import { loadUserPlanModules } from "@/modules/tree/load-modules.action";
+import { getBookFolders } from "../api";
 import { NewQuestionBookPageClient } from "./pageClient";
 
 type SearchParams = Promise<{ pasta: string }>
@@ -8,20 +8,18 @@ type SearchParams = Promise<{ pasta: string }>
 
 
 export default async function NewQuestionBookPage(props: { searchParams: SearchParams }) {
-  const supabase = await createClient();
   const { pasta } = await props.searchParams;
-  const folderId = pasta
+  const folderId = pasta;
 
-  const userPlanModules = await loadUserPlanModules();
-  
-  const { data: folders } = await supabase
-    .from("book_folders")
-    .select("id, name, questionBooks:question_books(id, name)");
+  const [userPlanModules, folders] = await Promise.all([
+    loadUserPlanModules(),
+    getBookFolders()
+  ]);
 
   return (
     <NewQuestionBookPageClient
       folderId={folderId || undefined}
-      folders={folders || []}
+      folders={folders?.folders || []}
       userPlanModules={userPlanModules || []}
     />
   );

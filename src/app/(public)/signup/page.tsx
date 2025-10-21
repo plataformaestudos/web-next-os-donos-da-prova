@@ -11,7 +11,7 @@ export default async function SignupPage() {
     price:month_value,
     modules:plans_modules(...modules(name))
   `
-  );
+  ).eq("status", "ACTIVE");
 
   if (!plans) {
     return null;
