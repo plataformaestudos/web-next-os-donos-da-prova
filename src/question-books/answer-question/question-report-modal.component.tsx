@@ -119,7 +119,7 @@ export function QuestionReportModal({
     
     const handleCategoryChange = (value: QuestionReportCategory) => {
         setReportCategory(value);
-        setReportSubcategory(""); // Reset subcategoria quando categoria muda
+        setReportSubcategory(""); 
     };
     
     const handleClose = () => {

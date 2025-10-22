@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Typography, Button, Spin, Alert } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { getTermsFromAPI } from "@/terms/terms-client.action";
 import { PrivacyPolicy } from "@/types/terms.types";
@@ -44,12 +43,6 @@ const Header = styled.div`
   position: relative;
 `;
 
-const HeaderTop = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-`;
 
 const HeaderContent = styled.div`
   display: flex;
@@ -77,23 +70,6 @@ const HeaderSubtitle = styled(Paragraph)`
   font-size: 1rem !important;
   margin-bottom: 0 !important;
   opacity: 0.9;
-`;
-
-const BackButton = styled(Button)`
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: ${({ theme }) => theme.colorSecondary};
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
-    color: ${({ theme }) => theme.colorSecondary};
-  }
 `;
 
 const Content = styled.div`

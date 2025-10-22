@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Checkbox, Typography, Alert, Button } from "antd";
-import { useRouter } from "next/navigation";
 import { getTermsFromAPI } from "@/terms/terms-client.action";
 import { TermsOfUse, PrivacyPolicy } from "@/types/terms.types";
 
