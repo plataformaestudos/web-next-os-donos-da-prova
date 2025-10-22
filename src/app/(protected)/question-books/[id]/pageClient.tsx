@@ -147,56 +147,111 @@ export function QuestionBookPageClient({
     }));
     return (
         <Container>
-            <Flex align="center" style={{ marginBottom: 16 }}>
-                <AppQuestionCounter question={question.orderDetails.questionOrder} total={currentQuestionBook.questionsCount} />
-                
-                {/* Estatísticas coladas à direita do contador */}
-                <div style={{
-                    marginLeft: -1,
-                    padding: "2px 10px",
-                    borderRadius: "0 6px 6px 0",
-                    width: "fit-content"
-                }}>
-                    <Flex align="center" gap={16}>
-                        
-                        {isStatsVisible && (
-                            <>
-                                <Space size={4}>
-                                    <ClockCircleOutlined style={{ color: token.colorInfo, fontSize: 15 }} />
-                                    <Typography.Text style={{ fontSize: 15, fontWeight: 600, color: token.colorText  }}>
-                                        {currentQuestionBook.questionBookStats.totalAnswers} {currentQuestionBook.questionBookStats.totalAnswers > 1 ? 'resolvidas' : 'resolvida'}
-                                    </Typography.Text>
-                                </Space>
+            {/* Layout para Desktop */}
+            {!isMobile ? (
+                <Flex align="center" style={{ marginBottom: 16 }}>
+                    <AppQuestionCounter question={question.orderDetails.questionOrder} total={currentQuestionBook.questionsCount} />
 
-                                <Space size={4}>
-                                    <CheckCircleOutlined style={{ color: token.colorSuccess, fontSize: 15 }} />
-                                    <Typography.Text style={{ fontSize: 15, fontWeight: 600, color: token.colorText  }}>
-                                        {currentQuestionBook.questionBookStats.correctAnswers} {currentQuestionBook.questionBookStats.correctAnswers > 1 ? 'corretas' : 'correta'}
-                                    </Typography.Text>
-                                </Space>
-                                <Space size={4}>
-                                    <CloseCircleOutlined style={{ color: token.colorError, fontSize: 15 }} />
-                                    <Typography.Text style={{ fontSize: 15, fontWeight: 600, color: token.colorText  }}>
-                                        {currentQuestionBook.questionBookStats.wrongAnswers} {currentQuestionBook.questionBookStats.wrongAnswers > 1 ? 'incorretas' : 'incorreta'}
-                                    </Typography.Text>
-                                </Space>
-                            </>
-                        )}
+                    <div style={{
+                        marginLeft: -1,
+                        padding: "2px 10px",
+                        borderRadius: "0 6px 6px 0",
+                        width: "fit-content"
+                    }}>
+                        <Flex align="center" gap={16}>
+
+                            {isStatsVisible && (
+                                <>
+                                    <Space size={4}>
+                                        <ClockCircleOutlined style={{ color: token.colorInfo, fontSize: 15 }} />
+                                        <Typography.Text style={{ fontSize: 15, fontWeight: 600, color: token.colorText }}>
+                                            {currentQuestionBook.questionBookStats.totalAnswers} {currentQuestionBook.questionBookStats.totalAnswers > 1 ? 'resolvidas' : 'resolvida'}
+                                        </Typography.Text>
+                                    </Space>
+
+                                    <Space size={4}>
+                                        <CheckCircleOutlined style={{ color: token.colorSuccess, fontSize: 15 }} />
+                                        <Typography.Text style={{ fontSize: 15, fontWeight: 600, color: token.colorText }}>
+                                            {currentQuestionBook.questionBookStats.correctAnswers} {currentQuestionBook.questionBookStats.correctAnswers > 1 ? 'corretas' : 'correta'}
+                                        </Typography.Text>
+                                    </Space>
+                                    <Space size={4}>
+                                        <CloseCircleOutlined style={{ color: token.colorError, fontSize: 15 }} />
+                                        <Typography.Text style={{ fontSize: 15, fontWeight: 600, color: token.colorText }}>
+                                            {currentQuestionBook.questionBookStats.wrongAnswers} {currentQuestionBook.questionBookStats.wrongAnswers > 1 ? 'incorretas' : 'incorreta'}
+                                        </Typography.Text>
+                                    </Space>
+                                </>
+                            )}
+                            <Button
+                                type="text"
+                                size="large"
+                                icon={isStatsVisible ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                                onClick={() => setIsStatsVisible(!isStatsVisible)}
+                                style={{
+                                    padding: "2px 4px",
+                                    minWidth: "auto",
+                                    height: "auto",
+                                    color: token.colorText
+                                }}
+                            />
+                        </Flex>
+                    </div>
+                </Flex>
+            ) : (
+                /* Layout para Mobile */
+                <div style={{ marginBottom: 6 }}>
+                    <Flex align="center" justify="space-between" style={{ marginBottom: isStatsVisible ? 12 : 0 }}>
+                        <AppQuestionCounter question={question.orderDetails.questionOrder} total={currentQuestionBook.questionsCount} />
                         <Button
                             type="text"
-                            size="large"
+                            size="small"
                             icon={isStatsVisible ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                             onClick={() => setIsStatsVisible(!isStatsVisible)}
                             style={{
-                                padding: "2px 4px",
+                                padding: "4px 8px",
                                 minWidth: "auto",
                                 height: "auto",
-                                color: token.colorText 
+                                color: token.colorText,
                             }}
                         />
                     </Flex>
+
+                    {isStatsVisible && (
+                        <div style={{
+                            padding: "6px 0px",
+                            marginTop: 8,
+                        }}>
+                            <Flex gap={8}>
+                                <Flex align="center" gap={8}>
+                                    <Space size={4}>
+                                        <ClockCircleOutlined style={{ color: token.colorInfo, fontSize: 12 }} />
+                                        <Typography.Text style={{ fontSize: 12, fontWeight: 600, color: token.colorText }}>
+                                            {currentQuestionBook.questionBookStats.totalAnswers} {currentQuestionBook.questionBookStats.totalAnswers > 1 ? 'resolvidas' : 'resolvida'}
+                                        </Typography.Text>
+                                    </Space>
+
+                                    <Space size={4}>
+                                        <CheckCircleOutlined style={{ color: token.colorSuccess, fontSize: 12 }} />
+                                        <Typography.Text style={{ fontSize: 12, fontWeight: 600, color: token.colorText }}>
+                                            {currentQuestionBook.questionBookStats.correctAnswers} {currentQuestionBook.questionBookStats.correctAnswers > 1 ? 'corretas' : 'correta'}
+                                        </Typography.Text>
+                                    </Space>
+                                </Flex>
+
+                                <Flex align="center" gap={8}>
+                                    <Space size={4}>
+                                        <CloseCircleOutlined style={{ color: token.colorError, fontSize: 12 }} />
+                                        <Typography.Text style={{ fontSize: 12, fontWeight: 600, color: token.colorText }}>
+                                            {currentQuestionBook.questionBookStats.wrongAnswers} {currentQuestionBook.questionBookStats.wrongAnswers > 1 ? 'incorretas' : 'incorreta'}
+                                        </Typography.Text>
+                                    </Space>
+                                </Flex>
+                            </Flex>
+                        </div>
+                    )}
                 </div>
-            </Flex>
+            )}
 
             {question.module.name && (
                 <Typography.Paragraph
