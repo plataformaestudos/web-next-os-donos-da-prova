@@ -31,6 +31,10 @@ import { QuestionType } from "@/model/question.model";
 import { TiptapEditor } from "@/ui/tiptap-editor/tiptap-editor.component";
 import { answerQuestion } from "./answer-question.action";
 import { useRouter } from "next/navigation";
+import { useTheme } from "styled-components";
+import { QuestionReportModal } from "./question-report-modal.component";
+import { QuestionReportData } from "@/types/question-report.types";
+import HttpClient from "@/util/http-client/fetch-client.util";
 
 // Componente reutilizável para o campo de navegação
 const NavigationField = ({ 
@@ -122,11 +126,16 @@ export function AnswerQuestion({
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<boolean>(false);
     const app = App.useApp?.();
+    const theme = useTheme();
     const [correctAlternative, setCorrectAlternative] = useState<string | null>(
         (userAnswer && alternatives.find(({ isCorrect }) => isCorrect)?.id) ?? null
     );
     const [showComment, setShowComment] = useState<boolean>(false);
     const [isMobile, setIsMobile] = useState(false);
+    
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    
+    
     const [selectedAlternative, setSelectedAlternative] = useState<string | null>(
         userAnswer?.alternativeId ?? null
     );
@@ -142,6 +151,23 @@ export function AnswerQuestion({
         checkScreenSize();
         window.addEventListener('resize', checkScreenSize);
     }, []);
+    
+    const handleReportSubmit = async (reportData: QuestionReportData): Promise<void> => {
+        try {
+            await HttpClient.fetch<{ success: boolean; message: string }>(
+                '/question-reports',
+                {
+                    method: 'POST',
+                    body: JSON.stringify(reportData)
+                },
+                false 
+            );
+            
+        } catch (error) {
+            console.error('Erro ao enviar reporte:', error);
+            throw error;
+        }
+    };
     function toggleDiscard(id: string) {
         if (discardedAlternatives.has(id)) {
             discardedAlternatives.delete(id);
@@ -260,6 +286,7 @@ export function AnswerQuestion({
             >
                 Responder questão
             </Button>
+            
             <br />
             <br />
 
@@ -318,6 +345,19 @@ export function AnswerQuestion({
                     )}
                 </Fragment>
             )}
+
+             <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                <Typography.Text type="secondary" style={{ fontSize: '14px' }}>
+                    Encontrou algum erro nesta questão?{' '}
+                    <Button 
+                        type="link" 
+                        onClick={() => setIsReportModalOpen(true)}
+                        style={{ padding: 0, height: 'auto', fontSize: '14px', color: theme.colorPrimary, fontWeight: 600 }}
+                    >
+                        Fale conosco
+                    </Button>
+                </Typography.Text>
+            </div>
 
             {/* Divider para separar resolução da navegação */}
             <Divider style={{ margin: "24px 0 16px 0" }} />
@@ -422,6 +462,14 @@ export function AnswerQuestion({
                 </>
             )}
             </div>
+            
+            <QuestionReportModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                onSubmit={handleReportSubmit}
+                questionBookId={questionBookId}
+                questionBookQuestionId={questionBookQuestionId}
+            />
         </Container>
     );
 }

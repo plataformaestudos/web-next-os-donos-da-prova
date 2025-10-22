@@ -31,7 +31,7 @@ export function AppQuestionLoader({
     onAnswerSubmitted,
 }: AppQuestionLoaderProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
-
+    
     useEffect(() => {
         async function getQuestionBookQuestion(id: string, seq: string) {
             const params = new URLSearchParams();
@@ -57,7 +57,6 @@ export function AppQuestionLoader({
                 setIsLoading(false);
             }
         }
-        console.log(seq, question.orderDetails.questionOrder, seqRandom);
         if ((seq && parseInt(seq) !== question.orderDetails.questionOrder) || seqRandom) {
             getQuestionBookQuestion(id, seq ?? "")
                 .then((data) => setQuestion(data ?? questionBook?.nextQuestion));
