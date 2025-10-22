@@ -1,3 +1,6 @@
+/* Importar estilos personalizados do scrollbar */
+@import '../styles/scrollbar.css';
+
 @font-face {
   font-family: 'Digital-7';
   src: url('/fonts/digital-7.ttf') format('truetype');

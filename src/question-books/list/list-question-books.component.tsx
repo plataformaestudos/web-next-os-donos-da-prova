@@ -164,6 +164,7 @@ export function ListQuestionBooks({ questionBooks, folders, setQuestionBooksWith
                                             percent={Math.max(0, Math.min(100, Number(item.percentAnswered || 0)))}
                                             strokeColor={item.percentAnswered === 100 ? '#52c41a' : primaryColor}
                                             showInfo={false}
+                                            /* eslint-disable-next-line */
                                             strokeWidth={8}
                                             style={{ width: 120 }}
                                         />

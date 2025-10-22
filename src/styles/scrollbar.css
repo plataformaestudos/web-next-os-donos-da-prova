@@ -1,0 +1,81 @@
+/* Personalização do Scrollbar */
+
+/* Para navegadores Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Scrollbar para tema escuro */
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* Scrollbar com cores do tema */
+.themed-scrollbar ::-webkit-scrollbar-track {
+  background: var(--color-primary-bg);
+}
+
+.themed-scrollbar ::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+}
+
+.themed-scrollbar ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-hover);
+}
+
+/* Scrollbar mais fino */
+.thin-scrollbar ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+/* Scrollbar mais grosso */
+.thick-scrollbar ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+/* Scrollbar invisível (ainda funcional) */
+.invisible-scrollbar ::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+
+/* Scrollbar com gradiente */
+.gradient-scrollbar ::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Scrollbar com animação */
+.animated-scrollbar ::-webkit-scrollbar-thumb {
+  background: #667eea;
+  transition: background 0.3s ease;
+}
+
+.animated-scrollbar ::-webkit-scrollbar-thumb:hover {
+  background: #764ba2;
+}
