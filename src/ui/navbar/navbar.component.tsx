@@ -16,6 +16,7 @@ import { FaArrowRightToBracket } from "react-icons/fa6";
 import { useNabvarContext } from "./navbar.context";
 import { useMenus } from "./use-menus.hook";
 import { useState } from "react";
+import { TbMessageReport } from "react-icons/tb";
 
 const icons = {
   home: (
@@ -36,7 +37,6 @@ const icons = {
   ),
   question: (
     <LuFileQuestion
-      color="#fff"
       size={24}
     />
   ),
@@ -70,6 +70,11 @@ const icons = {
       alt="Home"
       width={24}
       height={24}
+    />
+  ),
+  reports: (
+    <TbMessageReport
+      size={24}
     />
   ),
 };
@@ -127,6 +132,12 @@ const iconsB = {
       alt="Planos e Pagamentos"
       width={24}
       height={24}
+    />
+  ),
+  reports: (
+    <TbMessageReport
+      color="#fff"
+      size={24}
     />
   ),
 };

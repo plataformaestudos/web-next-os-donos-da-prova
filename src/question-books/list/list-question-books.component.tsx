@@ -162,7 +162,7 @@ export function ListQuestionBooks({ questionBooks, folders, setQuestionBooksWith
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                         <Progress
                                             percent={Math.max(0, Math.min(100, Number(item.percentAnswered || 0)))}
-                                            strokeColor={item.percentAnswered === 100 ? '#52c41a' : primaryColor}
+                                            strokeColor={item.percentAnswered === 100 ? '#52c41a' : item.percentAnswered >= 50 ? '#ffc107' : primaryColor}
                                             showInfo={false}
                                             /* eslint-disable-next-line */
                                             strokeWidth={8}

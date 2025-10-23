@@ -131,7 +131,6 @@ export const NavButton = styled(Button)<{ $enabled?: boolean; $variant?: "pill" 
   
 
   /* variant */
-  border-radius: ${(p) => (p.$variant === "pill" ? "50%" : "999px")};
   ${(p) =>
     p.$variant === "circle" &&
     css`

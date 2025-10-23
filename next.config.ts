@@ -19,6 +19,9 @@ const routeAlias: {
   "/assinatura": "/subscription",
   "/perfil": "/profile",
   "/perfil/editar": "/profile/edit",
+  "/politica-privacidade": "/privacy-policy",
+  "/termos-de-uso": "/terms-of-use",
+  "/reports-de-questoes": "/question-reports",
 };
 
 const nextConfig = {

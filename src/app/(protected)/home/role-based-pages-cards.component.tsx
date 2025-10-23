@@ -3,9 +3,11 @@ import {
   LuBook,
   LuCircleDollarSign,
   LuFileQuestion,
+  LuFlag,
   LuFolders,
   LuHouse,
 } from "react-icons/lu";
+
 
 import { CgProfile } from "react-icons/cg";
 import { MenuModel } from "@/model/menu.model";
@@ -17,6 +19,7 @@ const icons = {
   profile: <CgProfile size={48} />,
   module: <LuFolders size={48} />,
   plan: <LuCircleDollarSign size={48} />,
+  reports: <LuFlag size={48} />,
 };
 
 export function RoleBasedPagesCards({ menus }: { menus: MenuModel[] }) {
