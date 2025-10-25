@@ -7,7 +7,6 @@ import { getTermsFromAPI } from "@/terms/terms-client.action";
 import { TermsOfUse } from "@/types/terms.types";
 import styled from "styled-components";
 import Image from "next/image";
-import { PublicFooter } from "@/ui/footer/footer.component";
 
 const { Title, Paragraph } = Typography;
 
@@ -262,7 +261,6 @@ export default function TermosDeUsoPage() {
           </LastUpdated>
         </ContentWrapper>
       </MainContent>
-      <PublicFooter />
     </Container>
   );
 }

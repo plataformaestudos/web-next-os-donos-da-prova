@@ -7,7 +7,6 @@ import { getTermsFromAPI } from "@/terms/terms-client.action";
 import { PrivacyPolicy } from "@/types/terms.types";
 import styled from "styled-components";
 import Image from "next/image";
-import { PublicFooter } from "@/ui/footer/footer.component";
 
 const { Title, Paragraph } = Typography;
 
@@ -261,7 +260,6 @@ export default function PoliticaPrivacidadePage() {
           </LastUpdated>
         </ContentWrapper>
       </MainContent>
-      <PublicFooter />
     </Container>
   );
 }

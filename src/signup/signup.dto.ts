@@ -19,4 +19,6 @@ export interface SignupDTO {
   };
   termsAccepted: boolean;
   privacyAccepted: boolean;
+  autoChargeAccepted: boolean;
+  cancellationPolicyAccepted: boolean;
 }

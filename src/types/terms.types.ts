@@ -20,9 +20,37 @@ export interface PrivacyPolicy {
   is_active: boolean;
 }
 
+export interface LegalNotice {
+  version: string;
+  title: string;
+  content: string;
+}
+
+export interface CancellationPolicy {
+  version: string;
+  title: string;
+  content: string;
+}
+
+export interface AcceptanceTerms {
+  version: string;
+  title: string;
+  content: string;
+}
+
+export interface AutoRenewalTerms {
+  version: string;
+  title: string;
+  content: string;
+}
+
 export interface TermsResponse {
   termsOfUse: TermsOfUse;
   privacyPolicy: PrivacyPolicy;
+  legalNotice: LegalNotice;
+  cancellationPolicy: CancellationPolicy;
+  acceptanceTerms: AcceptanceTerms;
+  autoRenewalTerms: AutoRenewalTerms;
   success: boolean;
   error?: string;
 }

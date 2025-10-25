@@ -71,14 +71,15 @@ export default function SignupSteps({
   } = useForm<PaymentInfo>();
 
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [autoBillingAccepted, setAutoBillingAccepted] = useState(false);
 
   const isDisabled = useMemo(() => {
     return (
       (currentStep === 1 && !selectedPlan) ||
       (currentStep === 2 && !personalInfoFormValid) ||
-      (currentStep === 3 && (!paymentInfoFormValid || !termsAccepted))
+      (currentStep === 3 && (!paymentInfoFormValid || !termsAccepted || !autoBillingAccepted))
     );
-  }, [currentStep, selectedPlan, personalInfoFormValid, paymentInfoFormValid, termsAccepted]);
+  }, [currentStep, selectedPlan, personalInfoFormValid, paymentInfoFormValid, termsAccepted, autoBillingAccepted]);
 
   return (
     <Container>
@@ -145,6 +146,7 @@ export default function SignupSteps({
             <PaymentInfoThirdStep formV={paymentInfoForm} />
             <TermsCheckbox 
               onAcceptanceChange={setTermsAccepted}
+              onAutoBillingChange={setAutoBillingAccepted}
             />
           </div>
 
@@ -193,6 +195,8 @@ export default function SignupSteps({
                         },
                         termsAccepted: termsAccepted,
                         privacyAccepted: termsAccepted,
+                        autoChargeAccepted: autoBillingAccepted,
+                        cancellationPolicyAccepted:autoBillingAccepted
                       });
 
                       if (result.success) {

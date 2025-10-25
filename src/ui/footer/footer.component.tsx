@@ -90,17 +90,13 @@ export function Footer() {
     const currentYear = new Date().getFullYear();
 
     const handleTermsClick = () => {
-        window.open('/termos-de-uso', '_blank');
-    };
-
-    const handlePrivacyClick = () => {
-        window.open('/politica-privacidade', '_blank');
+        window.open('/terms-and-policies', '_blank');
     };
 
     return (
         <FooterContainer>
             <CopyrightText>
-                © {currentYear} Os Donos da Prova. Todos os direitos reservados.
+                © {currentYear} OS DONOS DA PROVA LTDA - CNPJ 60.336.131/0001-76 - Belo Horizonte/MG. Todos os direitos reservados.
             </CopyrightText>
 
             <LinksContainer>
@@ -108,14 +104,7 @@ export function Footer() {
                     type="link"
                     onClick={handleTermsClick}
                 >
-                    Termos de Uso
-                </FooterLink>
-
-                <FooterLink
-                    type="link"
-                    onClick={handlePrivacyClick}
-                >
-                    Política de Privacidade
+                    Termos e Políticas
                 </FooterLink>
             </LinksContainer>
 
@@ -123,61 +112,3 @@ export function Footer() {
     );
 }
 
-// Footer específico para páginas públicas (sem margin-left)
-const PublicFooterContainer = styled.footer`
-  background-color: ${({ theme }) => theme.colorPrimaryBg};
-  color: ${({ theme }) => theme.colorPrimaryText};
-  padding: clamp(8px, 2vw, 16px) clamp(16px, 4vw, 32px);
-  border-top: 1px solid ${({ theme }) => theme.colorPrimaryBg};
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: clamp(12px, 3vw, 24px);
-  min-height: clamp(40px, 8vh, 48px);
-  margin-top: auto;
-  width: 100%;
-  box-sizing: border-box;
-  
-  @media (max-width: 768px) {
-    display: block;
-    text-align: center;
-    padding: clamp(8px, 2vw, 16px) clamp(12px, 3vw, 20px);
-  }
-`;
-
-export function PublicFooter() {
-    const currentYear = new Date().getFullYear();
-
-    const handleTermsClick = () => {
-        window.open('/termos-de-uso', '_blank');
-    };
-
-    const handlePrivacyClick = () => {
-        window.open('/politica-privacidade', '_blank');
-    };
-
-    return (
-        <PublicFooterContainer>
-            <LinksContainer>
-                <FooterLink
-                    type="link"
-                    onClick={handleTermsClick}
-                >
-                    Termos de Uso
-                </FooterLink>
-
-                <FooterLink
-                    type="link"
-                    onClick={handlePrivacyClick}
-                >
-                    Política de Privacidade
-                </FooterLink>
-            </LinksContainer>
-
-            <CopyrightText>
-                © {currentYear} Os Donos da Prova. Todos os direitos reservados.
-            </CopyrightText>
-        </PublicFooterContainer>
-    );
-}

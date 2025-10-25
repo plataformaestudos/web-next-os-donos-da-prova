@@ -9,10 +9,12 @@ const { Text } = Typography;
 
 interface TermsCheckboxProps {
   onAcceptanceChange: (accepted: boolean) => void;
+  onAutoBillingChange: (accepted: boolean) => void;
 }
 
-export function TermsCheckbox({ onAcceptanceChange }: TermsCheckboxProps) {
+export function TermsCheckbox({ onAcceptanceChange, onAutoBillingChange }: TermsCheckboxProps) {
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [autoBillingAccepted, setAutoBillingAccepted] = useState(false);
   const [termsOfUse, setTermsOfUse] = useState<TermsOfUse | null>(null);
   const [privacyPolicy, setPrivacyPolicy] = useState<PrivacyPolicy | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,16 +46,20 @@ export function TermsCheckbox({ onAcceptanceChange }: TermsCheckboxProps) {
     onAcceptanceChange(termsAccepted);
   }, [termsAccepted, onAcceptanceChange]);
 
+  useEffect(() => {
+    onAutoBillingChange(autoBillingAccepted);
+  }, [autoBillingAccepted, onAutoBillingChange]);
+
   const handleCheckboxChange = (checked: boolean) => {
     setTermsAccepted(checked);
   };
 
-  const handleTermsClick = () => {
-    window.open('/termos-de-uso', '_blank');
+  const handleAutoBillingChange = (checked: boolean) => {
+    setAutoBillingAccepted(checked);
   };
 
-  const handlePrivacyClick = () => {
-    window.open('/politica-privacidade', '_blank');
+  const handleTermsClick = () => {
+    window.open('/terms-and-policies', '_blank');
   };
 
   if (loading) {
@@ -75,24 +81,31 @@ export function TermsCheckbox({ onAcceptanceChange }: TermsCheckboxProps) {
   }
 
   return (
-    <div>
+    <div style={{ marginTop: "20px" }}>
       <Checkbox
         checked={termsAccepted}
         onChange={(e) => handleCheckboxChange(e.target.checked)}
+        style={{ marginBottom: "16px" }}
       >
         <Text>
-          Aceito os{" "}
+          Li e concordo com os{" "}
           <Button
             type="link"
             onClick={handleTermsClick}
             style={{ padding: 0 }}
           >
-            termos de uso
+            Termos de Uso, a Política de Privacidade e a Política de Reembolso
           </Button>
-          {" "} e a{" "}
-          <Button type="link" onClick={handlePrivacyClick} style={{ padding: 0 }}>
-            política de privacidade
-          </Button>
+          {" "} da OS DONOS DA PROVA{" "}
+        </Text>
+      </Checkbox>
+      
+      <Checkbox
+        checked={autoBillingAccepted}
+        onChange={(e) => handleAutoBillingChange(e.target.checked)}
+      >
+        <Text>
+          Concordo com a cobrança automática após o período gratuito
         </Text>
       </Checkbox>
     </div>

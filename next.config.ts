@@ -21,6 +21,7 @@ const routeAlias: {
   "/perfil/editar": "/profile/edit",
   "/politica-privacidade": "/privacy-policy",
   "/termos-de-uso": "/terms-of-use",
+  "/termos-e-politicas": "/terms-and-policies",
   "/reports-de-questoes": "/question-reports",
 };
 

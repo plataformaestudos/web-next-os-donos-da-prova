@@ -109,7 +109,6 @@ export function QuestionReportFilters({ currentFilters }: QuestionReportFiltersP
     params.delete('subcategory');
     params.delete('questionText');
     
-    // Add new filter params if they have values
     if (filters.status) params.set('status', filters.status);
     if (filters.category) params.set('category', filters.category);
     if (filters.subcategory) params.set('subcategory', filters.subcategory);
