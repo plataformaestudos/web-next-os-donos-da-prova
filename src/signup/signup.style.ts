@@ -88,6 +88,7 @@ export const PlansContainer = styled.div`
 export const PlansModules = styled.div`
   flex: 1;
   overflow-y: auto;
+  width: 100%;
   max-height: 100px;
 
   &::-webkit-scrollbar {

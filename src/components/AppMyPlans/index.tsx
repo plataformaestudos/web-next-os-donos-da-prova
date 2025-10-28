@@ -1,23 +1,23 @@
 "use client";
 
 import { App, Empty, Flex } from "antd";
-import { AppPlan } from "../AppPlan";
+import { AppPlanCardMyPlan } from "../AppPlanCardMyPlan";
 import { useEffect, useState } from "react";
 import { ResponseModel } from "@/model/common.model";
 import HttpClient from "@/util/http-client/fetch-client.util";
-import { PlanModel } from "@/model/plan.model";
+import { MyPlanModel } from "@/model/plan.model";
 
 export const AppMyPlans = () => {
-    const [plans, setPlans] = useState<PlanModel[]>([]);
+    const [plans, setPlans] = useState<MyPlanModel[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-
+    
     const { message } = App.useApp();
 
     useEffect(() => {
         async function getPayments() {
             setIsLoading(true);
             try {
-                const response = await HttpClient.fetch<ResponseModel<PlanModel[]>>(
+                const response = await HttpClient.fetch<ResponseModel<MyPlanModel[]>>(
                     `/user-subscriptions/actives`,
                     {
                         method: "GET",
@@ -52,8 +52,7 @@ export const AppMyPlans = () => {
                 <Empty description="Você não possui planos ativos no momento." />
             )}
             {plans.map((plan) => (
-                <AppPlan
-                    myPlan
+                <AppPlanCardMyPlan
                     key={plan?.id}
                     plan={plan}
                 />

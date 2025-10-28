@@ -1,6 +1,6 @@
 "use client";
 
-import { PlanModel } from "@/model/plan.model";
+import { MyPlanModel } from "@/model/plan.model";
 import {
     Button,
     Descriptions,
@@ -19,22 +19,7 @@ import {
     PaymentInfoThirdStep,
 } from "@/signup/payment-info.component";
 
-interface AppPlanProps {
-    plan: PlanModel;
-    myPlan?: boolean;
-}
-
 const { Title } = Typography;
-
-// const ProfileCard = styled(Card)`
-//   background-color: #fff;
-//   border-radius: 10px;
-//   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-//   width: 100%;
-//   min-width: 350px;
-//   max-width: 350px;
-//   height: fit-content;
-// `;
 
 const ProfileTitle = styled(Title)`
   color: #1890ff;
@@ -46,6 +31,7 @@ const ButtonContent = styled.div`
   justify-content: center;
   margin-top: 20px;
 `;
+
 const FlipCardContainer = styled.div`
   perspective: 1000px;
   width: 100%;
@@ -54,7 +40,6 @@ const FlipCardContainer = styled.div`
   margin: 10px;
   flex: 0 0 auto;
 `;
-
 
 const FlipCardInner = styled.div<{ flipped: boolean }>`
   position: relative;
@@ -95,7 +80,7 @@ interface ModalProps {
     isDeclined?: boolean;
 }
 
-export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
+export const AppPlanCardMyPlan = ({ plan }: { plan: MyPlanModel }) => {
     const app = App.useApp?.();
     const message = app?.message;
     const useForm = <T,>() => {
@@ -143,7 +128,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
 
     const handleFlip = () => setFlipped(!flipped);
 
-    const handleCancelPlan = (planData: PlanModel) => {
+    const handleCancelPlan = (planData: MyPlanModel) => {
         setModalProps({
             title: "Cancelar Plano",
             content: (
@@ -161,38 +146,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
         });
     };
 
-    const handleSelectPlan = (planData: PlanModel) => {
-        setModalProps({
-            title: "Assinar novo plano",
-            content: (
-                <div style={{ display: "flex", flexDirection: "column", gap: 30 }}>
-                    <span>
-                        Tem certeza que deseja escolher o plano{" "}
-                        <strong>{planData.name}</strong> no valor de{" "}
-                        <strong>
-                            {Number(
-                                planData.subscriptionPlan?.monthValue ?? planData.billingValue ?? 0
-                            ).toLocaleString("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
-                            })}
-                        </strong>
-                        ?
-                        <br />
-                    </span>
-                    <PaymentInfoThirdStep formV={paymentInfoForm} />
-                </div>
-            ),
-            onConfirm: () => subscribePlan(planData, paymentInfoForm),
-            onCancel: () => setModalProps({ ...modalProps, visible: false }),
-            confirmText: "Sim, assinar",
-            cancelText: "Não",
-            visible: true,
-            isDeclined: false,
-        });
-    };
-
-    const handleUpdatePayment = (planData: PlanModel) => {
+    const handleUpdatePayment = (planData: MyPlanModel) => {
         setModalProps({
             title: "Atualizar dados de pagamento",
             content: (
@@ -215,7 +169,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
         });
     };
 
-    async function cancelPlan(planData: PlanModel) {
+    async function cancelPlan(planData: MyPlanModel) {
         setIsLoading(true);
         try {
             await HttpClient.fetch(`/subscription/cancel/${planData.id}`, {
@@ -233,50 +187,7 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
         }
     }
 
-    async function subscribePlan(planData: PlanModel, paymentInfoForm: FormInstance<PaymentInfo>) {
-        setIsLoading(true);
-        if (!isPaymentInfoValid) {
-            message.error("Por favor, preencha os dados de pagamento corretamente");
-            setIsLoading(false);
-            return;
-        }
-        const paymentData = paymentInfoForm.getFieldsValue() as PaymentInfo;
-        if (!paymentData || !paymentData.expiryDate) {
-            message.error("Por favor, preencha todos os dados de pagamento");
-            setIsLoading(false);
-            return;
-        }
-
-        const payload = {
-            planId: planData.id,
-            saveCard: paymentData.saveCard || false,
-            billingType: "CREDIT_CARD",
-            cycle: planData.billingRecurrencyType ?? "MONTHLY",
-            description: planData?.description ?? "",
-            creditCard: {
-                holderName: paymentData.holderName,
-                number: paymentData.number,
-                expiryMonth: paymentData.expiryDate.split("/")[0],
-                expiryYear: paymentData.expiryDate.split("/")[1],
-                ccv: paymentData.cvv,
-            },
-        };
-        try {
-            await HttpClient.fetch(`/subscription`, {
-                method: "POST",
-                body: JSON.stringify(payload),
-            },
-                false
-            );
-            message.success("Plano assinado com sucesso");
-            setModalProps({ ...modalProps, visible: false });
-            setTimeout(() => window.location.reload(), 200);
-        } finally {
-            setIsLoading(false);
-        }
-    }
-
-    async function updatePlan(planData: PlanModel) {
+    async function updatePlan(planData: MyPlanModel) {
         setIsLoading(true);
         if (!isPaymentInfoValid) {
             message.error("Por favor, preencha os dados de pagamento corretamente");
@@ -338,62 +249,67 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
                         bordered
                         column={1}
                     >
-                        <Descriptions.Item label="Valor">
-                            {Number(plan?.subscriptionPlan?.monthValue ?? plan?.billingValue ?? 0).toLocaleString(
-                                "pt-BR",
-                                {
-                                    style: "currency",
-                                    currency: "BRL",
-                                }
-                            )}
+                        <Descriptions.Item label="Valor mensal">
+                            {(() => {
+                                const values = [
+                                    plan?.subscriptionPlan?.monthValue,
+                                    plan?.subscriptionPlan?.quarterlyValue ? plan.subscriptionPlan.quarterlyValue : null,
+                                    plan?.subscriptionPlan?.semiannualValue ? plan.subscriptionPlan.semiannualValue: null,
+                                    plan?.subscriptionPlan?.annualValue ? plan.subscriptionPlan.annualValue: null,
+                                    plan?.billingValue ? plan.billingValue : null,
+                                ].filter((v): v is number => v !== null && v !== undefined && !isNaN(v));
+                                
+                                const minValue = values.length > 0 ? Math.min(...values) : 0;
+                                return Number(minValue).toLocaleString(
+                                    "pt-BR",
+                                    {
+                                        style: "currency",
+                                        currency: "BRL",
+                                    }
+                                );
+                            })()}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Limite de questões">
-                            {plan?.subscriptionPlan?.questionLimit || 0}
-                        </Descriptions.Item>
+                        {plan?.subscriptionPlan?.allowLifetime && plan?.subscriptionPlan?.lifetimeValue && (
+                            <Descriptions.Item label="Pagamento único">
+                                {Number(plan.subscriptionPlan.lifetimeValue).toLocaleString(
+                                    "pt-BR",
+                                    {
+                                        style: "currency",
+                                        currency: "BRL",
+                                    }
+                                )}
+                            </Descriptions.Item>
+                        )}
+                        { plan?.subscriptionPlan?.questionLimit !== undefined && plan?.subscriptionPlan?.questionLimit !== 0 && (
+                            <Descriptions.Item label="Limite de questões">
+                                {plan.subscriptionPlan.questionLimit}
+                            </Descriptions.Item>
+                        )}
                     </Descriptions>
                     <ButtonContent>
-                        {myPlan ? (
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: 12,
-                                }}
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 12,
+                            }}
+                        >
+                            <Button
+                                type="primary"
+                                size="large"
+                                danger
+                                onClick={() => handleCancelPlan(plan)}
                             >
-                                <Button
-                                    type="primary"
-                                    size="large"
-                                    danger
-                                    onClick={() => handleCancelPlan(plan)}
-                                >
-                                    Cancelar Plano
-                                </Button>
-                                <Button
-                                    type="primary"
-                                    size="large"
-                                    onClick={() => handleUpdatePayment(plan)}
-                                >
-                                    Gerenciar pagamento
-                                </Button>
-                            </div>
-                        ) : (
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: 12,
-                                }}
+                                Cancelar Plano
+                            </Button>
+                            <Button
+                                type="primary"
+                                size="large"
+                                onClick={() => handleUpdatePayment(plan)}
                             >
-                                <Button
-                                    type="primary"
-                                    size="large"
-                                    onClick={() => handleSelectPlan(plan)}
-                                >
-                                    Assinar Plano
-                                </Button>
-                                <Button type="default" size="large" onClick={handleFlip}>Ver Módulos</Button>
-                            </div>
-                        )}
+                                Gerenciar pagamento
+                            </Button>
+                        </div>
                     </ButtonContent>
                 </FlipCardFace>
                 <FlipCardFace back>
@@ -424,7 +340,6 @@ export const AppPlan = ({ plan, myPlan }: AppPlanProps) => {
                 loadingModal
                 show={isLoading}
             />
-
         </FlipCardContainer >
     );
 };

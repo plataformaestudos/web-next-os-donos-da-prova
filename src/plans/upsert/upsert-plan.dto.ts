@@ -8,7 +8,7 @@ export interface UpsertPlanDTO {
   monthValue?: number;
   quarterlyValue?: number;
   semiannualValue?: number;
-  yearlyValue?: number;
+  annualValue?: number;
   lifetimeValue?: number;
   modules: string[];
 }

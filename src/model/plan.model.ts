@@ -1,4 +1,4 @@
-export interface PlanModel {
+export interface MyPlanModel {
   billingRecurrencyType: string;
   billingValue: number | null;
   created_at: string;
@@ -17,7 +17,7 @@ export interface PlanModel {
     monthValue: number | null;
     quarterlyValue: number | null;
     semiannualValue: number | null;
-    yearlyValue: number | null;
+    annualValue: number | null;
     lifetimeValue: number | null;
     durationDays: number | null;
     isFree: boolean;
@@ -27,4 +27,25 @@ export interface PlanModel {
     id: string;
     name: string;
   }[] | null;
+}
+
+
+export interface NewPlanModel {
+  allowLifetime: boolean;
+  annualValue: number | null;
+  description: string;
+  id: string;
+  lifetimeValue: number | null;
+  modules?: {
+    id: string;
+    name: string;
+  }[] | null;
+  monthValue: number | null;
+  name: string;
+  quarterlyValue: number | null;
+  semiannualValue: number | null;
+  uniqueValue: number | null;
+  questionLimit: number | null;
+  durationDays: number | null;
+  isFree: boolean;
 }

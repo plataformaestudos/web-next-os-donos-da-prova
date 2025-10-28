@@ -18,7 +18,7 @@ export default async function EditPlanPage({ params }: { params: Promise<{ id: s
       monthValue:month_value,
       quarterlyValue:quarterly_value,
       semiannualValue:semiannual_value,
-      yearlyValue: annual_value,
+      annualValue: annual_value,
       lifetimeValue:lifetime_value,
       isFree:is_free,
       durationDays:duration_days,

@@ -11,12 +11,13 @@ import {
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-import { ChoosePlanFirstStep } from "./choose-plan.component";
+import { ChoosePlanFirstStep, CycleSelector } from "./choose-plan.component";
 import { TermsCheckbox } from "./terms-checkbox.component";
 import Link from "next/link";
 import Title from "antd/es/typography/Title";
 import { signUpClient } from "./signup.action";
 import { useIsMobile } from "@/util/use-media-query.hook";
+import { NewPlanModel } from "@/model/plan.model";
 
 const useForm = <T,>() => {
   const [isValid, setIsFormValid] = useState<boolean | null>(null);
@@ -40,15 +41,7 @@ const useForm = <T,>() => {
 export default function SignupSteps({
   plans,
 }: {
-  plans: {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    modules: {
-      name: string;
-    }[];
-  }[];
+  plans: NewPlanModel[];
 }) {
   const isMobile = useIsMobile();
 
@@ -58,6 +51,7 @@ export default function SignupSteps({
   const router = useRouter();
 
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedCycle, setSelectedCycle] = useState<string>("YEARLY");
 
   const {
     form: personalInfoForm,
@@ -73,13 +67,21 @@ export default function SignupSteps({
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [autoBillingAccepted, setAutoBillingAccepted] = useState(false);
 
+  const selectedPlanData = useMemo(() => {
+    return plans.find((p) => p.id === selectedPlan);
+  }, [plans, selectedPlan]);
+
+  const isPlanFree = useMemo(() => {
+    return selectedPlanData?.isFree ?? false;
+  }, [selectedPlanData]);
+
   const isDisabled = useMemo(() => {
     return (
       (currentStep === 1 && !selectedPlan) ||
       (currentStep === 2 && !personalInfoFormValid) ||
-      (currentStep === 3 && (!paymentInfoFormValid || !termsAccepted || !autoBillingAccepted))
+      (currentStep === 3 && !isPlanFree && (!paymentInfoFormValid || !termsAccepted || !autoBillingAccepted))
     );
-  }, [currentStep, selectedPlan, personalInfoFormValid, paymentInfoFormValid, termsAccepted, autoBillingAccepted]);
+  }, [currentStep, selectedPlan, personalInfoFormValid, paymentInfoFormValid, termsAccepted, autoBillingAccepted, isPlanFree]);
 
   return (
     <Container>
@@ -102,19 +104,31 @@ export default function SignupSteps({
                 }
                 setCurrentStep(step + 1);
               }}
-              items={[
-                {
-                  title: "Plano",
-                },
-                {
-                  title: "Dados pessoais",
-                  disabled: !selectedPlan,
-                },
-                {
-                  title: "Pagamento",
-                  disabled: !personalInfoFormValid,
-                },
-              ]}
+              items={
+                isPlanFree
+                  ? [
+                      {
+                        title: "Plano",
+                      },
+                      {
+                        title: "Dados pessoais",
+                        disabled: !selectedPlan,
+                      },
+                    ]
+                  : [
+                      {
+                        title: "Plano",
+                      },
+                      {
+                        title: "Dados pessoais",
+                        disabled: !selectedPlan,
+                      },
+                      {
+                        title: "Pagamento",
+                        disabled: !personalInfoFormValid,
+                      },
+                    ]
+              }
             />
           )}
         </Header>
@@ -138,17 +152,34 @@ export default function SignupSteps({
           >
             <PersonalInfoSecondStep form={personalInfoForm} />
           </div>
-          <div
-            style={{
-              display: currentStep === 3 ? "block" : "none",
-            }}
-          >
-            <PaymentInfoThirdStep formV={paymentInfoForm} />
-            <TermsCheckbox 
-              onAcceptanceChange={setTermsAccepted}
-              onAutoBillingChange={setAutoBillingAccepted}
-            />
-          </div>
+          {!isPlanFree && (
+            <div
+              style={{
+                display: currentStep === 3 ? "block" : "none",
+              }}
+            >
+              <Typography.Paragraph>
+                Preencha as informações de pagamento
+              </Typography.Paragraph>
+              
+              {selectedPlanData && (
+                <div style={{ marginBottom: 20 }}>
+                  <Typography.Text strong>Assinatura:</Typography.Text>
+                  <CycleSelector
+                    plan={selectedPlanData}
+                    selectedCycle={selectedCycle}
+                    onCycleChange={setSelectedCycle}
+                  />
+                </div>
+              )}
+
+              <PaymentInfoThirdStep formV={paymentInfoForm} />
+              <TermsCheckbox 
+                onAcceptanceChange={setTermsAccepted}
+                onAutoBillingChange={setAutoBillingAccepted}
+              />
+            </div>
+          )}
 
           {error && <Typography.Text type="danger">{error}</Typography.Text>}
         </Content>
@@ -171,33 +202,61 @@ export default function SignupSteps({
             disabled={isDisabled || isPending}
             loading={isPending}
             onClick={() => {
-              if (currentStep === 3) {
+              const isLastStep = isPlanFree ? currentStep === 2 : currentStep === 3;
+              
+              if (isLastStep) {
                 startTransition(() => {
                   (async () => {
                     try {
-                      setError(null); 
-                      const result = await signUpClient({
-                        planId: selectedPlan as string,
-                        saveCard: paymentInfo.saveCard,
-                        billingType: "CREDIT_CARD",
-                        cycle: "MONTHLY",
-                        description: "",
-                        userInfo: {
-                          ...personalInfo,
-                          cpfCnpj: personalInfo.cpf,
-                        },
-                        creditCard: {
-                          holderName: paymentInfo.holderName,
-                          number: paymentInfo.number,
-                          expiryMonth: paymentInfo.expiryDate.split("/")[0],
-                          expiryYear: paymentInfo.expiryDate.split("/")[1],
-                          ccv: paymentInfo.cvv,
-                        },
-                        termsAccepted: termsAccepted,
-                        privacyAccepted: termsAccepted,
-                        autoChargeAccepted: autoBillingAccepted,
-                        cancellationPolicyAccepted:autoBillingAccepted
-                      });
+                      setError(null);
+                      
+                      const payload = isPlanFree
+                        ? {
+                            planId: selectedPlan as string,
+                            saveCard: false,
+                            billingType: "FREE" as const,
+                            cycle: "MONTHLY",
+                            description: "",
+                            userInfo: {
+                              ...personalInfo,
+                              cpfCnpj: personalInfo.cpf,
+                            },
+                            creditCard: {
+                              holderName: "",
+                              number: "",
+                              expiryMonth: "",
+                              expiryYear: "",
+                              ccv: "",
+                            },
+                            termsAccepted: true,
+                            privacyAccepted: true,
+                            autoChargeAccepted: true,
+                            cancellationPolicyAccepted: true
+                          }
+                        : {
+                            planId: selectedPlan as string,
+                            saveCard: paymentInfo.saveCard,
+                            billingType: "CREDIT_CARD" as const,
+                            cycle: selectedCycle,
+                            description: "",
+                            userInfo: {
+                              ...personalInfo,
+                              cpfCnpj: personalInfo.cpf,
+                            },
+                            creditCard: {
+                              holderName: paymentInfo.holderName,
+                              number: paymentInfo.number,
+                              expiryMonth: paymentInfo.expiryDate.split("/")[0],
+                              expiryYear: paymentInfo.expiryDate.split("/")[1],
+                              ccv: paymentInfo.cvv,
+                            },
+                            termsAccepted: termsAccepted,
+                            privacyAccepted: termsAccepted,
+                            autoChargeAccepted: autoBillingAccepted,
+                            cancellationPolicyAccepted: autoBillingAccepted
+                          };
+
+                      const result = await signUpClient(payload);
 
                       if (result.success) {
                         router.push("/home");

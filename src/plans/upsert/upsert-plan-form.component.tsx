@@ -19,7 +19,7 @@ export interface PlanFormValues {
   monthValue?: number;
   quarterlyValue?: number;
   semiannualValue?: number;
-  yearlyValue?: number;
+  annualValue?: number;
   lifetimeValue?: number;
   modules: string[];
 }
@@ -45,7 +45,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
     monthValue: plan?.monthValue || 0,
     quarterlyValue: plan?.quarterlyValue || 0,
     semiannualValue: plan?.semiannualValue || 0,
-    yearlyValue: plan?.yearlyValue || 0,
+    annualValue: plan?.annualValue || 0,
     lifetimeValue: plan?.lifetimeValue || 0,
     modules: plan?.modules || []
   });
@@ -240,11 +240,11 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
           <Flex vertical style={{ flex: 1, minWidth: 120 }}>
             <Label>Anual</Label>
             <InputNumber
-              id="yearlyValue"
-              value={values.yearlyValue}
+              id="annualValue"
+              value={values.annualValue}
               prefix="R$"
               step={0.01}
-              onChange={val => handleChange("yearlyValue",  val ?? undefined)}
+              onChange={val => handleChange("annualValue",  val ?? undefined)}
               style={{ width: '100%' }}
               disabled={values.isFree}
             />

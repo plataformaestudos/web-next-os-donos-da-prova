@@ -11,7 +11,7 @@ export async function upsertPlan(
   _: {
     error: string | null;
   },
-  { id, name, description, isFree, durationDays, lifetimeValue, monthValue, quarterlyValue, questionLimit, semiannualValue, yearlyValue, modules }: UpsertPlanDTO
+  { id, name, description, isFree, durationDays, lifetimeValue, monthValue, quarterlyValue, questionLimit, semiannualValue, annualValue, modules }: UpsertPlanDTO
 ): Promise<{ error: string | null }> {
   if (!name) {
     return {
@@ -30,7 +30,7 @@ export async function upsertPlan(
       month_value: monthValue,
       quarterly_value: quarterlyValue,
       semiannual_value: semiannualValue,
-      annual_value: yearlyValue,
+      annual_value: annualValue,
       lifetime_value: lifetimeValue,
       is_free: isFree,
       duration_days: durationDays,

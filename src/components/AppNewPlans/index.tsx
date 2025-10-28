@@ -1,23 +1,23 @@
 "use client";
 
 import { App, Flex } from "antd";
-import { AppPlan } from "../AppPlan";
+import { AppPlanCardNewPlan } from "../AppPlanCardNewPlan";
 import { useEffect, useState } from "react";
 import { ResponseModel } from "@/model/common.model";
 import HttpClient from "@/util/http-client/fetch-client.util";
-import { PlanModel } from "@/model/plan.model";
+import { NewPlanModel } from "@/model/plan.model";
 
 export const AppNewPlans = () => {
-  const [plans, setPlans] = useState<PlanModel[]>([]);
+  const [plans, setPlans] = useState<NewPlanModel[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
+  console.log(plans);
   const { message } = App.useApp();
 
   useEffect(() => {
  async function getAvailablePlans() {
       setIsLoading(true);
       try {
-        const response = await HttpClient.fetch<ResponseModel<PlanModel[]>>(
+        const response = await HttpClient.fetch<ResponseModel<NewPlanModel[]>>(
           "/subscription-plans/availables",
           {
             method: "GET",
@@ -52,8 +52,7 @@ export const AppNewPlans = () => {
         <p>Não temos novos planos disponíveis no momento.</p>
       )}
       {plans.map((plan) => (
-        <AppPlan
-          myPlan={false}
+        <AppPlanCardNewPlan
           key={plan?.id}
           plan={plan}
         />
