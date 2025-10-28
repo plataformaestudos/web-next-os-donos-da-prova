@@ -83,7 +83,7 @@ function PlanCardComponent({
     <PlanCard key={plan.id} $selected={isSelected} onClick={() => onClick()}>
       {modulesOpened ? (
         <PlansModules>
-          <Typography.Text style={{ fontSize: 12, color: "inherit", width: "100%" }}>
+          <Typography.Text style={{ fontSize: 12, color: "inherit" }}>
             {plan.modules?.length} Módulo(s)
             <ul>
               {plan.modules?.map((module) => (
