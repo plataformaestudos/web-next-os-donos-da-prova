@@ -130,7 +130,6 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
 
     const {
         form: paymentInfoForm,
-        values: paymentInfoValues,
         isValid: isPaymentInfoValid,
     } = useForm<PaymentInfo>();
 
