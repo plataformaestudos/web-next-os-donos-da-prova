@@ -7,6 +7,7 @@ import { UserProvider } from "./context/user.context";
 import { ThemeWrapper } from "./theme-wrapper";
 import { ErrorBoundaryWrapper } from "@/components/ErrorBoundary/ErrorBoundaryWrapper";
 import { App as AntdApp } from "antd"; // provedor do antd
+import { CookieBanner } from "@/components/CookieBanner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -39,7 +40,7 @@ export default async function RootLayout({
                         </ThemeWrapper>
                     </ClientProviders>
                 </AntdApp>
-
+                <CookieBanner />
             </body>
         </html>
     );

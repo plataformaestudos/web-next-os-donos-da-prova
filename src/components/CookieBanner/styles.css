@@ -1,0 +1,140 @@
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    padding: 20px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+    border-top: 3px solid #1890ff;
+}
+
+.cookie-banner-visible {
+    transform: translateY(0);
+}
+
+.cookie-banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.cookie-banner-icon {
+    color: #1890ff;
+    flex-shrink: 0;
+}
+
+.cookie-banner-text {
+    flex: 1;
+    min-width: 300px;
+}
+
+.cookie-banner-title {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #262626;
+}
+
+.cookie-banner-description {
+    margin: 0;
+    font-size: 14px;
+    color: #595959;
+    line-height: 1.6;
+}
+
+.cookie-banner-link {
+    color: #1890ff;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.cookie-banner-link:hover {
+    color: #40a9ff;
+}
+
+.cookie-banner-actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.cookie-banner-button-reject {
+    min-width: 100px;
+}
+
+.cookie-banner-button-accept {
+    min-width: 100px;
+}
+
+/* Modo escuro */
+@media (prefers-color-scheme: dark) {
+    .cookie-banner {
+        background: #1f1f1f;
+        border-top-color: #177ddc;
+    }
+
+    .cookie-banner-title {
+        color: #f0f0f0;
+    }
+
+    .cookie-banner-description {
+        color: #d9d9d9;
+    }
+
+    .cookie-banner-icon {
+        color: #177ddc;
+    }
+}
+
+/* Mobile responsivo */
+@media (max-width: 768px) {
+    .cookie-banner {
+        padding: 16px;
+    }
+
+    .cookie-banner-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .cookie-banner-icon {
+        text-align: center;
+    }
+
+    .cookie-banner-text {
+        text-align: center;
+    }
+
+    .cookie-banner-title {
+        font-size: 16px;
+    }
+
+    .cookie-banner-description {
+        font-size: 13px;
+    }
+
+    .cookie-banner-actions {
+        flex-direction: column-reverse;
+        width: 100%;
+    }
+
+    .cookie-banner-button-reject,
+    .cookie-banner-button-accept {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .cookie-banner-description {
+        font-size: 12px;
+    }
+}
+

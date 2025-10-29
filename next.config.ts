@@ -23,6 +23,7 @@ const routeAlias: {
   "/termos-de-uso": "/terms-of-use",
   "/termos-e-politicas": "/terms-and-policies",
   "/reports-de-questoes": "/question-reports",
+  "/configuracoes-cookies": "/config-cookies",
 };
 
 const nextConfig = {
