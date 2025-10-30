@@ -1,7 +1,9 @@
 "use client";
 
 import { UserExtended } from "@/app/context/user.context";
-import { Button, Card, Descriptions, Tabs, Typography, App } from "antd";
+import { Button, Card, Descriptions, Tabs, Typography, App, Space, Alert } from "antd";
+import { LockOutlined, KeyOutlined } from "@ant-design/icons";
+import { FaCookie } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import styled from "styled-components";
@@ -100,6 +102,14 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
         setIsDeleteModalVisible(false);
     };
 
+    const handleChangePassword = () => {
+        router.push("/forgot-password");
+    };
+
+    const handleCookieSettings = () => {
+        router.push("/config-cookies");
+    };
+
     const items = [
     {
       key: "1",
@@ -185,6 +195,83 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
             </Descriptions.Item>
           </Descriptions>
         </>
+      ),
+    },
+    {
+      key: "4",
+      label: "Privacidade",
+      children: (
+        <Space direction="vertical" size="large" style={{ width: "100%" }}>
+
+          <Card 
+            hoverable
+            style={{ 
+              borderRadius: "8px",
+              border: "1px solid #d9d9d9"
+            }}
+          >
+            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <KeyOutlined style={{ fontSize: "24px", color: "#1890ff" }} />
+                <div style={{ flex: 1 }}>
+                  <Title level={5} style={{ margin: 0 }}>
+                    Alterar Senha
+                  </Title>
+                  <Typography.Text type="secondary">
+                    Redefina sua senha de acesso
+                  </Typography.Text>
+                </div>
+              </div>
+              <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
+                Por segurança, você será redirecionado para o processo de redefinição de senha. 
+                Um email será enviado para você confirmar a alteração.
+              </Typography.Paragraph>
+              <Button 
+                type="primary" 
+                icon={<LockOutlined />}
+                onClick={handleChangePassword}
+                size="large"
+                block
+              >
+                Alterar Minha Senha
+              </Button>
+            </Space>
+          </Card>
+
+          <Card 
+            hoverable
+            style={{ 
+              borderRadius: "8px",
+              border: "1px solid #d9d9d9"
+            }}
+          >
+            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <FaCookie style={{ fontSize: "24px", color: "#fa8c16" }} />
+                <div style={{ flex: 1 }}>
+                  <Title level={5} style={{ margin: 0 }}>
+                    Configurações de Cookies
+                  </Title>
+                  <Typography.Text type="secondary">
+                    Gerencie suas preferências de cookies e privacidade
+                  </Typography.Text>
+                </div>
+              </div>
+              <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
+                Você pode visualizar, alterar ou revogar seu consentimento para o uso de cookies 
+                a qualquer momento, conforme garantido pela LGPD.
+              </Typography.Paragraph>
+              <Button 
+                icon={<FaCookie />}
+                onClick={handleCookieSettings}
+                size="large"
+                block
+              >
+                Gerenciar Cookies
+              </Button>
+            </Space>
+          </Card>
+        </Space>
       ),
     },
   ];

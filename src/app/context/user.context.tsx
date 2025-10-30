@@ -5,6 +5,7 @@ import { createClient } from "@/util/supabase/client";
 import { User } from "@supabase/supabase-js";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import { UnauthorizedError } from "@/lib/errors";
+import { syncSessionWithUser } from "@/services/cookie-consent.service";
 
 export type UserExtended = User & {
     user?: User
@@ -70,6 +71,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                     }
 
                     setUser({ ...userData, profile: profileData || undefined });
+                    
+                    // Sincroniza sessionId com userId (se houver consentimento de cookies)
+                    syncSessionWithUser().catch(err => 
+                        console.error("Erro ao sincronizar cookies:", err)
+                    );
                 } else {
                     setUser(null);
                 }
@@ -105,6 +111,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         }
 
         setUser({ ...userData, profile: profileData }); // atualiza user com profile
+        
+        // Sincroniza sessionId com userId após login
+        syncSessionWithUser().catch(err => 
+            console.error("Erro ao sincronizar cookies:", err)
+        );
     };
 
     const refreshProfile = async () => {

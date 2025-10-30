@@ -1,19 +1,14 @@
-/**
- * Serviço para comunicação com backend sobre consentimento de cookies
- * Implementa abordagem híbrida: localStorage + backend
- */
 
 import { v4 as uuidv4 } from 'uuid';
+import HttpClient from '@/util/http-client/fetch-client.util';
 
 const SESSION_ID_KEY = 'cookie-session-id';
-const POLICY_VERSION = '1.0';
 
 export type ConsentType = 'accepted' | 'rejected';
 
 interface SaveConsentRequest {
-    consent_type: ConsentType;
-    policy_version?: string;
-    session_id?: string;
+    consentType: ConsentType;
+    sessionId?: string;
 }
 
 interface ConsentResponse {
@@ -59,36 +54,24 @@ export async function saveConsentToBackend(consentType: ConsentType): Promise<Co
         const sessionId = getOrCreateSessionId();
 
         const payload: SaveConsentRequest = {
-            consent_type: consentType,
-            policy_version: POLICY_VERSION,
-            session_id: sessionId,
+            consentType: consentType,
+            sessionId: sessionId,
         };
 
-        const response = await fetch('/api/cookie-consent', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+        const data = await HttpClient.fetch<ConsentResponse>(
+            '/cookie-consent',
+            {
+                method: 'POST',
+                body: JSON.stringify(payload),
             },
-            credentials: 'include', // Inclui cookies de autenticação se existirem
-            body: JSON.stringify(payload),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            console.error('Erro ao salvar consentimento no backend:', data);
-            return {
-                success: false,
-                error: data.error || 'Erro ao salvar consentimento',
-                message: data.message,
-            };
-        }
+            false // não volta automaticamente em caso de erro
+        );
 
         console.log('✅ Consentimento salvo no backend:', data);
         return data;
 
     } catch (error) {
-        console.error('Erro de rede ao salvar consentimento:', error);
+        console.error('Erro ao salvar consentimento no backend:', error);
         return {
             success: false,
             error: 'Erro de rede',
@@ -97,25 +80,19 @@ export async function saveConsentToBackend(consentType: ConsentType): Promise<Co
     }
 }
 
-/**
- * Busca o consentimento atual do usuário no backend
- * @returns Promise com dados do consentimento ou null
- */
 export async function getConsentFromBackend(): Promise<ConsentType | null> {
     try {
         const sessionId = getOrCreateSessionId();
 
-        const response = await fetch(`/api/cookie-consent?session_id=${sessionId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
+        const data = await HttpClient.fetch<ConsentResponse>(
+            `/cookie-consent?session_id=${sessionId}`,
+            {
+                method: 'GET',
             },
-            credentials: 'include',
-        });
+            false
+        );
 
-        const data: ConsentResponse = await response.json();
-
-        if (!response.ok || !data.success) {
+        if (!data.success) {
             console.warn('Não foi possível buscar consentimento do backend:', data);
             return null;
         }
@@ -128,25 +105,19 @@ export async function getConsentFromBackend(): Promise<ConsentType | null> {
     }
 }
 
-/**
- * Remove o consentimento do backend
- * @returns Promise com resultado da operação
- */
 export async function deleteConsentFromBackend(): Promise<boolean> {
     try {
         const sessionId = getOrCreateSessionId();
 
-        const response = await fetch(`/api/cookie-consent?session_id=${sessionId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
+        const data = await HttpClient.fetch<ConsentResponse>(
+            `/cookie-consent?session_id=${sessionId}`,
+            {
+                method: 'DELETE',
             },
-            credentials: 'include',
-        });
+            false
+        );
 
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
+        if (!data.success) {
             console.error('Erro ao deletar consentimento do backend:', data);
             return false;
         }
@@ -169,19 +140,16 @@ export async function syncConsentWithBackend(): Promise<void> {
         const localConsent = localStorage.getItem('cookie-consent') as ConsentType | null;
         const backendConsent = await getConsentFromBackend();
 
-        // Se há consentimento local mas não no backend, enviar ao backend
         if (localConsent && !backendConsent) {
             await saveConsentToBackend(localConsent);
             return;
         }
 
-        // Se há consentimento no backend mas não local, atualizar local
         if (!localConsent && backendConsent) {
             localStorage.setItem('cookie-consent', backendConsent);
             return;
         }
 
-        // Se ambos existem mas são diferentes, backend tem prioridade
         if (localConsent && backendConsent && localConsent !== backendConsent) {
             localStorage.setItem('cookie-consent', backendConsent);
             console.log('📋 Consentimento sincronizado com backend');
@@ -193,20 +161,48 @@ export async function syncConsentWithBackend(): Promise<void> {
 }
 
 /**
- * Salva o consentimento tanto localmente quanto no backend
- * Esta é a função principal que deve ser usada pelos componentes
+ * Sincroniza o sessionId com o userId no backend
+ * Deve ser chamado após o usuário fazer login
  * 
- * @param consentType - 'accepted' ou 'rejected'
- * @returns Promise<boolean> - true se salvou com sucesso localmente (backend é best-effort)
+ * Vincula o consentimento anônimo (session_id) ao usuário logado (user_id)
+ * 
+ * @returns Promise<boolean> - true se sincronizou com sucesso
  */
+export async function syncSessionWithUser(): Promise<boolean> {
+    try {
+        const sessionId = getOrCreateSessionId();
+
+        const data = await HttpClient.fetch<ConsentResponse>(
+            '/cookie-consent/sync',
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    sessionId: sessionId,
+                }),
+            },
+            false
+        );
+
+        if (data.success) {
+            console.log('🔄 SessionId sincronizado com userId:', data);
+            return true;
+        }
+
+        return false;
+
+    } catch (error) {
+        console.error('Erro ao sincronizar sessionId com userId:', error);
+        return false;
+    }
+}
+
+
 export async function saveConsent(consentType: ConsentType): Promise<boolean> {
     try {
         // 1. Salvar localmente primeiro (UX imediato)
         localStorage.setItem('cookie-consent', consentType);
         console.log(`💾 Consentimento salvo localmente: ${consentType}`);
 
-        // 2. Salvar no backend (auditoria e verificação)
-        // Não bloqueamos a UI se o backend falhar
         saveConsentToBackend(consentType)
             .then((response) => {
                 if (!response.success) {
@@ -225,11 +221,6 @@ export async function saveConsent(consentType: ConsentType): Promise<boolean> {
     }
 }
 
-/**
- * Remove o consentimento tanto localmente quanto no backend
- * 
- * @returns Promise<boolean> - true se removeu com sucesso
- */
 export async function clearConsent(): Promise<boolean> {
     try {
         // 1. Remover localmente
@@ -247,15 +238,8 @@ export async function clearConsent(): Promise<boolean> {
     }
 }
 
-/**
- * Revoga o consentimento do usuário (LGPD Art. 8º, § 5º)
- * Remove o consentimento e desativa analytics
- * 
- * @returns Promise<boolean> - true se revogou com sucesso
- */
 export async function revokeConsent(): Promise<boolean> {
     try {
-        // 1. Remover localmente
         localStorage.removeItem('cookie-consent');
         console.log('🚫 Consentimento REVOGADO localmente');
 
@@ -271,7 +255,6 @@ export async function revokeConsent(): Promise<boolean> {
             console.log('📊 Analytics desativados');
         }
 
-        // 3. Remover do backend (auditoria de revogação)
         const success = await deleteConsentFromBackend();
         
         if (success) {
@@ -284,7 +267,6 @@ export async function revokeConsent(): Promise<boolean> {
 
     } catch (error) {
         console.error('Erro ao revogar consentimento:', error);
-        // Mesmo com erro, mantém revogação local
         return true;
     }
 }

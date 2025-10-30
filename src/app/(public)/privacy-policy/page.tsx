@@ -252,7 +252,7 @@ export default function PoliticaPrivacidadePage() {
           </Content>
 
           <LastUpdated>
-            Última atualização: {new Date(privacyPolicy.updated_at).toLocaleDateString('pt-BR', {
+            Última atualização: {new Date(privacyPolicy.updatedAt).toLocaleDateString('pt-BR', {
               year: 'numeric',
               month: 'long',
               day: 'numeric'

@@ -3,9 +3,9 @@ export interface TermsOfUse {
   version: string;
   title: string;
   content: string;
-  effective_date: string;
-  created_at: string;
-  updated_at: string;
+  effectiveDate: string;
+  createdAt: string;
+  updatedAt: string;
   is_active: boolean;
 }
 
@@ -14,9 +14,9 @@ export interface PrivacyPolicy {
   version: string;
   title: string;
   content: string;
-  effective_date: string;
-  created_at: string;
-  updated_at: string;
+  effectiveDate: string;
+  createdAt: string;
+  updatedAt: string;
   is_active: boolean;
 }
 
@@ -24,24 +24,40 @@ export interface LegalNotice {
   version: string;
   title: string;
   content: string;
+  effectiveDate: string;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
 }
 
 export interface CancellationPolicy {
   version: string;
   title: string;
   content: string;
+  effectiveDate: string;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
 }
 
 export interface AcceptanceTerms {
   version: string;
   title: string;
   content: string;
+  effectiveDate: string;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
 }
 
 export interface AutoRenewalTerms {
   version: string;
   title: string;
   content: string;
+  effectiveDate: string;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
 }
 
 export interface TermsResponse {

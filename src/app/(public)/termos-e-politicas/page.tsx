@@ -386,147 +386,147 @@ const MobileNavLink = styled.a`
 `;
 
 interface TermsData {
-    termsOfUse: TermsOfUse | null;
-    privacyPolicy: PrivacyPolicy | null;
-    legalNotice: LegalNotice | null;
-    cancellationPolicy: CancellationPolicy | null;
-    acceptanceTerms: AcceptanceTerms | null;
-    autoRenewalTerms: AutoRenewalTerms | null;
-    error?: string;
+  termsOfUse: TermsOfUse | null;
+  privacyPolicy: PrivacyPolicy | null;
+  legalNotice: LegalNotice | null;
+  cancellationPolicy: CancellationPolicy | null;
+  acceptanceTerms: AcceptanceTerms | null;
+  autoRenewalTerms: AutoRenewalTerms | null;
+  error?: string;
 }
 
 export default function TermosEPoliticasPage() {
-    const router = useRouter();
-    const [termsData, setTermsData] = useState<TermsData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const [termsData, setTermsData] = useState<TermsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const loadTerms = async () => {
-            try {
-                const result = await getTermsFromAPI();
+  useEffect(() => {
+    const loadTerms = async () => {
+      try {
+        const result = await getTermsFromAPI();
 
-                if (result.error) {
-                    setError(result.error || "Erro ao carregar termos e políticas");
-                    return;
-                }
+        if (result.error) {
+          setError(result.error || "Erro ao carregar termos e políticas");
+          return;
+        }
 
-                setTermsData(result);
-            } catch (err) {
-                console.error("Erro ao carregar termos:", err);
-                setError("Erro ao carregar termos e políticas");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadTerms();
-    }, []);
-
-    const handleBack = () => {
-        router.back();
+        setTermsData(result);
+      } catch (err) {
+        console.error("Erro ao carregar termos:", err);
+        setError("Erro ao carregar termos e políticas");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (loading) {
-        return (
-            <Container>
-                <ContentArea>
-                    <LoadingContainer>
-                        <Spin size="large" />
-                    </LoadingContainer>
-                </ContentArea>
-            </Container>
-        );
-    }
+    loadTerms();
+  }, []);
 
-    if (error || !termsData) {
-        return (
-            <Container>
-                <ContentArea>
-                    <ErrorContainer>
-                        <Alert
-                            message="Erro"
-                            description={error || "Não foi possível carregar os termos e políticas. Tente novamente."}
-                            type="error"
-                            showIcon
-                            style={{ marginBottom: 20 }}
-                        />
-                        <Button type="primary" onClick={handleBack}>
-                            Voltar
-                        </Button>
-                    </ErrorContainer>
-                </ContentArea>
-            </Container>
-        );
-    }
+  const handleBack = () => {
+    router.back();
+  };
 
-    const sections = [
-        {
-            id: "termos-de-uso",
-            title: "📄 Termos de Uso",
-            icon: "📄",
-            data: termsData.termsOfUse,
-            anchor: "termos-de-uso"
-        },
-        {
-            id: "politica-privacidade",
-            title: "🔒 Política de Privacidade",
-            icon: "🔒",
-            data: termsData.privacyPolicy,
-            anchor: "politica-privacidade"
-        },
-        {
-            id: "politica-cancelamento",
-            title: "❌ Política de Cancelamento e Reembolso",
-            icon: "❌",
-            data: termsData.cancellationPolicy,
-            anchor: "politica-cancelamento"
-        },
-        {
-            id: "termos-aceite",
-            title: "✅ Termos de Aceite",
-            icon: "✅",
-            data: termsData.acceptanceTerms,
-            anchor: "termos-aceite"
-        },
-        {
-            id: "termos-renovacao",
-            title: "🔄 Termos de Renovação Automática",
-            icon: "🔄",
-            data: termsData.autoRenewalTerms,
-            anchor: "termos-renovacao"
-        },
-        {
-            id: "aviso-legal",
-            title: "⚖️ Aviso Legal",
-            icon: "⚖️",
-            data: termsData.legalNotice,
-            anchor: "aviso-legal"
-        },
-    ];
-
+  if (loading) {
     return (
-        <Container>
-            <MainContent>
-                <ContentWrapper>
-                    <Sidebar>
-                        <SidebarCard>
-                            <NavigationTitle level={4}>Navegação</NavigationTitle>
-                            <Anchor
-                                affix={false}
-                                showInkInFixed={true}
-                                offsetTop={100}
-                            >
-                                {sections.map((section) => (
-                                    <Link
-                                        key={section.id}
-                                        href={`#${section.anchor}`}
-                                        title={section.title}
-                                    />
-                                ))}
-                            </Anchor>
-                        </SidebarCard>
-                    </Sidebar>
+      <Container>
+        <ContentArea>
+          <LoadingContainer>
+            <Spin size="large" />
+          </LoadingContainer>
+        </ContentArea>
+      </Container>
+    );
+  }
+
+  if (error || !termsData) {
+    return (
+      <Container>
+        <ContentArea>
+          <ErrorContainer>
+            <Alert
+              message="Erro"
+              description={error || "Não foi possível carregar os termos e políticas. Tente novamente."}
+              type="error"
+              showIcon
+              style={{ marginBottom: 20 }}
+            />
+            <Button type="primary" onClick={handleBack}>
+              Voltar
+            </Button>
+          </ErrorContainer>
+        </ContentArea>
+      </Container>
+    );
+  }
+
+  const sections = [
+    {
+      id: "termos-de-uso",
+      title: "📄 Termos de Uso",
+      icon: "📄",
+      data: termsData.termsOfUse,
+      anchor: "termos-de-uso"
+    },
+    {
+      id: "politica-privacidade",
+      title: "🔒 Política de Privacidade",
+      icon: "🔒",
+      data: termsData.privacyPolicy,
+      anchor: "politica-privacidade"
+    },
+    {
+      id: "politica-cancelamento",
+      title: "❌ Política de Cancelamento e Reembolso",
+      icon: "❌",
+      data: termsData.cancellationPolicy,
+      anchor: "politica-cancelamento"
+    },
+    {
+      id: "termos-aceite",
+      title: "✅ Termos de Aceite",
+      icon: "✅",
+      data: termsData.acceptanceTerms,
+      anchor: "termos-aceite"
+    },
+    {
+      id: "termos-renovacao",
+      title: "🔄 Termos de Renovação Automática",
+      icon: "🔄",
+      data: termsData.autoRenewalTerms,
+      anchor: "termos-renovacao"
+    },
+    {
+      id: "aviso-legal",
+      title: "⚖️ Aviso Legal",
+      icon: "⚖️",
+      data: termsData.legalNotice,
+      anchor: "aviso-legal"
+    },
+  ];
+
+  return (
+    <Container>
+      <MainContent>
+        <ContentWrapper>
+          <Sidebar>
+            <SidebarCard>
+              <NavigationTitle level={4}>Navegação</NavigationTitle>
+              <Anchor
+                affix={false}
+                showInkInFixed={true}
+                offsetTop={100}
+              >
+                {sections.map((section) => (
+                  <Link
+                    key={section.id}
+                    href={`#${section.anchor}`}
+                    title={section.title}
+                  />
+                ))}
+              </Anchor>
+            </SidebarCard>
+          </Sidebar>
 
           <ContentArea>
             <LogoSection>
@@ -566,7 +566,7 @@ export default function TermosEPoliticasPage() {
                       'termos-aceite': 'Aceite',
                       'termos-renovacao': 'Renovação'
                     };
-                    
+
                     return (
                       <MobileNavLink
                         key={section.id}
@@ -581,35 +581,36 @@ export default function TermosEPoliticasPage() {
 
               {sections.map((section) => {
                 if (!section.data) return null;
-                
+
                 return (
                   <Section key={section.id} id={section.anchor}>
                     <SectionTitle level={2}>
                       {section.icon} {section.data.title}
                     </SectionTitle>
-                    
-                    <SectionContent 
-                      dangerouslySetInnerHTML={{ __html: section.data.content }} 
+
+                    <SectionContent
+                      dangerouslySetInnerHTML={{ __html: section.data.content }}
                     />
-                    
+
                     <VersionBadge>
                       Versão {section.data.version}
                     </VersionBadge>
+                    <LastUpdated>
+                      Última atualização: {new Date(section.data.updatedAt).toLocaleDateString('pt-BR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </LastUpdated>
                   </Section>
                 );
               })}
             </Content>
 
-                        <LastUpdated>
-                            Última atualização: {new Date().toLocaleDateString('pt-BR', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            })}
-                        </LastUpdated>
-                    </ContentArea>
-                </ContentWrapper>
-            </MainContent>
-        </Container>
-    );
+
+          </ContentArea>
+        </ContentWrapper>
+      </MainContent>
+    </Container>
+  );
 }
