@@ -5,7 +5,6 @@ import { Button, message } from 'antd';
 import Link from 'next/link';
 import './styles.css';
 import { saveConsent, syncConsentWithBackend } from '@/services/cookie-consent.service';
-import { FaCookie } from 'react-icons/fa';
 
 const COOKIE_CONSENT_KEY = 'cookie-consent';
 
@@ -41,13 +40,11 @@ export function CookieBanner() {
             setTimeout(() => setShowBanner(false), 300);
             
             // Inicializar cookies analytics/tracking
-            if (typeof window !== 'undefined') {
-                if ((window as any).gtag) {
-                    (window as any).gtag('consent', 'update', { 
-                        analytics_storage: 'granted',
-                        ad_storage: 'granted'
-                    });
-                }
+            if (typeof window !== 'undefined' && window.gtag) {
+                window.gtag('consent', 'update', { 
+                    analytics_storage: 'granted',
+                    ad_storage: 'granted'
+                });
             }
             
             message.success('Preferências de cookies salvas com sucesso!');
@@ -70,13 +67,11 @@ export function CookieBanner() {
             setTimeout(() => setShowBanner(false), 300);
             
             // Garante que cookies não essenciais não sejam utilizados
-            if (typeof window !== 'undefined') {
-                if ((window as any).gtag) {
-                    (window as any).gtag('consent', 'update', { 
-                        analytics_storage: 'denied',
-                        ad_storage: 'denied'
-                    });
-                }
+            if (typeof window !== 'undefined' && window.gtag) {
+                window.gtag('consent', 'update', { 
+                    analytics_storage: 'denied',
+                    ad_storage: 'denied'
+                });
             }
             
             message.info('Suas preferências foram registradas.');
@@ -105,13 +100,13 @@ export function CookieBanner() {
                     </h3>
                     <p className="cookie-banner-description">
                         Este site utiliza cookies para melhorar sua experiência de navegação, 
-                        personalizar conteúdo e analisar nosso tráfego. Ao clicar em "Aceitar", 
+                        personalizar conteúdo e analisar nosso tráfego. Ao clicar em &quot;Aceitar&quot;, 
                         você concorda com o uso de cookies conforme descrito em nossa{' '}
                         <Link href="/terms-and-policies" className="cookie-banner-link">
                             Política de Privacidade
                         </Link>
                         . Você pode escolher recusar o uso de cookies não essenciais clicando 
-                        em "Recusar". Para gerenciar suas preferências, acesse as{' '}
+                        em &quot;Recusar&quot;. Para gerenciar suas preferências, acesse as{' '}
                         <Link href="/configuracoes-cookies" className="cookie-banner-link">
                             Configurações de Cookies
                         </Link>

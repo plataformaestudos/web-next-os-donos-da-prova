@@ -1,7 +1,7 @@
 "use client";
 
 import { UserExtended } from "@/app/context/user.context";
-import { Button, Card, Descriptions, Tabs, Typography, App, Space, Alert } from "antd";
+import { Button, Card, Descriptions, Tabs, Typography, App, Space } from "antd";
 import { LockOutlined, KeyOutlined } from "@ant-design/icons";
 import { FaCookie } from "react-icons/fa";
 import Image from "next/image";

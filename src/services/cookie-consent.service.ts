@@ -244,13 +244,11 @@ export async function revokeConsent(): Promise<boolean> {
         console.log('🚫 Consentimento REVOGADO localmente');
 
         // 2. Desativar analytics imediatamente
-        if (typeof window !== 'undefined') {
-            if ((window as any).gtag) {
-                (window as any).gtag('consent', 'update', {
-                    analytics_storage: 'denied',
-                    ad_storage: 'denied',
-                });
-            }
+        if (typeof window !== 'undefined' && window.gtag) {
+            window.gtag('consent', 'update', {
+                analytics_storage: 'denied',
+                ad_storage: 'denied',
+            });
             // Limpar outros serviços de tracking
             console.log('📊 Analytics desativados');
         }

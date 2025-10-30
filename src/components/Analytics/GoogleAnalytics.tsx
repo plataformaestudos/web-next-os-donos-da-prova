@@ -34,21 +34,21 @@ export function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps) {
         if (!gaId) return;
 
         // Configurar consentimento padrão (negado até que o usuário aceite)
-        if (typeof window !== 'undefined' && (window as any).gtag) {
+        if (typeof window !== 'undefined' && window.gtag) {
             if (hasAccepted) {
-                (window as any).gtag('consent', 'update', {
+                window.gtag('consent', 'update', {
                     analytics_storage: 'granted',
                     ad_storage: 'granted',
                 });
                 
                 // Enviar pageview quando o usuário aceitar
-                (window as any).gtag('config', gaId, {
+                window.gtag('config', gaId, {
                     page_path: window.location.pathname,
                 });
                 
                 console.log('✅ Google Analytics ativado - Usuário aceitou cookies');
             } else if (hasRejected) {
-                (window as any).gtag('consent', 'update', {
+                window.gtag('consent', 'update', {
                     analytics_storage: 'denied',
                     ad_storage: 'denied',
                 });
@@ -130,16 +130,12 @@ export function trackEvent({
     label?: string;
     value?: number;
 }) {
-    if (typeof window === 'undefined') return;
-    
-    const gtag = (window as any).gtag;
-    
-    if (!gtag) {
+    if (typeof window === 'undefined' || !window.gtag) {
         console.warn('Google Analytics não está disponível');
         return;
     }
 
-    gtag('event', action, {
+    window.gtag('event', action, {
         event_category: category,
         event_label: label,
         value: value,
@@ -159,17 +155,16 @@ export function trackEvent({
  * ```
  */
 export function trackPageview(url: string) {
-    if (typeof window === 'undefined') return;
-    
-    const gtag = (window as any).gtag;
-    
-    if (!gtag) {
+    if (typeof window === 'undefined' || !window.gtag) {
         console.warn('Google Analytics não está disponível');
         return;
     }
 
-    gtag('config', process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, {
-        page_path: url,
-    });
+    const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+    if (measurementId) {
+        window.gtag('config', measurementId, {
+            page_path: url,
+        });
+    }
 }
 
