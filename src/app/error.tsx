@@ -12,6 +12,8 @@ type AppError = Error & {
     data?: ErrorData;
     cause?: Error | string | { message?: string; error?: string } | unknown;
     digest?: string;
+    errorCode?: string;
+    status?: number;
 };
 
 export default function GlobalAppError({
@@ -37,6 +39,8 @@ export default function GlobalAppError({
             // Log completo do erro para debug em produção
             console.error("Erro capturado:", {
                 message: error.message,
+                errorCode: error.errorCode,
+                status: error.status,
                 data: error.data,
                 cause: error.cause,
                 digest: error.digest,

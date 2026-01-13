@@ -4,6 +4,8 @@ type AppError = Error & {
     data?: ErrorData;
     cause?: Error | string | { message?: string; error?: string } | unknown;
     digest?: string;
+    errorCode?: string;
+    status?: number;
 };
 
 /**
@@ -14,7 +16,12 @@ type AppError = Error & {
  * @returns A mensagem de erro extraída ou uma mensagem padrão
  */
 export function extractErrorMessage(error: AppError): string {
-    // 1. Primeiro tenta pegar de data.error (formato preferido)
+    // 1. Primeiro tenta pegar de errorCode (propriedade do HttpError)
+    if (error.errorCode && typeof error.errorCode === 'string') {
+        return error.errorCode;
+    }
+
+    // 2. Tenta pegar de data.error (formato preferido)
     if (error.data && typeof error.data === 'object' && 'error' in error.data) {
         const errorValue = (error.data as { error?: unknown }).error;
         if (typeof errorValue === 'string') {
@@ -22,7 +29,7 @@ export function extractErrorMessage(error: AppError): string {
         }
     }
 
-    // 2. Tenta pegar de data.message
+    // 3. Tenta pegar de data.message
     if (error.data && typeof error.data === 'object' && 'message' in error.data) {
         const messageValue = (error.data as { message?: unknown }).message;
         if (typeof messageValue === 'string') {
@@ -30,12 +37,12 @@ export function extractErrorMessage(error: AppError): string {
         }
     }
 
-    // 3. Tenta pegar do error.message direto (pode funcionar em dev)
+    // 4. Tenta pegar do error.message direto (pode funcionar em dev)
     if (error.message && !error.message.startsWith("An error occurred in the Server Components render")) {
         return error.message;
     }
 
-    // 4. Tenta pegar do cause (erro original que causou este erro)
+    // 5. Tenta pegar do cause (erro original que causou este erro)
     if (error.cause) {
         if (error.cause instanceof Error && error.cause.message) {
             return error.cause.message;
@@ -55,7 +62,7 @@ export function extractErrorMessage(error: AppError): string {
         }
     }
 
-    // 5. Tenta pegar do stack trace (pode conter a mensagem original)
+    // 6. Tenta pegar do stack trace (pode conter a mensagem original)
     if (error.stack) {
         const stackLines = error.stack.split('\n');
         for (const line of stackLines) {
@@ -67,7 +74,7 @@ export function extractErrorMessage(error: AppError): string {
         }
     }
 
-    // 6. Se for o erro genérico do Next.js, tenta usar o digest para debug
+    // 7. Se for o erro genérico do Next.js, tenta usar o digest para debug
     const isNextProdError = error.message?.startsWith("An error occurred in the Server Components render");
     if (isNextProdError && error.digest) {
         // Em produção, o Next.js oculta a mensagem, mas podemos logar o digest para debug
@@ -75,7 +82,7 @@ export function extractErrorMessage(error: AppError): string {
         console.error("Erro completo:", error);
     }
 
-    // 7. Fallback
+    // 8. Fallback
     return isNextProdError 
         ? "Ops, algo deu errado ao carregar os dados." 
         : (error.message || "Ocorreu um erro inesperado.");

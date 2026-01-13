@@ -14,18 +14,21 @@ export class HttpError extends Error {
     this.status = status;
     this.errorCode = errorCode;
     
+    // Prioriza errorCode se fornecido, caso contrário usa message
+    const errorMessage = errorCode || message;
+    
     // Garante que a mensagem sempre esteja em data.error para ser exibida em produção
     if (data && typeof data === 'object' && !Array.isArray(data)) {
       const dataObj = data as ErrorData;
       this.data = {
         ...data,
-        error: dataObj.error || message,
-        message: dataObj.message || message,
+        error: dataObj.error || errorMessage,
+        message: dataObj.message || errorMessage,
       };
     } else {
       this.data = {
-        error: message,
-        message: message,
+        error: errorMessage,
+        message: errorMessage,
         ...(data ? { originalData: data } : {}),
       };
     }
