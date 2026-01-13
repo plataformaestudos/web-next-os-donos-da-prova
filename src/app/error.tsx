@@ -4,11 +4,13 @@ import { useEffect, useRef } from "react";
 import { App, Result } from "antd";
 import { useRouter } from "next/navigation";
 import styled, { DefaultTheme, useTheme } from "styled-components";
+import { extractErrorMessage } from "@/lib/error-utils";
 
 type AppError = Error & {
-    data?: { error?: string };
+    data?: { error?: string } | any;
+    cause?: Error | any;
+    digest?: string;
 };
-
 
 export default function GlobalAppError({
     error,
@@ -22,11 +24,7 @@ export default function GlobalAppError({
 
     useEffect(() => {
         if (!notifiedRef.current) {
-            const isNextProdError = error.message?.startsWith("An error occurred in the Server Components render");
-            const friendly =
-                error.data?.error ||
-                (isNextProdError ? "Ops, algo deu errado ao carregar os dados." : error.message) ||
-                "Ocorreu um erro inesperado.";
+            const friendly = extractErrorMessage(error);
 
             if (app?.message) {
                 app.message.error(friendly);
@@ -34,7 +32,15 @@ export default function GlobalAppError({
                 alert(friendly);
             }
 
-
+            // Log completo do erro para debug em produção
+            console.error("Erro capturado:", {
+                message: error.message,
+                data: error.data,
+                cause: error.cause,
+                digest: error.digest,
+                stack: error.stack,
+                extractedMessage: friendly
+            });
 
             notifiedRef.current = true;
         }
@@ -55,11 +61,7 @@ export default function GlobalAppError({
             <Result
                 status="error"
                 title="Ops — algo deu errado"
-                subTitle={
-                    error.data?.error ??
-                    error.message ??
-                    "Estamos trabalhando para corrigir isso."
-                }
+                subTitle={extractErrorMessage(error)}
             />
         </Wrapper>
     );
