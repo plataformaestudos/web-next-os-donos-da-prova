@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 import styled, { DefaultTheme, useTheme } from "styled-components";
 import { extractErrorMessage } from "@/lib/error-utils";
 
+type ErrorData = { error?: string; message?: string } | Record<string, unknown>;
+
 type AppError = Error & {
-    data?: { error?: string } | any;
-    cause?: Error | any;
+    data?: ErrorData;
+    cause?: Error | string | { message?: string; error?: string } | unknown;
     digest?: string;
 };
 

@@ -1,3 +1,8 @@
+type ErrorData = Record<string, unknown> & {
+  error?: string;
+  message?: string;
+};
+
 export class HttpError extends Error {
   status: number;
   data?: unknown;
@@ -11,10 +16,11 @@ export class HttpError extends Error {
     
     // Garante que a mensagem sempre esteja em data.error para ser exibida em produção
     if (data && typeof data === 'object' && !Array.isArray(data)) {
+      const dataObj = data as ErrorData;
       this.data = {
         ...data,
-        error: (data as any).error || message,
-        message: (data as any).message || message,
+        error: dataObj.error || message,
+        message: dataObj.message || message,
       };
     } else {
       this.data = {
@@ -42,9 +48,9 @@ export class UnauthorizedError extends HttpError {
  * throw new ServerError("Mensagem de erro que será exibida em produção");
  */
 export class ServerError extends Error {
-  data: { error: string; message: string };
+  data: { error: string; message: string } & Record<string, unknown>;
 
-  constructor(message: string, data?: Record<string, any>) {
+  constructor(message: string, data?: Record<string, unknown>) {
     super(message);
     this.name = "ServerError";
     // Sempre inclui a mensagem em data.error para ser exibida em produção

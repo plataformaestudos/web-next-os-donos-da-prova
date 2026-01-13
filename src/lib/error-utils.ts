@@ -1,6 +1,8 @@
+type ErrorData = { error?: string; message?: string } | Record<string, unknown>;
+
 type AppError = Error & {
-    data?: { error?: string; message?: string } | any;
-    cause?: Error | any;
+    data?: ErrorData;
+    cause?: Error | string | { message?: string; error?: string } | unknown;
     digest?: string;
 };
 
@@ -13,13 +15,19 @@ type AppError = Error & {
  */
 export function extractErrorMessage(error: AppError): string {
     // 1. Primeiro tenta pegar de data.error (formato preferido)
-    if (error.data?.error && typeof error.data.error === 'string') {
-        return error.data.error;
+    if (error.data && typeof error.data === 'object' && 'error' in error.data) {
+        const errorValue = (error.data as { error?: unknown }).error;
+        if (typeof errorValue === 'string') {
+            return errorValue;
+        }
     }
 
     // 2. Tenta pegar de data.message
-    if (error.data?.message && typeof error.data.message === 'string') {
-        return error.data.message;
+    if (error.data && typeof error.data === 'object' && 'message' in error.data) {
+        const messageValue = (error.data as { message?: unknown }).message;
+        if (typeof messageValue === 'string') {
+            return messageValue;
+        }
     }
 
     // 3. Tenta pegar do error.message direto (pode funcionar em dev)
@@ -35,11 +43,15 @@ export function extractErrorMessage(error: AppError): string {
         if (typeof error.cause === 'string') {
             return error.cause;
         }
-        if (error.cause?.message && typeof error.cause.message === 'string') {
-            return error.cause.message;
-        }
-        if (error.cause?.error && typeof error.cause.error === 'string') {
-            return error.cause.error;
+        // Verifica se é um objeto com propriedades message ou error
+        if (typeof error.cause === 'object' && error.cause !== null) {
+            const causeObj = error.cause as { message?: unknown; error?: unknown };
+            if (causeObj.message && typeof causeObj.message === 'string') {
+                return causeObj.message;
+            }
+            if (causeObj.error && typeof causeObj.error === 'string') {
+                return causeObj.error;
+            }
         }
     }
 
