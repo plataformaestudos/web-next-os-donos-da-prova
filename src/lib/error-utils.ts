@@ -1,8 +1,16 @@
 type ErrorData = { error?: string; message?: string } | Record<string, unknown>;
 
+type ErrorCause = {
+    error?: string;
+    message?: string;
+    errorCode?: string;
+    status?: number;
+    data?: ErrorData;
+} | Error | string | unknown;
+
 type AppError = Error & {
     data?: ErrorData;
-    cause?: Error | string | { message?: string; error?: string } | unknown;
+    cause?: ErrorCause;
     digest?: string;
     errorCode?: string;
     status?: number;
@@ -43,6 +51,7 @@ export function extractErrorMessage(error: AppError): string {
     }
 
     // 5. Tenta pegar do cause (erro original que causou este erro)
+    // O Next.js serializa cause, então é uma forma confiável de preservar a mensagem
     if (error.cause) {
         if (error.cause instanceof Error && error.cause.message) {
             return error.cause.message;
@@ -50,14 +59,22 @@ export function extractErrorMessage(error: AppError): string {
         if (typeof error.cause === 'string') {
             return error.cause;
         }
-        // Verifica se é um objeto com propriedades message ou error
+        // Verifica se é um objeto com propriedades message, error ou errorCode
         if (typeof error.cause === 'object' && error.cause !== null) {
-            const causeObj = error.cause as { message?: unknown; error?: unknown };
-            if (causeObj.message && typeof causeObj.message === 'string') {
-                return causeObj.message;
+            const causeObj = error.cause as { 
+                message?: unknown; 
+                error?: unknown; 
+                errorCode?: unknown;
+            };
+            // Prioriza errorCode, depois error, depois message
+            if (causeObj.errorCode && typeof causeObj.errorCode === 'string') {
+                return causeObj.errorCode;
             }
             if (causeObj.error && typeof causeObj.error === 'string') {
                 return causeObj.error;
+            }
+            if (causeObj.message && typeof causeObj.message === 'string') {
+                return causeObj.message;
             }
         }
     }

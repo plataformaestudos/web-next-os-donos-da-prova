@@ -8,9 +8,17 @@ import { extractErrorMessage } from "@/lib/error-utils";
 
 type ErrorData = { error?: string; message?: string } | Record<string, unknown>;
 
+type ErrorCause = {
+    error?: string;
+    message?: string;
+    errorCode?: string;
+    status?: number;
+    data?: ErrorData;
+} | Error | string | unknown;
+
 type AppError = Error & {
     data?: ErrorData;
-    cause?: Error | string | { message?: string; error?: string } | unknown;
+    cause?: ErrorCause;
     digest?: string;
     errorCode?: string;
     status?: number;

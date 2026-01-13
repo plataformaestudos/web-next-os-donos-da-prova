@@ -9,13 +9,14 @@ export class HttpError extends Error {
   errorCode?: string;
 
   constructor(message: string, status = 0, data?: unknown, errorCode?: string) {
-    super(message);
+    // Prioriza errorCode se fornecido, caso contrário usa message
+    const errorMessage = errorCode || message;
+    
+    // Usa errorMessage como mensagem principal
+    super(errorMessage);
     this.name = "HttpError";
     this.status = status;
     this.errorCode = errorCode;
-    
-    // Prioriza errorCode se fornecido, caso contrário usa message
-    const errorMessage = errorCode || message;
     
     // Garante que a mensagem sempre esteja em data.error para ser exibida em produção
     if (data && typeof data === 'object' && !Array.isArray(data)) {
@@ -32,6 +33,16 @@ export class HttpError extends Error {
         ...(data ? { originalData: data } : {}),
       };
     }
+    
+    // Usa cause para preservar a mensagem original (Next.js serializa cause)
+    // Isso garante que mesmo que message seja ocultado, cause preserve a informação
+    this.cause = {
+      error: errorMessage,
+      message: errorMessage,
+      errorCode: errorCode,
+      status: status,
+      data: this.data,
+    };
   }
 }
 
