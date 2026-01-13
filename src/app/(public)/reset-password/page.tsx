@@ -86,8 +86,14 @@ export default function ResetPasswordPage() {
     }
   };
 
-  const handleBackToLogin = () => {
-    router.push("/login");
+  const handleGoBack = () => {
+    // Se houver histórico de navegação, volta para página anterior
+    // Caso contrário, redireciona para login
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/login");
+    }
   };
 
   if (passwordReset) {
@@ -105,10 +111,10 @@ export default function ResetPasswordPage() {
           <Button
             type="primary"
             block
-            onClick={handleBackToLogin}
+            onClick={handleGoBack}
             size="large"
           >
-            Ir para Login
+            Continuar
           </Button>
         </Styled.Card>
       </Styled.Container>
@@ -172,10 +178,10 @@ export default function ResetPasswordPage() {
           <div style={{ textAlign: "center" }}>
             <Button
               type="link"
-              onClick={handleBackToLogin}
+              onClick={handleGoBack}
               style={{ padding: 0 }}
             >
-              Voltar ao Login
+              Voltar
             </Button>
           </div>
         </Form>

@@ -240,7 +240,7 @@ export function AnswerQuestion({
                                     />
                                     {type === QuestionType.MULTIPLE_CHOICE && (
                                         <Tooltip
-                                            title="Descartar questão"
+                                            title="Descartar alternativa"
                                             placement="left"
                                         >
                                             <Button

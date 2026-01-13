@@ -259,7 +259,7 @@ export default function SignupSteps({
                       const result = await signUpClient(payload);
 
                       if (result.success) {
-                        router.push("/home");
+                        router.push("/signup/success");
                       } else {
                         setError(result.error ?? "Erro desconhecido no cadastro");
                       }

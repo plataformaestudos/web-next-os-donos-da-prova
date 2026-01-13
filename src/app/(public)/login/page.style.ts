@@ -19,7 +19,7 @@ export const Card = styled.div`
 
   padding: 28px 16px 16px;
   margin: 24px;
-  border-radius: 6px;
+  border-radius: 10px;
 
   background-color: ${({ theme }) => theme.colorBgElevated};
 

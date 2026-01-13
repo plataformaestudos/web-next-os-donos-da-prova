@@ -44,8 +44,14 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  const handleBackToLogin = () => {
-    router.push("/login");
+  const handleGoBack = () => {
+    // Se houver histórico de navegação, volta para página anterior
+    // Caso contrário, redireciona para login
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/login");
+    }
   };
 
   if (emailSent) {
@@ -63,10 +69,10 @@ export default function ForgotPasswordPage() {
           <Button
             type="primary"
             block
-            onClick={handleBackToLogin}
+            onClick={handleGoBack}
             size="large"
           >
-            Voltar ao Login
+            Voltar
           </Button>
         </Styled.Card>
       </Styled.Container>
@@ -115,10 +121,10 @@ export default function ForgotPasswordPage() {
           <div style={{ textAlign: "center" }}>
             <Button
               type="link"
-              onClick={handleBackToLogin}
+              onClick={handleGoBack}
               style={{ padding: 0 }}
             >
-              Voltar ao Login
+              Voltar
             </Button>
           </div>
         </Form>

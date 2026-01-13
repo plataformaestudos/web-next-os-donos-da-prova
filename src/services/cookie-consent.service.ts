@@ -1,8 +1,41 @@
 
 import { v4 as uuidv4 } from 'uuid';
-import HttpClient from '@/util/http-client/fetch-client.util';
 
 const SESSION_ID_KEY = 'cookie-session-id';
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+/**
+ * Fetch silencioso para cookie-consent
+ * Não dispara eventos de erro global (notificações ao usuário)
+ * Erros são tratados internamente e logados no console
+ */
+async function silentFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint;
+    
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    };
+
+    const response = await fetch(url, {
+        ...options,
+        headers,
+        credentials: 'include',
+    });
+
+    if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        let body;
+        try {
+            body = text ? JSON.parse(text) : null;
+        } catch {
+            body = text;
+        }
+        throw new Error(body?.message || body?.error || response.statusText || 'Erro desconhecido');
+    }
+
+    return await response.json();
+}
 
 export type ConsentType = 'accepted' | 'rejected';
 
@@ -58,13 +91,12 @@ export async function saveConsentToBackend(consentType: ConsentType): Promise<Co
             sessionId: sessionId,
         };
 
-        const data = await HttpClient.fetch<ConsentResponse>(
+        const data = await silentFetch<ConsentResponse>(
             '/cookie-consent',
             {
                 method: 'POST',
                 body: JSON.stringify(payload),
-            },
-            false // não volta automaticamente em caso de erro
+            }
         );
 
         console.log('✅ Consentimento salvo no backend:', data);
@@ -84,12 +116,11 @@ export async function getConsentFromBackend(): Promise<ConsentType | null> {
     try {
         const sessionId = getOrCreateSessionId();
 
-        const data = await HttpClient.fetch<ConsentResponse>(
+        const data = await silentFetch<ConsentResponse>(
             `/cookie-consent?session_id=${sessionId}`,
             {
                 method: 'GET',
-            },
-            false
+            }
         );
 
         if (!data.success) {
@@ -109,12 +140,11 @@ export async function deleteConsentFromBackend(): Promise<boolean> {
     try {
         const sessionId = getOrCreateSessionId();
 
-        const data = await HttpClient.fetch<ConsentResponse>(
+        const data = await silentFetch<ConsentResponse>(
             `/cookie-consent?session_id=${sessionId}`,
             {
                 method: 'DELETE',
-            },
-            false
+            }
         );
 
         if (!data.success) {
@@ -172,15 +202,14 @@ export async function syncSessionWithUser(): Promise<boolean> {
     try {
         const sessionId = getOrCreateSessionId();
 
-        const data = await HttpClient.fetch<ConsentResponse>(
+        const data = await silentFetch<ConsentResponse>(
             '/cookie-consent/sync',
             {
                 method: 'POST',
                 body: JSON.stringify({
                     sessionId: sessionId,
                 }),
-            },
-            false
+            }
         );
 
         if (data.success) {
