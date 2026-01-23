@@ -29,9 +29,9 @@ export default function LoginPage() {
       await loginUser(userData);
       message.success("Login bem-sucedido!");
       router.push("/home");
-    } catch (error) {
-      console.log(error);
-      message.error("Erro ao tentar realizar a ação.");
+    } catch (error: unknown) {
+      const msg = error?.toString()?.includes("Invalid login credentials") || error?.toString()?.includes("401") ? "Email ou senha inválidos" : "Erro ao tentar realizar a ação.";
+      message.error(msg);
     } finally {
       setLoading(false);
     }

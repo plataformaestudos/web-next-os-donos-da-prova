@@ -5,6 +5,7 @@ import { Button, Popconfirm, App } from "antd";
 import { FaTrash } from "react-icons/fa6";
 import { deleteModule } from "./delete-module.action";
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 export function DeleteModuleButton({
     moduleId,
@@ -14,6 +15,7 @@ export function DeleteModuleButton({
     onDelete: () => void;
 }) {
     const [isPending, startTransition] = useTransition();
+    const router = useRouter();
     const app = App.useApp?.();
     const message = app?.message;
     const handleConfirm = () => {
@@ -23,6 +25,7 @@ export function DeleteModuleButton({
                 if (res.success) {
                     message?.success("Módulo deletado com sucesso!");
                     onDelete?.();
+                    router.refresh();
                 } else {
                     message?.error(res.error ?? "Erro ao deletar o módulo");
 

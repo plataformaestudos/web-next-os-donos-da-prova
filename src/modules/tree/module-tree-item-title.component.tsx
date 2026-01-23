@@ -25,6 +25,7 @@ export function ModuleTreeItemTitle({
     readonly,
     numberQuestions,
     onClick,
+    onDelete,
 }: {
     id: string;
     title: string;
@@ -33,6 +34,7 @@ export function ModuleTreeItemTitle({
     readonly?: boolean;
     numberQuestions: number;
     onClick?: () => void;
+    onDelete?: () => void;
 }) {
     const { openCreateModal } = useCreateModule();
     const [menuOpened, setMenuOpened] = useState(false);
@@ -94,13 +96,16 @@ export function ModuleTreeItemTitle({
                 label: (
                     <DeleteModuleButton
                         moduleId={id}
-                        onDelete={() => setMenuOpened(false)}
+                        onDelete={() => {
+                            setMenuOpened(false);
+                            onDelete?.();
+                        }}
                     />
                 ),
             }
         );
         return result;
-    }, [id, title, parentModuleId, isLeaf, openCreateModal]);
+    }, [id, title, parentModuleId, isLeaf, openCreateModal, onDelete]);
 
     return (
         <Flex onClick={onClick} justify="space-between" align="center" style={{ minHeight: 32, cursor: "pointer", padding: "8px 0" }}>

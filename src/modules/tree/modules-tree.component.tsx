@@ -82,6 +82,23 @@ const updateTreeData = (
     return node;
   });
 
+const removeNodeFromTree = (
+  list: ModuleViewModel[],
+  key: React.Key
+): ModuleViewModel[] => {
+  return list
+    .filter((node) => node.key !== key)
+    .map((node) => {
+      if (node.children && node.children.length > 0) {
+        return {
+          ...node,
+          children: removeNodeFromTree(node.children, key),
+        };
+      }
+      return node;
+    });
+};
+
 // TODO: If /modules return full tree, we can use this to initially setup the tree
 // function setupTree(
 //   modules: ModuleViewModel[],
@@ -133,17 +150,21 @@ export function ModulesTree(props: ModulesTreeProps) {
       : []
   );
   const [autoExpandParent, setAutoExpandParent] = useState(true);
+  const [deletedModuleIds, setDeletedModuleIds] = useState<Set<string>>(new Set());
   const [tree, setTree] = useState(setupTree(props.modules, props.autoExpand));
 
   useEffect(() => {
-    setTree(setupTree(props.modules, props.autoExpand));
+    const filteredModules = props.modules.filter(
+      (module) => !deletedModuleIds.has(module.id)
+    );
+    setTree(setupTree(filteredModules, props.autoExpand));
     setExpandedKeys(
       autoExpand
-        ? props.defaultCheckedKeys ?? props.modules.map(({ id }) => id)
+        ? props.defaultCheckedKeys ?? filteredModules.map(({ id }) => id)
         : []
     );
     setLoadedKeys([]);
-  }, [props.modules, autoExpand, props.autoExpand, props.defaultCheckedKeys]);
+  }, [props.modules, autoExpand, props.autoExpand, props.defaultCheckedKeys, deletedModuleIds]);
 
   return (
     <TreeContainer>
@@ -194,7 +215,10 @@ export function ModulesTree(props: ModulesTreeProps) {
         treeData={mapTreeData(tree)}
         loadData={async ({ key }) => {
           const newChildren = await props.loadData(key);
-          setTree((origin) => updateTreeData(origin, key, newChildren));
+          const filteredChildren = newChildren.filter(
+            (child) => !deletedModuleIds.has(child.id)
+          );
+          setTree((origin) => updateTreeData(origin, key, filteredChildren));
         }}
         titleRender={({ key, title, parentModuleId, isLeaf, numberQuestions }) => {
           return (
@@ -212,6 +236,15 @@ export function ModulesTree(props: ModulesTreeProps) {
               parentModuleId={parentModuleId}
               readonly={props.readonly}
               numberQuestions={numberQuestions}
+              onDelete={() => {
+                // Adicionar à lista de deletados e remover da árvore
+                const moduleId = key as string;
+                setDeletedModuleIds((prev) => new Set([...prev, moduleId]));
+                setTree((origin) => removeNodeFromTree(origin, key));
+                // Remover das chaves carregadas e expandidas
+                setLoadedKeys((prev) => prev.filter((k) => k !== moduleId));
+                setExpandedKeys((prev) => prev.filter((k) => k !== moduleId));
+              }}
             />
 
           );
