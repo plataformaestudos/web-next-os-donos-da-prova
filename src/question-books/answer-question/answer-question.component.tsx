@@ -261,33 +261,34 @@ export function AnswerQuestion({
                     </AlternativesContainer>
                 )}
             </QuestionContainer>
-            <Button
-                disabled={!selectedAlternative || isPending || isAlternativesDisabled}
-                type="primary"
-                onClick={() => {
-                    setError(false);
-                    startTransition(async () => {
-                        const result = await answerQuestion({
-                            questionBookQuestionId,
-                            alternativeId: selectedAlternative as string,
+            <Flex justify="flex-end">
+                <Button
+                    disabled={!selectedAlternative || isPending || isAlternativesDisabled}
+                    type="primary"
+                    onClick={() => {
+                        setError(false);
+                        startTransition(async () => {
+                            const result = await answerQuestion({
+                                questionBookQuestionId,
+                                alternativeId: selectedAlternative as string,
+                            });
+
+                            if (result.error) {
+                                setError(true);
+                                app?.message.error("Não foi possível salvar a resposta neste momento, tente novamente!"); // Notificação de erro
+                            } else {
+                                setCorrectAlternative(result.data?.correctAlternativeId ?? null);
+                                app?.message.success("Resposta enviada com sucesso!");
+
+                                onAnswerSubmitted?.();
+                            }
                         });
-
-                        if (result.error) {
-                            setError(true);
-                            app?.message.error("Não foi possível salvar a resposta neste momento, tente novamente!"); // Notificação de erro
-                        } else {
-                            setCorrectAlternative(result.data?.correctAlternativeId ?? null);
-                            app?.message.success("Resposta enviada com sucesso!");
-
-                            onAnswerSubmitted?.();
-                        }
-                    });
-                }}
-            >
-                Responder questão
-            </Button>
+                    }}
+                >
+                    Responder questão
+                </Button>
+            </Flex>
             
-            <br />
             <br />
 
             {correctAlternative && selectedAlternative && !error && (
