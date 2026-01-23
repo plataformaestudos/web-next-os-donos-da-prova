@@ -237,11 +237,9 @@ export function ModulesTree(props: ModulesTreeProps) {
               readonly={props.readonly}
               numberQuestions={numberQuestions}
               onDelete={() => {
-                // Adicionar à lista de deletados e remover da árvore
                 const moduleId = key as string;
                 setDeletedModuleIds((prev) => new Set([...prev, moduleId]));
                 setTree((origin) => removeNodeFromTree(origin, key));
-                // Remover das chaves carregadas e expandidas
                 setLoadedKeys((prev) => prev.filter((k) => k !== moduleId));
                 setExpandedKeys((prev) => prev.filter((k) => k !== moduleId));
               }}
