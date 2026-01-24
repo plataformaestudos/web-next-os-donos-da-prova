@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/util/cache-tags.util";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import { ResponseModel } from "@/model/common.model";
 import { QuestionReportStatus } from "@/types/question-report-status.types";
@@ -26,6 +28,9 @@ export async function updateQuestionReportStatus(
         error: response.error ?? "Erro ao atualizar status do report" 
       };
     }
+
+    // Invalidar cache para atualizar o contador de reports pendentes
+    revalidateTag(CACHE_TAGS.QUESTION_REPORTS);
 
     return { success: true, error: null };
 

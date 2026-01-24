@@ -17,6 +17,7 @@ import { useNabvarContext } from "./navbar.context";
 import { useMenus } from "./use-menus.hook";
 import { useState } from "react";
 import { TbMessageReport } from "react-icons/tb";
+import { ReportsBadge } from "@/question-reports/reports-badge.client";
 
 const icons = {
   home: (
@@ -223,6 +224,13 @@ export function Navbar() {
             </>
           )}
           {menus?.map((item) => {
+            const iconKey = item.icon as keyof typeof icons;
+            const isReports = iconKey === "reports";
+            const iconElement = new RegExp(item.activeRegex).test(pathname) ||
+              hovered === item.link
+              ? icons[iconKey]
+              : iconsB[iconKey];
+
             return (
               <Styled.Link
                 key={item.link}
@@ -234,10 +242,11 @@ export function Navbar() {
                 onMouseEnter={() => setHovered(item.link)}
                 onMouseLeave={() => setHovered(null)}
               >
-                {new RegExp(item.activeRegex).test(pathname) ||
-                  hovered === item.link
-                  ? icons[item.icon as keyof typeof icons]
-                  : iconsB[item.icon as keyof typeof iconsB]}
+                {isReports ? (
+                  <ReportsBadge>{iconElement}</ReportsBadge>
+                ) : (
+                  iconElement
+                )}
                 <Styled.LinkText
                   $collapsed={isNavbarCollapsed}
                   $active={new RegExp(item.activeRegex).test(pathname)}
