@@ -3,6 +3,7 @@ import {
   LuBook,
   LuCircleDollarSign,
   LuFileQuestion,
+  LuFileUp,
   LuFlag,
   LuFolders,
   LuHouse,
@@ -13,6 +14,7 @@ import { CgProfile } from "react-icons/cg";
 import { MenuModel } from "@/model/menu.model";
 
 const icons = {
+  imports: <LuFileUp size={48} />,
   home: <LuHouse size={48} />,
   book: <LuBook size={48} />,
   question: <LuFileQuestion size={48} />,

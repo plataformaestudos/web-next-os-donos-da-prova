@@ -3,10 +3,14 @@ import HttpClient from "@/util/http-client/fetch-client.util";
 import { MenuModel } from "@/model/menu.model";
 import { ResponseModel } from "@/model/common.model";
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@/app/context/user.context";
+import { canAccess, Roles } from "@/util/roles";
 
 export function useMenus() {
+  const { user, loading } = useUser();
   const { data, isLoading } = useQuery({
-    queryKey: ["menus"],
+    queryKey: ["menus", user?.id, user?.profile?.role_id],
+    enabled: !loading && Boolean(user?.profile),
     queryFn: async () => {
       const response = await HttpClient.fetch<ResponseModel<MenuModel[]>>("/menu/menus", {
         method: "GET",
@@ -19,5 +23,9 @@ export function useMenus() {
     },
   });
 
-  return { menus: data, isLoading };
+  const menus = data?.filter((menu) => {
+    const isImport = /^\/(importacao-questoes|question-imports)(\/|$)/.test(menu.link);
+    return !isImport || canAccess(user, [Roles.ADMIN, Roles.COLLABORATOR]);
+  });
+  return { menus, isLoading: loading || isLoading };
 }

@@ -24,6 +24,9 @@ const routeAlias: {
   "/termos-e-politicas": "/terms-and-policies",
   "/reports-de-questoes": "/question-reports",
   "/configuracoes-cookies": "/config-cookies",
+  "/importacao-questoes": "/question-imports",
+  "/importacao-questoes/:id": "/question-imports/:id",
+  "/importacao-questoes/:id/preview": "/question-imports/:id/preview",
 };
 
 const nextConfig = {

@@ -5,6 +5,7 @@ import * as Styled from "./navbar.style";
 import { Skeleton, Tooltip } from "antd";
 import {
   LuFileQuestion,
+  LuFileUp,
 } from "react-icons/lu";
 
 import { createClient } from "@/util/supabase/client";
@@ -20,6 +21,7 @@ import { TbMessageReport } from "react-icons/tb";
 import { ReportsBadge } from "@/question-reports/reports-badge.client";
 
 const icons = {
+  imports: <LuFileUp size={24} />,
   home: (
     <Image
       src="/images/icons/INICIO.png"
@@ -81,6 +83,7 @@ const icons = {
 };
 
 const iconsB = {
+  imports: <LuFileUp color="#fff" size={24} />,
   home: (
     <Image
       src="/images/icons/INICIO B.png"
