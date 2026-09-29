@@ -56,3 +56,24 @@ export interface AcceptedQuestionImport {
   statusUrl: string;
   previousImportId?: string;
 }
+
+export interface RecentQuestionImport {
+  id: string;
+  sourceFileName: string;
+  status: QuestionImportStatus;
+  progress: number;
+  createdAt: string;
+  expiresAt: string | null;
+  totalItems: number;
+  invalidItems: number;
+  savedItems: number;
+  rootModule: { id: string; name: string } | null;
+}
+
+export interface QuestionImportsPage {
+  items: RecentQuestionImport[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}

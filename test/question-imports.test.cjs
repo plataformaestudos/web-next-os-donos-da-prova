@@ -205,6 +205,16 @@ test("HTTP contract: multipart upload, retry, status, roots and recoverable fail
         { id: rootId, name: "Contabilidade", parentModuleId: null },
         { id: "child", name: "Submódulo", parentModuleId: rootId },
       ];
+    else if (req.url.startsWith("/question-imports?"))
+      data = {
+        items: [
+          { id: importId, sourceFileName: "sample.docx", status: "READY" },
+        ],
+        page: 2,
+        pageSize: 10,
+        total: 11,
+        totalPages: 2,
+      };
     else if (req.method === "GET")
       data = { id: importId, status: "READY", summary: { invalidItems: 2 } };
     else
@@ -226,6 +236,26 @@ test("HTTP contract: multipart upload, retry, status, roots and recoverable fail
   if (previousBase === undefined) delete process.env.NEXT_PUBLIC_API_BASE_URL;
   else process.env.NEXT_PUBLIC_API_BASE_URL = previousBase;
   const document = new File(["PK\x03\x04sample"], "sample.docx");
+
+  await t.test(
+    "history requests the selected page and exposes IDs for resuming imports",
+    async () => {
+      const page = await api.loadRecentImports(2);
+      assert.equal(requests.at(-1).method, "GET");
+      assert.equal(requests.at(-1).url, "/question-imports?page=2&pageSize=10");
+      assert.equal(page.items[0].id, importId);
+      assert.equal(page.total, 11);
+      assert.equal(page.totalPages, 2);
+      const controller = new AbortController();
+      controller.abort();
+      const requestCount = requests.length;
+      await assert.rejects(
+        api.loadRecentImports(3, controller.signal),
+        (error) => error.code === "ERR_CANCELED",
+      );
+      assert.equal(requests.length, requestCount);
+    },
+  );
 
   await t.test(
     "preview endpoints send the draft version and preserve partial payloads",

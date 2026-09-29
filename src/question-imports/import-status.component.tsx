@@ -113,7 +113,7 @@ export function ImportStatus({
       title={preview ? "Revisar questões importadas" : "Acompanhar importação"}
       backHref={IMPORT_PATH}
       actions={[
-        <Link key="new" href={IMPORT_PATH}>
+        <Link key="new" href={`${IMPORT_PATH}?nova=1`}>
           <Button>Nova importação</Button>
         </Link>,
       ]}
