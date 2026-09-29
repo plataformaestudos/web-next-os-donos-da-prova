@@ -6,6 +6,16 @@ import type {
   QuestionImport,
 } from "./question-import.model";
 import { DOCX_MIME, isImportId } from "./question-import.rules";
+import type {
+  DraftPatch,
+  ImportErrorsPage,
+  ImportItemDetail,
+  ImportItemsPage,
+  ImportMutationResult,
+  ItemFilters,
+  ReviewStatus,
+} from "./import-preview.model";
+import { itemSearch } from "./import-preview.rules";
 
 // Upload and polling errors belong to this page, not the global auto-back dialog.
 const api = axios.create({
@@ -69,6 +79,101 @@ export async function uploadImport(options: {
 
 export function importErrorStatus(error: unknown): number | undefined {
   return axios.isAxiosError(error) ? error.response?.status : undefined;
+}
+
+export function importErrorCode(error: unknown): string | undefined {
+  return axios.isAxiosError(error) ? error.response?.data?.code : undefined;
+}
+
+export function draftErrorMessage(error: unknown): string {
+  if (importErrorStatus(error) === 413)
+    return "A edição excedeu o limite de conteúdo aceito pelo servidor. Revise o tamanho dos campos antes de tentar novamente.";
+  if (axios.isAxiosError(error) && !error.response)
+    return "A conexão foi interrompida e a alteração pode ter sido recebida. Consulte a versão atual antes de tentar novamente; sua edição local foi preservada.";
+  return importErrorMessage(error);
+}
+
+export async function loadImportItems(
+  id: string,
+  filters: ItemFilters,
+  signal?: AbortSignal,
+) {
+  return (
+    await api.get<ResponseModel<ImportItemsPage>>(
+      `/question-imports/${id}/items?${itemSearch(filters)}`,
+      { signal },
+    )
+  ).data.data;
+}
+export async function loadImportItem(
+  id: string,
+  itemId: string,
+  signal?: AbortSignal,
+) {
+  return (
+    await api.get<ResponseModel<ImportItemDetail>>(
+      `/question-imports/${id}/items/${itemId}`,
+      { signal },
+    )
+  ).data.data;
+}
+export async function loadImportErrors(
+  id: string,
+  severity: "ERROR" | "WARNING",
+  page: number,
+  signal?: AbortSignal,
+) {
+  return (
+    await api.get<ResponseModel<ImportErrorsPage>>(
+      `/question-imports/${id}/errors?severity=${severity}&page=${page}&pageSize=20`,
+      { signal },
+    )
+  ).data.data;
+}
+export async function loadImportModulePaths(id: string, signal?: AbortSignal) {
+  return (
+    await api.get<ResponseModel<{ modulePath: string[]; count: number }[]>>(
+      `/question-imports/${id}/module-paths`,
+      { signal },
+    )
+  ).data.data;
+}
+export async function updateImportItem(
+  id: string,
+  itemId: string,
+  patch: DraftPatch,
+) {
+  return (
+    await api.patch<ResponseModel<ImportMutationResult>>(
+      `/question-imports/${id}/items/${itemId}`,
+      patch,
+    )
+  ).data.data;
+}
+export async function reviewImportItem(
+  id: string,
+  itemId: string,
+  version: number,
+  reviewStatus: ReviewStatus,
+) {
+  return (
+    await api.patch<ResponseModel<ImportMutationResult>>(
+      `/question-imports/${id}/items/${itemId}/review`,
+      { version, reviewStatus },
+    )
+  ).data.data;
+}
+export async function revalidateImportItem(
+  id: string,
+  itemId: string,
+  version: number,
+) {
+  return (
+    await api.post<ResponseModel<ImportMutationResult>>(
+      `/question-imports/${id}/items/${itemId}/revalidate`,
+      { version },
+    )
+  ).data.data;
 }
 
 export function failedImportId(error: unknown): string | undefined {
