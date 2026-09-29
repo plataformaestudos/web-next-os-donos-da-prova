@@ -10,7 +10,8 @@ O acompanhamento fica em `/importacao-questoes/:id`. Atualizar a página ou reab
 esse endereço consulta o lote existente, sem repetir o envio. Ao receber `READY`,
 `PARTIALLY_SAVED` ou `COMPLETED`, a página abre `/importacao-questoes/:id/preview`.
 A rota agora oferece [preview, editor, aprovação e diálogo de erros](question-import-preview.md)
-da issue #5. Confirmação/salvamento parcial pertence à issue #6.
+da issue #5. Confirmação/salvamento parcial está descrita em
+[question-import-confirmation.md](question-import-confirmation.md) (issue #6).
 
 ## Pré-requisitos
 

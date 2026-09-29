@@ -32,6 +32,7 @@ export interface ImportItem {
   reviewStatus: ReviewStatus;
   persistenceStatus: "PENDING" | "SAVING" | "SAVED" | "FAILED";
   savedQuestionId: string | null;
+  saveError: QuestionImportIssue | null;
 }
 export interface ImportAssets {
   imageUrls: Record<string, string>;
@@ -77,3 +78,32 @@ export interface DraftPatch {
   payload?: Partial<DraftPayload>;
 }
 export type DraftField = keyof DraftPayload | "sourceNumber" | "modulePath";
+
+export interface ConfirmImportRequestItem {
+  id: string;
+  version: number;
+}
+
+export interface ImportConfirmationItemResult {
+  itemId: string;
+  itemOrder?: number;
+  outcome: "SAVED" | "IGNORED" | "FAILED";
+  code: string;
+  message: string;
+  currentVersion?: number;
+  questionId?: string;
+  moduleId?: string;
+  createdModuleIds?: string[];
+  issues?: QuestionImportIssue[];
+}
+
+export interface ImportConfirmationResult {
+  id: string;
+  status: import("./question-import.model").QuestionImportStatus | null;
+  summary: QuestionImportSummary | null;
+  summaryUnavailable: boolean;
+  saved: number;
+  ignored: number;
+  failed: number;
+  results: ImportConfirmationItemResult[];
+}

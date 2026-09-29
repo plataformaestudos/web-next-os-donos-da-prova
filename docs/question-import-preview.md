@@ -113,4 +113,5 @@ Esse arquivo não foi alterado por esta entrega; o build frontend segue pendente
     sessão expirada e lote encerrado. Tentar editar item salvo/em salvamento.
 
 Enviar passo, mensagem, papel e resposta HTTP em caso de falha, sem tokens/cookies.
-A confirmação definitiva “Salvar questões válidas” será implementada na issue #6.
+A confirmação definitiva “Salvar questões válidas” está descrita em
+[question-import-confirmation.md](question-import-confirmation.md).

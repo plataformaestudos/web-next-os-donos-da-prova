@@ -44,6 +44,7 @@ import {
 import { ImportItemView } from "./import-item-view.component";
 import { ImportItemDialog } from "./import-item-editor.component";
 import { ImportErrorsDialog } from "./import-errors-dialog.component";
+import { ImportConfirmation } from "./import-confirmation.component";
 
 interface ReviewResult {
   order: number;
@@ -207,6 +208,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
 
   return (
     <Flex vertical gap={20}>
+      <ImportConfirmation batch={batch} />
       <Flex gap={12} wrap>
         <Button onClick={() => setErrorsOpen(true)}>
           {batch.summary.errorCount} erros encontrados
