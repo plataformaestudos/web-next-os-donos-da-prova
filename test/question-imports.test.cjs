@@ -16,8 +16,8 @@ function loadTypeScript(relative) {
   compiled.paths = Module._nodeModulePaths(resolve(__dirname, ".."));
   const originalRequire = compiled.require.bind(compiled);
   compiled.require = (name) =>
-    name === "./question-import.rules"
-      ? loadTypeScript("question-import.rules.ts")
+    name === "./question-import.rules" || name === "./import-preview.rules"
+      ? loadTypeScript(`${name.slice(2)}.ts`)
       : originalRequire(name);
   const result = ts.transpileModule(readFileSync(filename, "utf8"), {
     compilerOptions: {
@@ -31,7 +31,88 @@ function loadTypeScript(relative) {
 }
 
 const rules = loadTypeScript("question-import.rules.ts");
+const previewRules = loadTypeScript("import-preview.rules.ts");
 const file = { name: "questoes.docx", type: rules.DOCX_MIME, size: 100 };
+
+test("draft patches preserve canonical images and only send explicitly reviewed fields", () => {
+  const canonical = `import-image://${"a".repeat(64)}`;
+  const original = {
+    version: 7,
+    payload: {
+      text: `<p><img src="${canonical}"></p>`,
+      comment: "original",
+      answer: "A",
+    },
+    sourceNumber: 1,
+    modulePath: ["Raiz", "Assunto"],
+  };
+  const edited = { ...original, payload: { ...original.payload, comment: "" } };
+  assert.deepEqual(
+    previewRules.buildDraftPatch(original, edited, ["comment"]),
+    { version: 7, payload: { comment: "" } },
+  );
+  assert.deepEqual(previewRules.buildDraftPatch(original, edited, ["text"]), {
+    version: 7,
+    payload: { text: original.payload.text },
+  });
+  assert.deepEqual(
+    previewRules.buildDraftPatch(original, edited, [
+      "modulePath",
+      "sourceNumber",
+    ]),
+    { version: 7, modulePath: original.modulePath, sourceNumber: 1 },
+  );
+});
+
+test("approval excludes invalid, pending validation, saving and saved items", () => {
+  for (const validity of [
+    "VALID",
+    "VALID_WITH_WARNINGS",
+    "INVALID",
+    "PENDING",
+  ]) {
+    for (const persistence of ["PENDING", "FAILED", "SAVING", "SAVED"]) {
+      assert.equal(
+        previewRules.canApproveItem({
+          validationStatus: validity,
+          persistenceStatus: persistence,
+        }),
+        ["VALID", "VALID_WITH_WARNINGS"].includes(validity) &&
+          ["PENDING", "FAILED"].includes(persistence),
+      );
+    }
+  }
+  assert.equal(
+    previewRules.canEditImport({ status: "READY", expiresAt: "2020-01-01" }),
+    false,
+  );
+  assert.equal(
+    previewRules.canEditImport({ status: "COMPLETED", expiresAt: null }),
+    false,
+  );
+  assert.equal(
+    previewRules.canEditImport({ status: "PARTIALLY_SAVED", expiresAt: null }),
+    true,
+  );
+});
+
+test("warning filter combines with invalid drafts and preserves exact module path parts", () => {
+  const params = new URLSearchParams(
+    previewRules.itemSearch({
+      page: 2,
+      pageSize: 20,
+      hasWarnings: true,
+      validationStatus: "INVALID",
+      modulePath: ["Raiz & teste", "Módulo / parte"],
+    }),
+  );
+  assert.equal(params.get("hasWarnings"), "true");
+  assert.equal(params.get("validationStatus"), "INVALID");
+  assert.deepEqual(params.getAll("modulePath[]"), [
+    "Raiz & teste",
+    "Módulo / parte",
+  ]);
+});
 
 test("DOCX: accepts the size boundary, uppercase extension and missing OS MIME", () => {
   assert.equal(
@@ -98,6 +179,20 @@ test("HTTP contract: multipart upload, retry, status, roots and recoverable fail
       body: Buffer.concat(chunks).toString(),
     });
     res.setHeader("Content-Type", "application/json");
+    if (
+      req.method === "PATCH" &&
+      JSON.parse(requests.at(-1).body).version === 99
+    ) {
+      res.statusCode = 409;
+      res.end(
+        JSON.stringify({
+          code: "IMPORT_ITEM_VERSION_CONFLICT",
+          currentVersion: 100,
+          message: "O rascunho foi alterado.",
+        }),
+      );
+      return;
+    }
     if (req.method === "POST" && failUpload) {
       res.statusCode = 503;
       res.end(JSON.stringify({ message: "Fila indisponível", importId }));
@@ -131,6 +226,66 @@ test("HTTP contract: multipart upload, retry, status, roots and recoverable fail
   if (previousBase === undefined) delete process.env.NEXT_PUBLIC_API_BASE_URL;
   else process.env.NEXT_PUBLIC_API_BASE_URL = previousBase;
   const document = new File(["PK\x03\x04sample"], "sample.docx");
+
+  await t.test(
+    "preview endpoints send the draft version and preserve partial payloads",
+    async () => {
+      await api.updateImportItem(importId, nextId, {
+        version: 7,
+        payload: { comment: "" },
+      });
+      assert.equal(requests.at(-1).method, "PATCH");
+      assert.deepEqual(JSON.parse(requests.at(-1).body), {
+        version: 7,
+        payload: { comment: "" },
+      });
+      await api.reviewImportItem(importId, nextId, 8, "APPROVED");
+      assert.equal(
+        requests.at(-1).url,
+        `/question-imports/${importId}/items/${nextId}/review`,
+      );
+      assert.deepEqual(JSON.parse(requests.at(-1).body), {
+        version: 8,
+        reviewStatus: "APPROVED",
+      });
+      await api.revalidateImportItem(importId, nextId, 9);
+      assert.equal(
+        requests.at(-1).url,
+        `/question-imports/${importId}/items/${nextId}/revalidate`,
+      );
+      await api.loadImportErrors(importId, "WARNING", 2);
+      assert.match(
+        requests.at(-1).url,
+        /errors\?severity=WARNING&page=2&pageSize=20/,
+      );
+      await api.loadImportModulePaths(importId);
+      assert.equal(
+        requests.at(-1).url,
+        `/question-imports/${importId}/module-paths`,
+      );
+    },
+  );
+
+  await t.test(
+    "version conflicts never resend a patch with a refreshed version",
+    async () => {
+      const count = requests.length;
+      await assert.rejects(
+        api.updateImportItem(importId, nextId, {
+          version: 99,
+          payload: { comment: "local" },
+        }),
+        (error) => {
+          assert.equal(
+            api.importErrorCode(error),
+            "IMPORT_ITEM_VERSION_CONFLICT",
+          );
+          return true;
+        },
+      );
+      assert.equal(requests.length, count + 1);
+    },
+  );
 
   await t.test(
     "upload includes root and browser-generated multipart boundary",

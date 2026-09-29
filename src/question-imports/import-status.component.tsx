@@ -31,6 +31,7 @@ import {
 } from "./question-import.rules";
 import { ImportSummary } from "./import-summary.component";
 import { ImportUpload } from "./import-upload.component";
+import { ImportReview } from "./import-review.component";
 
 export function ImportStatus({
   id,
@@ -109,7 +110,7 @@ export function ImportStatus({
 
   return (
     <PageLayout
-      title={preview ? "Resumo da importação" : "Acompanhar importação"}
+      title={preview ? "Revisar questões importadas" : "Acompanhar importação"}
       backHref={IMPORT_PATH}
       actions={[
         <Link key="new" href={IMPORT_PATH}>
@@ -221,7 +222,7 @@ export function ImportStatus({
             }
             description={
               batch.summary.totalItems
-                ? "A análise automática não substitui a revisão. O preview completo, a edição e a aprovação serão disponibilizados na próxima etapa desta funcionalidade."
+                ? "Confira cada questão, corrija os erros e marque as revisadas como aprovadas. Salvar o rascunho ainda não cria a questão definitiva."
                 : "Confira o modelo de importação e envie o documento corrigido em uma nova importação."
             }
           />
@@ -232,6 +233,7 @@ export function ImportStatus({
             entre as questões com erro.
           </Typography.Paragraph>
         )}
+        {preview && ready && <ImportReview batch={batch} />}
       </Flex>
     </PageLayout>
   );
