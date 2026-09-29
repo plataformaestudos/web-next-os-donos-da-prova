@@ -4,6 +4,7 @@ import type { ResponseModel } from "@/model/common.model";
 import type {
   AcceptedQuestionImport,
   QuestionImport,
+  QuestionImportsPage,
 } from "./question-import.model";
 import { DOCX_MIME, isImportId } from "./question-import.rules";
 import type {
@@ -25,6 +26,18 @@ const api = axios.create({
   withCredentials: true,
   timeout: 20_000,
 });
+
+export async function loadRecentImports(
+  page: number,
+  signal?: AbortSignal,
+): Promise<QuestionImportsPage> {
+  return (
+    await api.get<ResponseModel<QuestionImportsPage>>("/question-imports", {
+      params: { page, pageSize: 10 },
+      signal,
+    })
+  ).data.data;
+}
 
 export async function loadImport(
   id: string,
