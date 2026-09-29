@@ -8,7 +8,9 @@ import type {
 import { DOCX_MIME, isImportId } from "./question-import.rules";
 import type {
   DraftPatch,
+  ConfirmImportRequestItem,
   ImportErrorsPage,
+  ImportConfirmationResult,
   ImportItemDetail,
   ImportItemsPage,
   ImportMutationResult,
@@ -172,6 +174,19 @@ export async function revalidateImportItem(
     await api.post<ResponseModel<ImportMutationResult>>(
       `/question-imports/${id}/items/${itemId}/revalidate`,
       { version },
+    )
+  ).data.data;
+}
+
+export async function confirmImportItems(
+  id: string,
+  items: ConfirmImportRequestItem[],
+): Promise<ImportConfirmationResult> {
+  return (
+    await api.post<ResponseModel<ImportConfirmationResult>>(
+      `/question-imports/${id}/confirm`,
+      { items },
+      { timeout: 120_000 },
     )
   ).data.data;
 }

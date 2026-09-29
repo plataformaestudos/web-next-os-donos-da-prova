@@ -1,6 +1,7 @@
 "use client";
 
 import { Alert, Divider, Flex, Tag, Typography } from "antd";
+import Link from "next/link";
 import type { ImportItem } from "./import-preview.model";
 import {
   moduleLabels,
@@ -77,6 +78,19 @@ export function ImportItemView({
           description={issue.suggestedFix}
         />
       ))}
+      {item.saveError && (
+        <Alert
+          showIcon
+          type="error"
+          message={`Falha ao salvar: ${item.saveError.message}`}
+          description={item.saveError.suggestedFix}
+        />
+      )}
+      {item.savedQuestionId && (
+        <Link href={`/questions/view/${item.savedQuestionId}`} target="_blank">
+          Abrir questão salva
+        </Link>
+      )}
     </Flex>
   );
 }
