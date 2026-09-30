@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, Button, Card, Form, Input, Spin, Typography } from "antd";
 import Link from "next/link";
 import { createClient } from "@/util/supabase/client";
-import { acceptStaffInvitation } from "@/staff-users/staff-users.api";
+import {
+  acceptStaffInvitation,
+  staffErrorMessage,
+} from "@/staff-users/staff-users.api";
 
 export default function AcceptInvitationPage() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -110,11 +113,7 @@ export default function AcceptInvitationPage() {
       setAccessToken(null);
       await supabase.auth.signOut({ scope: "local" });
     } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível definir a senha.",
-      );
+      setError(staffErrorMessage(error));
     } finally {
       setSaving(false);
     }

@@ -22,6 +22,7 @@ import {
   inviteStaffUser,
   listStaffUsers,
   resendStaffInvitation,
+  staffErrorMessage,
   StaffRole,
   StaffUser,
 } from "./staff-users.api";
@@ -83,11 +84,7 @@ function StaffUsersContent({ userId }: { userId: string }) {
       form.resetFields();
       setPage(1);
     } catch (error) {
-      setFormError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível enviar o convite.",
-      );
+      setFormError(staffErrorMessage(error));
     } finally {
       setSubmitting(false);
       // Failed delivery can still leave a recoverable invitation in the list.
@@ -100,11 +97,7 @@ function StaffUsersContent({ userId }: { userId: string }) {
       const result = await resendStaffInvitation(id);
       message.success(result.message);
     } catch (error) {
-      message.error(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível reenviar o link.",
-      );
+      message.error(staffErrorMessage(error));
     } finally {
       setSending(null);
       await refresh();
@@ -196,7 +189,7 @@ function StaffUsersContent({ userId }: { userId: string }) {
           <Alert
             type="error"
             message="Não foi possível atualizar a lista de usuários."
-            description={error.message}
+            description={staffErrorMessage(error)}
             showIcon
             style={{ marginBottom: 16 }}
           />

@@ -1,4 +1,22 @@
 import HttpClient from "@/util/http-client/fetch-client.util";
+import { HttpError } from "@/lib/errors";
+
+export function staffErrorMessage(error: unknown) {
+  if (error instanceof HttpError) {
+    if (error.status === 401)
+      return "Este acesso expirou. Entre novamente ou solicite o reenvio do convite.";
+    const detail = (error.data as { message?: unknown } | undefined)?.message;
+    if (typeof detail === "string") return detail;
+    if (
+      Array.isArray(detail) &&
+      detail.every((item) => typeof item === "string")
+    )
+      return detail.join(" ");
+  }
+  return error instanceof Error
+    ? error.message
+    : "Não foi possível concluir a solicitação.";
+}
 
 export type StaffRole = "ADMIN" | "COLLABORATOR";
 export interface StaffUser {
