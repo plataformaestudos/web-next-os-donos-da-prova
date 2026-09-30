@@ -1,4 +1,4 @@
-import { UserExtended } from "@/app/context/user.context";
+import type { UserExtended } from "@/app/context/user.context";
 
 export enum Roles {
   ADMIN = "ADMIN",
@@ -19,4 +19,8 @@ export function canAccess(user: UserExtended | null, roles: Roles[]) {
   return roles.some(
     (role) => user.profile?.role_id === ROLES_IDS[role]
   );
+}
+
+export function hasStaffAccess(user: UserExtended | null) {
+  return canAccess(user, [Roles.ADMIN, Roles.COLLABORATOR]);
 }

@@ -6,6 +6,7 @@ import { Skeleton, Tooltip } from "antd";
 import {
   LuFileQuestion,
   LuFileUp,
+  LuUsers,
 } from "react-icons/lu";
 
 import { createClient } from "@/util/supabase/client";
@@ -21,6 +22,7 @@ import { TbMessageReport } from "react-icons/tb";
 import { ReportsBadge } from "@/question-reports/reports-badge.client";
 
 const icons = {
+  users: <LuUsers size={24} />,
   imports: <LuFileUp size={24} />,
   home: (
     <Image
@@ -83,6 +85,7 @@ const icons = {
 };
 
 const iconsB = {
+  users: <LuUsers color="#fff" size={24} />,
   imports: <LuFileUp color="#fff" size={24} />,
   home: (
     <Image

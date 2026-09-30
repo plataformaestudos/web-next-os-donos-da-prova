@@ -11,6 +11,7 @@ import { useState, useTransition } from "react";
 import { DeleteAccountModal } from "@/profile/delete-account/delete-account-modal.component";
 import { deleteAccountClient } from "@/profile/delete-account/delete-account.action";
 import { useRouter } from "next/navigation";
+import { canAccess, hasStaffAccess, Roles } from "@/util/roles";
 
 interface AppProfileCardProps {
   user: UserExtended | null;
@@ -124,11 +125,15 @@ export const AppProfileCard = ({ user }: AppProfileCardProps) => {
           </Descriptions>
           <ButtonContent>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}>
-              <Link href="/subscription">
+              {hasStaffAccess(user) ? (
+                <Typography.Text type="secondary">
+                  {canAccess(user, [Roles.ADMIN]) ? "Acesso administrativo" : "Acesso de colaborador"} — sem assinatura
+                </Typography.Text>
+              ) : user?.profile ? <Link href="/subscription">
                 <Button type="primary" size="large">
                   Gerenciar Assinatura
                 </Button>
-              </Link>
+              </Link> : null}
               <Button 
                 type="default" 
                 size="large" 

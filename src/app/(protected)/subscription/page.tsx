@@ -1,23 +1,20 @@
-import { Row, Tabs } from "antd";
-import { createClient } from "@/util/supabase/server";
+"use client";
+
+import { Alert, Tabs } from "antd";
 import { AppPayments } from "@/components/AppPayments";
 import { AppMyPlans } from "@/components/AppMyPlans";
 import { AppNewPlans } from "@/components/AppNewPlans";
+import { useAuthGuard } from "@/app/hooks/useAuthGuard";
+import { hasStaffAccess } from "@/util/roles";
+import { FullPageLoading } from "@/ui/loading/full-page-loading";
 
-const UserProfile = async () => {
-    const supabase = await createClient();
-    const { data: plans } = await supabase.from("subscription_plans").select("*");
-
-    if (!plans) {
-        return (
-            <Row
-                justify="center"
-                style={{ marginTop: "50px" }}
-            >
-                <p>Nenhum usuário encontrado</p>
-            </Row>
-        );
-    }
+const UserProfile = () => {
+    const { user, loading, allowed } = useAuthGuard();
+    if (loading) return <FullPageLoading />;
+    if (!allowed) return null;
+    if (hasStaffAccess(user)) return <Alert style={{ margin: 24 }} type="info" showIcon
+        message="Seu acesso não depende de assinatura"
+        description="Administradores e colaboradores têm acesso à plataforma pelo seu tipo de usuário." />;
 
     const items = [
         {
