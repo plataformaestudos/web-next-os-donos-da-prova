@@ -30,7 +30,7 @@ interface DashboardData {
 interface HomeContentProps {
     userProfile: {
         name?: string;
-        nickname?: string;
+        nickname?: string | null;
     };
 }
 
