@@ -106,7 +106,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
 
     return (
         <div>
-            <S.Title>Olá, {userProfile.name}</S.Title>
+            <S.Title>Olá, {userProfile.nickname ?? userProfile.name}</S.Title>
             {isLoading ? (
                 <AppLoading
                     show={isLoading}
