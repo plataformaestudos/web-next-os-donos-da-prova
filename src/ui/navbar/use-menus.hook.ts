@@ -4,7 +4,7 @@ import { MenuModel } from "@/model/menu.model";
 import { ResponseModel } from "@/model/common.model";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@/app/context/user.context";
-import { canAccess, Roles } from "@/util/roles";
+import { canAccess, hasStaffAccess, Roles } from "@/util/roles";
 
 export function useMenus() {
   const { user, loading } = useUser();
@@ -24,6 +24,8 @@ export function useMenus() {
   });
 
   const menus = data?.filter((menu) => {
+    if (/^\/subscription(\/|$)/.test(menu.link) && hasStaffAccess(user)) return false;
+    if (/^\/gerenciar-usuarios(\/|$)/.test(menu.link)) return canAccess(user, [Roles.ADMIN]);
     const isImport = /^\/(importacao-questoes|question-imports)(\/|$)/.test(menu.link);
     return !isImport || canAccess(user, [Roles.ADMIN, Roles.COLLABORATOR]);
   });

@@ -7,6 +7,7 @@ import {
   LuFlag,
   LuFolders,
   LuHouse,
+  LuUsers,
 } from "react-icons/lu";
 
 
@@ -14,6 +15,7 @@ import { CgProfile } from "react-icons/cg";
 import { MenuModel } from "@/model/menu.model";
 
 const icons = {
+  users: <LuUsers size={48} />,
   imports: <LuFileUp size={48} />,
   home: <LuHouse size={48} />,
   book: <LuBook size={48} />,
