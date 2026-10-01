@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "test:staff-users": "node --test test/staff-users.test.cjs",
     "test:question-imports": "node --test test/question-imports.test.cjs",
     "build": "next build",
     "dev": "NODE_OPTIONS='--inspect' next dev --turbopack",
