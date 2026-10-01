@@ -340,6 +340,17 @@ test("HTTP contract: multipart upload, retry, status, roots and recoverable fail
   );
 
   await t.test(
+    "new upload without a root sends only the file for automatic root resolution",
+    async () => {
+      const accepted = await api.uploadImport({ file: document, onProgress() {} });
+      assert.equal(accepted.id, importId);
+      assert.equal(requests.at(-1).url, '/question-imports');
+      assert.doesNotMatch(requests.at(-1).body, /name="rootModuleId"/);
+      assert.match(requests.at(-1).body, /filename="sample.docx"/);
+    },
+  );
+
+  await t.test(
     "retry sends only file and uses the new returned identifier",
     async () => {
       const accepted = await api.uploadImport({
