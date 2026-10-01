@@ -19,14 +19,23 @@ export function staffErrorMessage(error: unknown) {
 }
 
 export type StaffRole = "ADMIN" | "COLLABORATOR";
+export type UserRole = StaffRole | "STUDENT";
 export interface StaffUser {
   id: string;
   invitationId: string | null;
   userId: string | null;
   name: string;
   email: string;
-  role: StaffRole;
-  status: "ACTIVE" | "PENDING" | "SENDING" | "SENT" | "FAILED" | "ACCEPTED";
+  role: UserRole;
+  doc: string;
+  status:
+    | "ACTIVE"
+    | "BLOCKED"
+    | "PENDING"
+    | "SENDING"
+    | "SENT"
+    | "FAILED"
+    | "ACCEPTED";
   lastSentAt: string | null;
 }
 export interface StaffUsersPage {
@@ -35,10 +44,65 @@ export interface StaffUsersPage {
   page: number;
   limit: number;
 }
-export const listStaffUsers = (page: number, limit: number) =>
-  HttpClient.fetch<StaffUsersPage>(
-    `/admin/users?page=${page}&limit=${limit}`,
+export interface StaffUsersFilters {
+  name?: string;
+  email?: string;
+  doc?: string;
+  role?: UserRole;
+  status?: StaffUser["status"];
+}
+
+export const listStaffUsers = (
+  page: number,
+  limit: number,
+  filters: StaffUsersFilters = {},
+) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value?.trim()) params.set(key, value.trim());
+  });
+  return HttpClient.fetch<StaffUsersPage>(
+    `/admin/users?${params.toString()}`,
     { cache: "no-store" },
+    false,
+  );
+};
+
+export const updateStaffUser = (
+  id: string,
+  data: {
+    name: string;
+    doc: string;
+    role: StaffRole;
+  },
+) =>
+  HttpClient.fetch<{ message: string }>(
+    `/admin/users/${encodeURIComponent(id)}`,
+    { method: "PATCH", body: JSON.stringify(data) },
+    false,
+  );
+
+export const setStudentAccess = (id: string, blocked: boolean) =>
+  HttpClient.fetch<{ message: string }>(
+    `/admin/users/${encodeURIComponent(id)}/access`,
+    { method: "POST", body: JSON.stringify({ blocked }) },
+    false,
+  );
+
+export const resetStudentPassword = (id: string) =>
+  HttpClient.fetch<{ message: string }>(
+    `/admin/users/${encodeURIComponent(id)}/reset-password`,
+    { method: "POST" },
+    false,
+  );
+
+export const removeStudent = (id: string) =>
+  HttpClient.fetch<{ message: string }>(
+    `/admin/users/${encodeURIComponent(id)}`,
+    { method: "DELETE" },
     false,
   );
 
@@ -46,6 +110,7 @@ export const inviteStaffUser = (data: {
   name: string;
   email: string;
   role: StaffRole;
+  doc?: string;
 }) =>
   HttpClient.fetch<{ id: string; message: string }>(
     "/admin/users/invitations",
