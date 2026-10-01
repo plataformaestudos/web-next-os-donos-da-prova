@@ -65,10 +65,6 @@ export function ImportUpload({ retryId }: { retryId?: string }) {
       setError(validation);
       return;
     }
-    if (!retryId && !rootModuleId) {
-      setError("Selecione o módulo raiz antes de importar.");
-      return;
-    }
     submitting.current = true;
     setBusy(true);
     setProgress(0);
@@ -105,19 +101,25 @@ export function ImportUpload({ retryId }: { retryId?: string }) {
         ) : (
           <>
             <Typography.Paragraph>
-              Escolha o módulo raiz e envie seu DOCX. As questões serão
-              preparadas para revisão antes de serem salvas.
+              Envie seu DOCX e, se desejar, escolha um módulo raiz existente.
+              Sem seleção, o nome do arquivo será usado para reaproveitar ou
+              criar a raiz. As questões serão preparadas para revisão antes de
+              serem salvas.
             </Typography.Paragraph>
-            <Form.Item label="Módulo raiz" required>
+            <Form.Item
+              label="Módulo raiz (opcional)"
+              extra="Sem seleção, usa o nome do arquivo, sem .docx. Se já existir uma raiz com esse nome, ela será reaproveitada."
+            >
               <Select
                 aria-label="Módulo raiz"
-                placeholder="Selecione o módulo raiz"
+                placeholder="Usar o nome do arquivo"
+                allowClear
                 showSearch
                 optionFilterProp="label"
                 value={rootModuleId}
                 onChange={setRootModuleId}
                 loading={roots.isFetching}
-                disabled={busy || roots.isError}
+                disabled={busy}
                 options={roots.data?.map((module) => ({
                   value: module.id,
                   label: module.name,
@@ -132,9 +134,9 @@ export function ImportUpload({ retryId }: { retryId?: string }) {
             {roots.isError && (
               <Alert
                 style={{ marginBottom: 16 }}
-                type="error"
+                type="warning"
                 showIcon
-                message={importErrorMessage(roots.error)}
+                message="Não foi possível carregar os módulos existentes. Você pode continuar sem selecionar uma raiz, usando o nome do arquivo."
                 action={
                   <Button onClick={() => roots.refetch()}>
                     Tentar novamente
@@ -147,7 +149,7 @@ export function ImportUpload({ retryId }: { retryId?: string }) {
                 style={{ marginBottom: 16 }}
                 type="info"
                 showIcon
-                message="Cadastre um módulo raiz em Módulos antes de importar."
+                message="Nenhum módulo raiz cadastrado. A importação criará uma raiz com o nome do arquivo."
               />
             )}
           </>
@@ -185,12 +187,18 @@ export function ImportUpload({ retryId }: { retryId?: string }) {
             <p className="ant-upload-hint">Um arquivo por importação</p>
           </Upload.Dragger>
         </Form.Item>
-        {file && !retryId && (
+        {file && !retryId && !rootModuleId && (
           <Typography.Paragraph type="secondary">
-            Sugestão pelo nome do arquivo:{" "}
-            <strong>{file.name.replace(/\.docx$/i, "")}</strong>. Confirme sua
-            escolha no campo Módulo raiz; o nome do arquivo não altera a
-            seleção.
+            Módulo raiz pelo nome do arquivo:{" "}
+            <strong>
+              {file.name
+                .replace(/\.docx$/i, "")
+                .normalize("NFKC")
+                .trim()
+                .replace(/\s+/g, " ")}
+            </strong>
+            . Uma raiz existente com esse nome será reaproveitada; caso
+            contrário, uma nova será criada.
           </Typography.Paragraph>
         )}
         <Flex vertical gap={16}>
@@ -211,7 +219,7 @@ export function ImportUpload({ retryId }: { retryId?: string }) {
             type="primary"
             htmlType="submit"
             loading={busy}
-            disabled={!file || (!retryId && (!rootModuleId || roots.isError))}
+            disabled={!file}
           >
             {retryId ? "Enviar nova tentativa" : "Importar questões"}
           </Button>

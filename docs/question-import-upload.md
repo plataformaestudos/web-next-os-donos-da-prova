@@ -2,9 +2,12 @@
 
 ## Entrega e próxima etapa
 
-A rota `/importacao-questoes` oferece seleção explícita de módulo raiz, validação
-de DOCX (1 byte a 30 MB), upload com progresso e criação de rascunho. O nome do
-arquivo aparece como sugestão textual e nunca seleciona o módulo automaticamente.
+A rota `/importacao-questoes` oferece seleção **opcional** de módulo raiz, validação
+de DOCX (1 byte a 30 MB), upload com progresso e criação de rascunho. Sem seleção,
+o backend reaproveita ou cria uma raiz com o nome do arquivo, sem `.docx` e com
+normalização de espaços. A tela mostra esse nome antes do envio e permite limpar
+a seleção para voltar ao modo automático. Uma seleção explícita prevalece sobre
+o nome do arquivo. Nenhuma migration nova é necessária para este ajuste.
 
 O acompanhamento fica em `/importacao-questoes/:id`. Atualizar a página ou reabrir
 esse endereço consulta o lote existente, sem repetir o envio. Ao receber `READY`,
@@ -27,8 +30,8 @@ da issue #5. Confirmação/salvamento parcial está descrita em
   NODE_OPTIONS='-r tsconfig-paths/register' make migrate
   ```
 
-- Administrador/colaborador-editor com perfil e papel configurados, e pelo menos
-  um módulo raiz existente. O guard do frontend usa `src/util/roles.ts`; a API
+- Administrador/colaborador-editor com perfil e papel configurados. Não é necessário
+  cadastrar um módulo raiz antes de importar. O guard do frontend usa `src/util/roles.ts`; a API
   valida independentemente papel e proprietário do lote.
 
 ## Comportamento
@@ -48,8 +51,20 @@ da issue #5. Confirmação/salvamento parcial está descrita em
 - Axios já existente faz o multipart sem forçar `Content-Type`. MIME vazio do sistema
   operacional é normalizado para DOCX; tipo explícito incompatível é rejeitado. O backend
   continua validando assinatura, estrutura e limites do arquivo.
+- Falha ao carregar a lista de raízes não bloqueia o upload sem seleção. A API
+  mantém a autorização por papel e valida IDs explicitamente enviados.
+- A raiz automática é criada no upload, mas questões e submódulos só são salvos
+  após revisão/confirmar. Descartar um lote não remove sua raiz automaticamente.
+- Para implantação, publicar o backend antes do frontend: versões antigas da API
+  ainda exigem `rootModuleId`.
 
 ## Verificação automatizada
+
+Raiz opcional (01/10/2026): 17 testes de regras/contrato HTTP aprovados, incluindo
+upload sem `rootModuleId`; TypeScript e lint da tela aprovados. O build completo
+do Next e o fluxo no navegador não foram repetidos neste ajuste. Validar upload
+sem seleção (criação e reaproveitamento), limpar seleção, seleção explícita,
+preview/confirmar e retry preservando a raiz original. Publicar o backend primeiro.
 
 Na pasta frontend (Node 20 ou posterior):
 
