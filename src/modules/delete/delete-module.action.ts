@@ -3,7 +3,6 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 
 import { CACHE_TAGS } from "@/util/cache-tags.util";
-import { createClient } from "@/util/supabase/server";
 import HttpClient from "@/util/http-client/fetch-server.util";
 import { ResponseModel } from "@/model/common.model";
 
@@ -29,11 +28,10 @@ export async function deleteModule(id: string): Promise<{ success: boolean; erro
 }
 
 export async function unlinkModule(id: string, parentModuleId: string) {
-    const supabase = await createClient();
     try {
-        await supabase.from("modules_submodules").delete().match({
-            module_id: id,
-            parent_module_id: parentModuleId,
+        await HttpClient.fetch(`/modules/${encodeURIComponent(id)}/unlink`, {
+            method: "PATCH",
+            body: JSON.stringify({ parentModuleId }),
         });
 
         revalidateTag(CACHE_TAGS.MODULES);

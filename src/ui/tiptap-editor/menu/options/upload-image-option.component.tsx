@@ -22,7 +22,7 @@ export function UploadImageOption() {
                   .insertContentAt(editor.state.selection.anchor, {
                     type: "image",
                     attrs: {
-                      src: `https://wrdtodflbsnfpiksmikk.supabase.co/storage/v1/object/public/${path}`,
+                      src: path,
                     },
                   })
                   .focus()

@@ -4,7 +4,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 
 import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { UpsertPlanDTO } from "./upsert-plan.dto";
-import { createClient } from "@/util/supabase/server";
+import HttpClient from "@/util/http-client/fetch-server.util";
+import { ResponseModel } from "@/model/common.model";
 import { redirect } from "next/navigation";
 
 export async function upsertPlan(
@@ -19,40 +20,20 @@ export async function upsertPlan(
     };
   }
 
-  const supabase = await createClient();
-
-  const { data: plan, error } = await supabase
-    .from("subscription_plans")
-    .upsert({
-      id,
-      name,
-      description,
-      month_value: monthValue,
-      quarterly_value: quarterlyValue,
-      semiannual_value: semiannualValue,
-      annual_value: annualValue,
-      lifetime_value: lifetimeValue,
-      is_free: isFree,
-      duration_days: durationDays,
-      question_limit: questionLimit,
-    })
-    .select()
-    .single();
-
-  if (plan) {
-    await supabase.from("plans_modules").delete().eq("plan_id", plan.id);
-    await supabase.from("plans_modules").insert(
-      modules.map((module) => ({
-        plan_id: plan.id,
-        module_id: module,
-      }))
-    );
-
-    revalidateTag(CACHE_TAGS.PLANS);
-    revalidatePath("/plans");
-    revalidatePath(`/plans/${plan.id}`);
-    redirect(`/plans`);
-  } else {
-    return { error: error?.message ?? null };
+  let planId: string;
+  try {
+    const result = await HttpClient.fetch<ResponseModel<{ id: string }>>(
+      id ? `/management/plans/${encodeURIComponent(id)}` : "/management/plans", {
+        method: id ? "PUT" : "POST",
+        body: JSON.stringify({ name, description, isFree, durationDays, lifetimeValue,
+          monthValue, quarterlyValue, questionLimit, semiannualValue, annualValue, modules }),
+      });
+    planId = result.data.id;
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Não foi possível salvar o plano." };
   }
+  revalidateTag(CACHE_TAGS.PLANS);
+  revalidatePath("/plans");
+  revalidatePath(`/plans/${planId}`);
+  redirect("/plans");
 }

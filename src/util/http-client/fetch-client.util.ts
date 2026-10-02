@@ -21,7 +21,8 @@ const HttpClient = Object.freeze({
     async fetch<T>(resource: string, opts: RequestInit = {}, autoBack?: boolean): Promise<T> {
         const url = baseUrl ? `${baseUrl}${resource}` : resource;
         const headers: HeadersInit = {
-            "Content-Type": "application/json",
+            ...(typeof FormData !== "undefined" && opts.body instanceof FormData
+                ? {} : { "Content-Type": "application/json" }),
             ...opts.headers,
         };
 

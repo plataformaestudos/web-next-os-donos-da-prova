@@ -64,7 +64,7 @@ interface QuestionData {
 
 export function QuestionViewPageClient({ question }: { question: QuestionData }) {
     const { user, loading, allowed } = useAuthGuard({
-        requireRoles: [Roles.ADMIN, Roles.STUDENT],
+        requireRoles: [Roles.ADMIN, Roles.COLLABORATOR, Roles.STUDENT],
     });
     
     const { token } = theme.useToken();

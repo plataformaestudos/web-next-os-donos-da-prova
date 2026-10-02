@@ -1,11 +1,16 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { createClient } from "@/util/supabase/client";
 import { User } from "@supabase/supabase-js";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import { UnauthorizedError } from "@/lib/errors";
 import { syncSessionWithUser } from "@/services/cookie-consent.service";
+import { ResponseModel } from "@/model/common.model";
+
+async function loadOwnProfile() {
+    const response = await HttpClient.fetch<ResponseModel<UserProfile>>("/profiles/me", { cache: "no-store" });
+    return response.data;
+}
 
 export type UserExtended = User & {
     user?: User
@@ -57,18 +62,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                 const userData = await HttpClient.fetch<User>("/auth/me");
 
                 if (userData) {
-                    const supabase = createClient();
-
-                    // Busca profile do Supabase
-                    const { data: profileData, error } = await supabase
-                        .from("profiles")
-                        .select("*")
-                        .match({ user_id: userData.id })
-                        .single();
-
-                    if (error) {
-                        console.error("Erro ao buscar profile:", error);
-                    }
+                    const profileData = await loadOwnProfile();
 
                     setUser({ ...userData, profile: profileData || undefined });
                     
@@ -97,18 +91,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const loginUser = async (userData: UserExtended) => {
         setUser(userData); // já salva o user do login
 
-        // Busca profile no Supabase
-        const supabase = createClient();
-        const { data: profileData, error } = await supabase
-            .from("profiles")
-            .select("*")
-            .match({ user_id: userData.id })
-            .single();
-
-        if (error) {
-            console.error("Erro ao buscar profile:", error);
-            return;
-        }
+        const profileData = await loadOwnProfile();
 
         setUser({ ...userData, profile: profileData }); // atualiza user com profile
         
@@ -120,14 +103,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     const refreshProfile = async () => {
         if (!user) return;
-        const supabase = createClient();
-        const { data: profileData, error } = await supabase
-            .from("profiles")
-            .select("*")
-            .match({ user_id: user.id })
-            .single();
+        const profileData = await loadOwnProfile();
 
-        if (!error && profileData) {
+        if (profileData) {
             setUser(prev => prev ? { ...prev, profile: profileData } : null);
         }
     };

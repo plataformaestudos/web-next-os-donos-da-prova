@@ -16,17 +16,21 @@ import { StyledEditorContent } from "./tiptap-editor.stye";
 import TextStyle from "@tiptap/extension-text-style";
 import { Transaction } from "@tiptap/pm/state";
 import Underline from "@tiptap/extension-underline";
-import { createClient } from "@/util/supabase/client";
+import HttpClient from "@/util/http-client/fetch-client.util";
+import { ResponseModel } from "@/model/common.model";
+import { message } from "antd";
 import { useEditor } from "@tiptap/react";
-import { v4 as uuid } from "uuid";
 
 export async function uploadFile(file: File) {
-  const client = createClient();
-  const { data } = await client.storage
-    .from("question-images")
-    .upload(uuid(), file);
-
-  return data?.fullPath;
+  const body = new FormData();
+  body.append("file", file);
+  try {
+    const response = await HttpClient.fetch<ResponseModel<{ url: string }>>("/question-images", { method: "POST", body }, false);
+    return response.data.url;
+  } catch {
+    message.error("Não foi possível enviar a imagem. Use PNG, JPEG, GIF ou WebP de até 2 MiB.");
+    return undefined;
+  }
 }
 
 async function handleImageDeletes(transaction: Transaction) {
@@ -52,14 +56,9 @@ async function handleImageDeletes(transaction: Transaction) {
   );
 
   if (deletedImageSrcs.length > 0) {
-    const client = createClient();
-    await client.storage
-      .from("question-images")
-      .remove(
-        deletedImageSrcs
-          .map((src) => src.split("/").pop() as string)
-          .filter(Boolean)
-      );
+    await Promise.all(deletedImageSrcs.filter(src => src.includes("/editor/")).map(url =>
+      HttpClient.fetch("/question-images", { method: "DELETE", body: JSON.stringify({ url }) }, false)
+    ));
   }
 }
 
@@ -120,7 +119,7 @@ export function TiptapEditor({
                   .insertContentAt(pos, {
                     type: "image",
                     attrs: {
-                      src: `https://wrdtodflbsnfpiksmikk.supabase.co/storage/v1/object/public/${path}`,
+                      src: path,
                     },
                   })
                   .focus()
@@ -138,7 +137,7 @@ export function TiptapEditor({
                   .insertContentAt(currentEditor.state.selection.anchor, {
                     type: "image",
                     attrs: {
-                      src: `https://wrdtodflbsnfpiksmikk.supabase.co/storage/v1/object/public/${path}`,
+                      src: path,
                     },
                   })
                   .focus()
@@ -168,7 +167,9 @@ export function TiptapEditor({
     onUpdate: ({ editor }) =>
       onChange?.(editor.getText() ? editor.getHTML() : ""),
     onTransaction({ transaction }) {
-      handleImageDeletes(transaction);
+      if (editable && transaction.docChanged) {
+        void handleImageDeletes(transaction).catch(() => console.error("Não foi possível remover a imagem temporária."));
+      }
     },
   });
 

@@ -10,28 +10,9 @@ import { TogglePlanStatusButton } from "@/plans/toggle-status/toggle-plan-status
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Roles } from "@/util/roles";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
-type SubscriptionPlan = {
-  id: string;
-  name: string;
-  month_value: number;
-  quarterly_value: number;
-  semiannual_value: number;
-  annual_value: number;
-  unique_value: number;
-  allow_lifetime: boolean;
-  created_at: string; 
-  created_by: string;
-  updated_at: string;
-  updated_by: string;
-  status: string | null; 
-  lifetime_value: number | null;
-  description: string | null;
-  is_free: boolean;
-  question_limit: number | null;
-  duration_days: number | null;
-};
+import type { ManagedPlanSummary } from "@/services/content-management.server";
 
-export function PlansPageClient({ plans }: { plans: SubscriptionPlan[] }) {
+export function PlansPageClient({ plans }: { plans: ManagedPlanSummary[] }) {
   const { loading, allowed } = useAuthGuard({ requireRoles: [Roles.ADMIN] });
 
   if (loading) return <FullPageLoading />;

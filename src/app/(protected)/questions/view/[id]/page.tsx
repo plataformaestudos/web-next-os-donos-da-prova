@@ -1,4 +1,5 @@
-import { createClient } from "@/util/supabase/server";
+import HttpClient from "@/util/http-client/fetch-server.util";
+import { ResponseModel } from "@/model/common.model";
 import { getQuestionStats } from "../api";
 import { QuestionViewPageClient } from "./pageClient";
 
@@ -37,30 +38,22 @@ interface QuestionData {
 export default async function QuestionViewPage(props: { params: Params }) {
   const { id } = await props.params;
 
-  const supabase = await createClient();
-  
-  const { data: questionData } = await supabase
-    .from("questions")
-    .select(`
-      id,
-      text,
-      type,
-      comment,
-      alternatives:question_alternatives ( id, text, is_correct ),
-      modules:modules_questions ( ...modules(id, name) )
-    `)
-    .eq("id", id)
-    .single();
+  const response = await HttpClient.fetch<ResponseModel<{
+    id: string; text: string; type: string; comment: string | null;
+    questionAlternatives: { id: string; text: string; isCorrect: boolean }[];
+    modules: { id: string; name: string }[];
+  }>>(`/questions/${encodeURIComponent(id)}`, { cache: "no-store" });
+  const questionData = response.data;
 
   if (!questionData) {
     return <div>Questão não encontrada!</div>;
   }
 
-  const rawAlternatives = questionData.alternatives || [];
-  const alternatives = rawAlternatives.map((a: { id: string; text: string; is_correct: boolean }) => ({
+  const rawAlternatives = questionData.questionAlternatives || [];
+  const alternatives = rawAlternatives.map(a => ({
     id: String(a.id),
     text: String(a.text ?? ""),
-    isCorrect: Boolean(a.is_correct),
+    isCorrect: Boolean(a.isCorrect),
   }));
 
   

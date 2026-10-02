@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Popconfirm } from "antd";
+import { Button, Popconfirm, message } from "antd";
 
 import { FaTrash } from "react-icons/fa6";
 import { deletePlan } from "./delete-plan.action";
@@ -14,8 +14,8 @@ export function DeletePlanButton({ planId }: { planId: string }) {
       placement="left"
       title="Tem certeza que deseja apagar esse plano?"
       onConfirm={() => {
-        startTransition(() => {
-          deletePlan(planId);
+        startTransition(async () => {
+          if (await deletePlan(planId) === false) message.error("Não foi possível excluir o plano.");
         });
       }}
       okText="Sim"

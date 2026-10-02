@@ -5,7 +5,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { CACHE_TAGS } from "@/util/cache-tags.util";
 import { QuestionType } from "@/model/question.model";
 import { UpsertQuestionDTO } from "../question.dto";
-import { createClient } from "@/util/supabase/server";
+import HttpClient from "@/util/http-client/fetch-server.util";
+import { ResponseModel } from "@/model/common.model";
 import { redirect } from "next/navigation";
 
 export async function upsertQuestionAndAlternatives(
@@ -18,7 +19,7 @@ export async function upsertQuestionAndAlternatives(
     alternatives,
     module,
   }: UpsertQuestionDTO
-) {
+): Promise<{ error: string | null }> {
   if (!text) {
     return {
       error: "A pergunta não pode ser vazia",
@@ -32,49 +33,18 @@ export async function upsertQuestionAndAlternatives(
     };
   }
 
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("questions")
-    .upsert({
-      id,
-      text,
-      type,
-      comment,
-    })
-    .select();
-
-  if (!data?.length) {
-    return {
-      error: "Questão não encontrada",
-    };
-  } else {
-    const [{ id: question_id }] = data;
-    await supabase
-      .from("question_alternatives")
-      .delete()
-      .eq("question_id", question_id);
-
-    await supabase.from("question_alternatives").upsert(
-      alternatives.map(({ id, text, is_correct }) => ({
-        id,
-        text,
-        is_correct,
-        question_id,
-      })),
-      { defaultToNull: false }
-    );
-
-    if (module) {
-      await supabase.from("modules_questions").delete().match({ question_id });
-      await supabase.from("modules_questions").insert({ module_id: module, question_id });
-    }
-
-    revalidateTag(CACHE_TAGS.QUESTIONS);
-    revalidatePath(`/questions/${question_id}`);
-    redirect(`/questions/${question_id}`);
-
-    return {
-      error: null,
-    };
+  let questionId: string;
+  try {
+    const response = await HttpClient.fetch<ResponseModel<{ id: string }>>(
+      id ? `/management/questions/${encodeURIComponent(id)}` : "/management/questions", {
+        method: id ? "PUT" : "POST",
+        body: JSON.stringify({ text, type, comment, alternatives, ...(module ? { module } : {}) }),
+      });
+    questionId = response.data.id;
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Não foi possível salvar a questão." };
   }
+  revalidateTag(CACHE_TAGS.QUESTIONS);
+  revalidatePath(`/questions/${questionId}`);
+  redirect(`/questions/${questionId}`);
 }

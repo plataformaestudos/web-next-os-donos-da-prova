@@ -1,5 +1,4 @@
 // EditModulePage.tsx (Server Component)
-import { createClient } from "@/util/supabase/server";
 import { loadChildrenModules } from "@/modules/tree/load-modules.action";
 import { EditModulePageClient } from "./pageClient";
 import HttpClient from "@/util/http-client/fetch-server.util";
@@ -14,16 +13,11 @@ export default async function EditModulePage(props: { params: Params }) {
     const params = await props.params;
     const { id } = params;
 
-    const supabase = await createClient();
-    const { data } = await supabase
-        .from("modules")
-        .select(`
-      id,
-      name, parent_module_id
-    `)
-        .eq("id", id)
-        .limit(1)
-        .single();
+    const response = await HttpClient.fetch<ResponseModel<ModuleEntitie>>(`/modules/${encodeURIComponent(id)}`, { cache: "no-store" });
+    const data = response.data ? {
+        id: response.data.id, name: response.data.name,
+        parent_module_id: response.data.parentModuleId,
+    } : null;
 
     if (!data) return null;
     const allModulesResponse = await HttpClient.fetch<ResponseModel<ModuleEntitie[]>>(

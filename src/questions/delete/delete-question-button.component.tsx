@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Popconfirm } from "antd";
+import { Button, Popconfirm, message } from "antd";
 
 import { FaTrash } from "react-icons/fa6";
 import { deleteQuestion } from "./delete-question.action";
@@ -14,8 +14,8 @@ export function DeleteQuestionButton({ questionId }: { questionId: string }) {
       placement="left"
       title="Tem certeza que deseja apagar essa questão?"
       onConfirm={() => {
-        startTransition(() => {
-          deleteQuestion(questionId);
+        startTransition(async () => {
+          if (await deleteQuestion(questionId) === false) message.error("Não foi possível excluir a questão.");
         });
       }}
       okText="Sim"

@@ -31,8 +31,11 @@ cadernos e limites comerciais, mantendo a autorização por papel.
 Esta entrega depende do backend de convites e da migration
 `1790769600000-staff-user-invitations.ts`. Configurar SMTP, `FRONTEND_URL`, os
 Redirect URLs e os templates do Supabase conforme `backend/docs/staff-users.md`.
-O link do template deve preservar `{{ .ConfirmationURL }}` e seu redirecionamento;
-não definir a chave de serviço do Supabase no frontend.
+Os templates customizados em `backend/docs/email-templates` usam o Site URL e
+`{{ .TokenHash }}`: convite em `/accept-invitation` e recuperação no callback
+`/auth/confirm`, preservando o destino de recuperação comum ou reenvio de convite.
+O link padrão `{{ .ConfirmationURL }}` também é suportado. Não definir a chave
+de serviço do Supabase no frontend.
 Antes de publicar a atualização da lista, executar também as migrations fornecidas
 `1790856000000-staff-invitation-document.ts` e
 `1790859600000-account-access-controls.ts` no backend. Não gerar outras migrations.

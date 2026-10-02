@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Popconfirm } from "antd";
+import { Button, Popconfirm, message } from "antd";
 import { FaToggleOn, FaToggleOff } from "react-icons/fa6";
 import { togglePlanStatus } from "./toggle-plan-status.action";
 import { useTransition } from "react";
@@ -22,8 +22,8 @@ export function TogglePlanStatusButton({ planId, currentStatus }: TogglePlanStat
       placement="left"
       title={confirmText}
       onConfirm={() => {
-        startTransition(() => {
-          togglePlanStatus(planId, currentStatus);
+        startTransition(async () => {
+          if (await togglePlanStatus(planId, currentStatus) === false) message.error("Não foi possível alterar o status do plano.");
         });
       }}
       okText="Sim"
