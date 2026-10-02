@@ -79,7 +79,7 @@ export const LogoContainer = styled.div`
   }
 `;
 
-export const Link = styled(NextLink)<{ $active: boolean }>`
+const menuItemStyles = css<{ $active: boolean }>`
   display: flex;
   align-items: center;
   gap: 16px;
@@ -113,6 +113,19 @@ export const Link = styled(NextLink)<{ $active: boolean }>`
   span {
     color: ${({ theme, $active }) => ($active ? theme.colorTertiary : "#fff")};
   }
+`;
+
+export const Link = styled(NextLink)<{ $active: boolean }>`
+  ${menuItemStyles}
+`;
+
+export const LogoutButton = styled.button<{ $active: boolean }>`
+  ${menuItemStyles}
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  &:disabled { cursor: wait; opacity: 0.6; }
 `;
 
 export const LinkText = styled.span<{ $collapsed: boolean; $active: boolean }>`

@@ -1,11 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { User } from "@supabase/supabase-js";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import { UnauthorizedError } from "@/lib/errors";
 import { syncSessionWithUser } from "@/services/cookie-consent.service";
 import { ResponseModel } from "@/model/common.model";
+import { useQueryClient } from "@tanstack/react-query";
+import { logoutClient } from "@/services/logout.service";
 
 async function loadOwnProfile() {
     const response = await HttpClient.fetch<ResponseModel<UserProfile>>("/profiles/me", { cache: "no-store" });
@@ -45,6 +47,7 @@ type UserContextType = {
     user: UserExtended | null;
     setUser: (user: UserExtended | null) => void;
     loginUser: (userData: UserExtended) => Promise<void>;
+    logoutUser: () => Promise<void>;
     loading: boolean;
     refreshProfile: () => Promise<void>;
 };
@@ -54,15 +57,21 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<UserExtended | null>(null);
     const [loading, setLoading] = useState(true);
+    const requestVersion = useRef(0);
+    const queryClient = useQueryClient();
 
     useEffect(() => {
+        let active = true;
         async function initializeUser() {
+            const version = ++requestVersion.current;
+            setLoading(true);
             try {
                 // Pega usuário autenticado do backend
-                const userData = await HttpClient.fetch<User>("/auth/me");
+                const userData = await HttpClient.fetch<User>("/auth/me", { cache: "no-store" });
 
                 if (userData) {
                     const profileData = await loadOwnProfile();
+                    if (!active || version !== requestVersion.current) return;
 
                     setUser({ ...userData, profile: profileData || undefined });
                     
@@ -71,9 +80,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                         console.error("Erro ao sincronizar cookies:", err)
                     );
                 } else {
-                    setUser(null);
+                    if (active && version === requestVersion.current) setUser(null);
                 }
             } catch (err) {
+                if (!active || version !== requestVersion.current) return;
                 if (err instanceof UnauthorizedError) {
                     setUser(null);
                 } else {
@@ -81,19 +91,30 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                     setUser(null);
                 }
             } finally {
-                setLoading(false);
+                if (active && version === requestVersion.current) setLoading(false);
             }
         }
 
         initializeUser();
+        const handlePageShow = (event: PageTransitionEvent) => {
+            if (event.persisted) void initializeUser();
+        };
+        window.addEventListener('pageshow', handlePageShow);
+        return () => {
+            active = false;
+            window.removeEventListener('pageshow', handlePageShow);
+        };
     }, []);
 
     const loginUser = async (userData: UserExtended) => {
+        const version = ++requestVersion.current;
         setUser(userData); // já salva o user do login
 
         const profileData = await loadOwnProfile();
+        if (version !== requestVersion.current) return;
 
         setUser({ ...userData, profile: profileData }); // atualiza user com profile
+        setLoading(false);
         
         // Sincroniza sessionId com userId após login
         syncSessionWithUser().catch(err => 
@@ -101,9 +122,20 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         );
     };
 
+    const logoutUser = async () => {
+        await logoutClient();
+        ++requestVersion.current;
+        setUser(null);
+        setLoading(false);
+        await queryClient.cancelQueries();
+        queryClient.clear();
+    };
+
     const refreshProfile = async () => {
         if (!user) return;
+        const version = requestVersion.current;
         const profileData = await loadOwnProfile();
+        if (version !== requestVersion.current) return;
 
         if (profileData) {
             setUser(prev => prev ? { ...prev, profile: profileData } : null);
@@ -111,7 +143,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <UserContext.Provider value={{ user, setUser, loginUser, loading, refreshProfile }}>
+        <UserContext.Provider value={{ user, setUser, loginUser, logoutUser, loading, refreshProfile }}>
             {children}
         </UserContext.Provider>
     );
