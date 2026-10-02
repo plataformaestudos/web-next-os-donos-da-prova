@@ -2,14 +2,14 @@
 
 import * as Styled from "./navbar.style";
 
-import { Skeleton, Tooltip } from "antd";
+import { App, Skeleton, Tooltip } from "antd";
 import {
   LuFileQuestion,
   LuFileUp,
   LuUsers,
 } from "react-icons/lu";
 
-import { createClient } from "@/util/supabase/client";
+import { useUser } from "@/app/context/user.context";
 import { useHorizontalSwipe } from "@/util/use-horizontal-swipe.hook";
 import { useIsMobile } from "@/util/use-media-query.hook";
 import Image from "next/image";
@@ -150,7 +150,9 @@ const iconsB = {
 };
 
 export function Navbar() {
-  const supabase = createClient();
+  const { logoutUser } = useUser();
+  const { message } = App.useApp();
+  const [loggingOut, setLoggingOut] = useState(false);
   const isMobile = useIsMobile();
   const pathname = usePathname();
   const { isNavbarCollapsed, setIsNavbarCollapsed } = useNabvarContext();
@@ -167,6 +169,20 @@ export function Navbar() {
     isLoading: boolean;
   };
   const [hovered, setHovered] = useState<string | null>(null);
+
+  const handleLogout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      await logoutUser();
+      // Discard the Next router's cached authenticated screens and replace this
+      // history entry only after the server has revoked the session.
+      window.location.replace('/login');
+    } catch {
+      message.error('Não foi possível sair. Tente novamente.');
+      setLoggingOut(false);
+    }
+  };
 
   return (
     <div {...handlers}>
@@ -277,13 +293,13 @@ export function Navbar() {
               title={isNavbarCollapsed ? "Sair" : null}
               placement="right"
             >
-              <Styled.Link
+              <Styled.LogoutButton
+                type="button"
                 key="/login"
-                href="/login"
                 $active={false}
-                onClick={() => {
-                  supabase.auth.signOut();
-                }}
+                disabled={loggingOut}
+                aria-label={loggingOut ? 'Saindo' : 'Sair'}
+                onClick={handleLogout}
               >
                 <FaArrowRightToBracket size={20} />
                 <Styled.LinkText
@@ -292,7 +308,7 @@ export function Navbar() {
                 >
                   {isNavbarCollapsed ? null : "Sair"}
                 </Styled.LinkText>
-              </Styled.Link>
+              </Styled.LogoutButton>
             </Tooltip>
           </div>
         </Styled.MenuItemsContainer>
