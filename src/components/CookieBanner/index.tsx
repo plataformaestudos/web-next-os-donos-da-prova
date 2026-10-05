@@ -102,7 +102,7 @@ export function CookieBanner() {
                         Este site utiliza cookies para melhorar sua experiência de navegação, 
                         personalizar conteúdo e analisar nosso tráfego. Ao clicar em &quot;Aceitar&quot;, 
                         você concorda com o uso de cookies conforme descrito em nossa{' '}
-                        <Link href="/terms-and-policies" className="cookie-banner-link">
+                        <Link href="/politica-privacidade" className="cookie-banner-link">
                             Política de Privacidade
                         </Link>
                         . Você pode escolher recusar o uso de cookies não essenciais clicando 

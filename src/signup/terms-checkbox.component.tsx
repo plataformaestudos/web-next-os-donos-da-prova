@@ -59,7 +59,7 @@ export function TermsCheckbox({ onAcceptanceChange, onAutoBillingChange }: Terms
   };
 
   const handleTermsClick = () => {
-    window.open('/terms-and-policies', '_blank');
+    window.open('/termos-e-politicas', '_blank');
   };
 
   if (loading) {

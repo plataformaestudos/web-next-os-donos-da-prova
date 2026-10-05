@@ -21,7 +21,6 @@ const routeAlias: {
   "/perfil/editar": "/profile/edit",
   "/politica-privacidade": "/privacy-policy",
   "/termos-de-uso": "/terms-of-use",
-  "/termos-e-politicas": "/terms-and-policies",
   "/reports-de-questoes": "/question-reports",
   "/configuracoes-cookies": "/config-cookies",
   "/importacao-questoes": "/question-imports",
@@ -37,11 +36,18 @@ const nextConfig = {
     }));
   },
   async redirects() {
-    return Object.entries(routeAlias).map(([routeName, folderName]) => ({
-      source: folderName,
-      destination: routeName,
-      permanent: true,
-    }));
+    return [
+      ...Object.entries(routeAlias).map(([routeName, folderName]) => ({
+        source: folderName,
+        destination: routeName,
+        permanent: true,
+      })),
+      {
+        source: "/terms-and-policies",
+        destination: "/termos-e-politicas",
+        permanent: true,
+      },
+    ];
   },
   compiler: {
     styledComponents: true,

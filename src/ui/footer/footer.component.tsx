@@ -90,7 +90,7 @@ export function Footer() {
     const currentYear = new Date().getFullYear();
 
     const handleTermsClick = () => {
-        window.open('/terms-and-policies', '_blank');
+        window.open('/termos-e-politicas', '_blank');
     };
 
     return (

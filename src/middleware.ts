@@ -3,7 +3,24 @@ import { type NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("access_token")?.value; 
-  const publicPaths = ["/login", "/cadastro", "/signup", "/forgot-password", "/reset-password", "/auth/confirm", "/auth/logout", "/accept-invitation"];
+  const publicPaths = [
+    "/login",
+    "/cadastro",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
+    "/auth/confirm",
+    "/auth/logout",
+    "/accept-invitation",
+    "/termos-e-politicas",
+    "/terms-and-policies",
+    "/termos-de-uso",
+    "/terms-of-use",
+    "/politica-privacidade",
+    "/privacy-policy",
+    "/configuracoes-cookies",
+    "/config-cookies",
+  ];
   const isPublic = publicPaths.some((path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`));
   if (!token && !isPublic) {
     console.log("No access token found, redirecting to login");
