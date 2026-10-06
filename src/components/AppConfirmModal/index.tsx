@@ -12,6 +12,7 @@ interface AppConfirmModalProps extends ModalProps {
   cancelText?: string;
   visible: boolean;
   isDeclined?: boolean;
+  confirmDisabled?: boolean;
 }
 
 export function AppConfirmModal({
@@ -23,6 +24,7 @@ export function AppConfirmModal({
   cancelText = "Cancelar",
   visible,
   isDeclined = false,
+  confirmDisabled = false,
   ...modalProps
 }: AppConfirmModalProps) {
   const { Text } = Typography;
@@ -58,6 +60,7 @@ export function AppConfirmModal({
         <Button
           onClick={onConfirm}
           danger={isDeclined}
+          disabled={confirmDisabled}
           size="large"
         >
           {confirmText}

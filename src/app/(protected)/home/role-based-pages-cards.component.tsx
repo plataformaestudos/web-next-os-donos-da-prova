@@ -14,8 +14,12 @@ import {
 import { CgProfile } from "react-icons/cg";
 import { MenuModel } from "@/model/menu.model";
 
+import { MdGroups } from "react-icons/md";
+
+
 const icons = {
   users: <LuUsers size={48} />,
+  affiliates: <MdGroups  size={48} />,
   imports: <LuFileUp size={48} />,
   home: <LuHouse size={48} />,
   book: <LuBook size={48} />,

@@ -42,6 +42,8 @@ export const saveAffiliateLink = (data: LinkInput, id?: string) => {
   const { title, slug, affiliateId, source, status } = data;
   return request<AffiliateLink>(id ? `/affiliate-links/${encodeURIComponent(id)}` : "/affiliate-links", id ? "PATCH" : "POST", id ? { title, status } : { title, slug, affiliateId, source });
 };
+export const updateAffiliateLinkStatus = (id: string, status: LinkStatus) =>
+  request<AffiliateLink>(`/affiliate-links/${encodeURIComponent(id)}`, "PATCH", { status });
 export const listAffiliateOffers = (id: string) => request<AffiliateOffer[]>(`/affiliate-links/${encodeURIComponent(id)}/offers`);
 export const publishAffiliateOffer = (id: string, data: OfferInput) => request<Omit<AffiliateOffer, "plans">>(`/affiliate-links/${encodeURIComponent(id)}/offers`, "POST", data);
 export const listAffiliatePlans = () => request<AffiliatePlan[]>("/affiliate-catalog/plans");

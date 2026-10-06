@@ -222,7 +222,7 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
           </>
         )}
 
-        <Label>Valores</Label>
+        <Label>Faixa de Valores</Label>
         
         <Flex style={{ gap: 16, flexWrap: 'wrap' }}>
           <Flex vertical style={{ flex: 1, minWidth: 120 }}>

@@ -8,7 +8,7 @@ import {
   PersonalInfo,
   PersonalInfoSecondStep,
 } from "./personal-info.component";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { ChoosePlanFirstStep, CycleSelector } from "./choose-plan.component";
@@ -16,6 +16,7 @@ import { TermsCheckbox } from "./terms-checkbox.component";
 import Link from "next/link";
 import Title from "antd/es/typography/Title";
 import { ReferralQuote } from "@/affiliates/referral-quote.component";
+import { isReferralCheckoutReady, ReferralReadiness, referralRequestQueue } from "@/affiliates/referral-request-queue";
 import { signUpClient } from "./signup.action";
 import { useIsMobile } from "@/util/use-media-query.hook";
 import { NewPlanModel } from "@/model/plan.model";
@@ -48,6 +49,9 @@ export default function SignupSteps({
   const isMobile = useIsMobile();
 
   const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
+  const pendingReferralRequests = useSyncExternalStore(referralRequestQueue.subscribe, referralRequestQueue.getPending, () => 0);
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
   const router = useRouter();
@@ -57,6 +61,16 @@ export default function SignupSteps({
 
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedCycle, setSelectedCycle] = useState<string>("YEARLY");
+  const [referralReadiness, setReferralReadiness] = useState<ReferralReadiness | null>(null);
+  const referralReadinessRef = useRef<ReferralReadiness | null>(null);
+  const handleReferralReadiness = useCallback((readiness: ReferralReadiness) => {
+    referralReadinessRef.current = readiness;
+    setReferralReadiness(readiness);
+  }, []);
+  const invalidateReferral = () => {
+    referralReadinessRef.current = null;
+    setReferralReadiness(null);
+  };
 
   const {
     form: personalInfoForm,
@@ -79,7 +93,11 @@ export default function SignupSteps({
   useEffect(() => {
     if (!selectedPlanData || selectedPlanData.isFree) return;
     const cycles = getPlanRecurringPrices(selectedPlanData);
-    if (cycles.length && !cycles.some(item => item.value === selectedCycle)) setSelectedCycle(cycles[0].value);
+    if (cycles.length && !cycles.some(item => item.value === selectedCycle)) {
+      referralReadinessRef.current = null;
+      setReferralReadiness(null);
+      setSelectedCycle(cycles[0].value);
+    }
   }, [selectedPlanData, selectedCycle]);
 
   const isPlanFree = useMemo(() => {
@@ -88,11 +106,12 @@ export default function SignupSteps({
 
   const isDisabled = useMemo(() => {
     return (
+      pendingReferralRequests > 0 ||
       (currentStep === 1 && !selectedPlan) ||
       (currentStep === 2 && !personalInfoFormValid) ||
-      (currentStep === 3 && !isPlanFree && (!paymentInfoFormValid || !termsAccepted || !autoBillingAccepted))
+      (currentStep === 3 && !isPlanFree && (!paymentInfoFormValid || !termsAccepted || !autoBillingAccepted || !isReferralCheckoutReady(referralReadiness, selectedPlan || "", selectedCycle)))
     );
-  }, [currentStep, selectedPlan, personalInfoFormValid, paymentInfoFormValid, termsAccepted, autoBillingAccepted, isPlanFree]);
+  }, [currentStep, selectedPlan, selectedCycle, personalInfoFormValid, paymentInfoFormValid, termsAccepted, autoBillingAccepted, isPlanFree, referralReadiness, pendingReferralRequests]);
 
   return (
     <Container>
@@ -107,6 +126,7 @@ export default function SignupSteps({
               type={isMobile ? "inline" : "default"}
               current={currentStep - 1}
               onChange={(step) => {
+                if (submittingRef.current) return;
                 if (
                   (step === 1 && !selectedPlan) ||
                   (step === 2 && !personalInfoFormValid)
@@ -120,23 +140,25 @@ export default function SignupSteps({
                   ? [
                       {
                         title: "Plano",
+                        disabled: isSubmitting,
                       },
                       {
                         title: "Dados pessoais",
-                        disabled: !selectedPlan,
+                        disabled: isSubmitting || !selectedPlan,
                       },
                     ]
                   : [
                       {
                         title: "Plano",
+                        disabled: isSubmitting,
                       },
                       {
                         title: "Dados pessoais",
-                        disabled: !selectedPlan,
+                        disabled: isSubmitting || !selectedPlan,
                       },
                       {
                         title: "Pagamento",
-                        disabled: !personalInfoFormValid,
+                        disabled: isSubmitting || !personalInfoFormValid,
                       },
                     ]
               }
@@ -144,7 +166,7 @@ export default function SignupSteps({
           )}
         </Header>
         <Divider />
-        <Content>
+        <Content inert={isSubmitting}>
           {campaignUnavailable && <Typography.Paragraph type="warning">Este link de campanha não está disponível. Você pode escolher um plano pelo valor regular.</Typography.Paragraph>}
           <div
             style={{
@@ -154,7 +176,7 @@ export default function SignupSteps({
             <ChoosePlanFirstStep
               plans={plans}
               selectedPlan={selectedPlan}
-              onSelectPlan={setSelectedPlan}
+              onSelectPlan={planId => { if (planId !== selectedPlan) { invalidateReferral(); setSelectedPlan(planId); } }}
             />
           </div>
           <div
@@ -180,9 +202,9 @@ export default function SignupSteps({
                   <CycleSelector
                     plan={selectedPlanData}
                     selectedCycle={selectedCycle}
-                    onCycleChange={setSelectedCycle}
+                    onCycleChange={cycle => { if (cycle !== selectedCycle) { invalidateReferral(); setSelectedCycle(cycle); } }}
                   />
-                  <ReferralQuote planId={selectedPlanData.id} cycle={selectedCycle} />
+                  <ReferralQuote planId={selectedPlanData.id} cycle={selectedCycle} onReadinessChange={handleReferralReadiness} disabled={isPending || isSubmitting} />
                 </div>
               )}
 
@@ -203,7 +225,8 @@ export default function SignupSteps({
               type="link"
               icon={<ArrowLeftOutlined />}
               iconPosition="start"
-              onClick={() => setCurrentStep(currentStep - 1)}
+              disabled={isSubmitting || isPending}
+              onClick={() => { if (!submittingRef.current) setCurrentStep(currentStep - 1); }}
             >
               Voltar
             </Button>
@@ -212,14 +235,20 @@ export default function SignupSteps({
             type="link"
             icon={<ArrowRightOutlined />}
             iconPosition="end"
-            disabled={isDisabled || isPending}
-            loading={isPending}
+            disabled={isDisabled || isPending || isSubmitting}
+            loading={isPending || isSubmitting}
             onClick={() => {
+              if (submittingRef.current) return;
               const isLastStep = isPlanFree ? currentStep === 2 : currentStep === 3;
               
               if (isLastStep) {
-                startTransition(() => {
-                  (async () => {
+                if (referralRequestQueue.getPending() > 0 || (!isPlanFree && !isReferralCheckoutReady(referralReadinessRef.current, selectedPlan || "", selectedCycle))) {
+                  setError("Confira o código de desconto ou continue pelo valor regular antes de confirmar.");
+                  return;
+                }
+                submittingRef.current = true;
+                setIsSubmitting(true);
+                startTransition(async () => {
                     try {
                       setError(null);
                       
@@ -279,8 +308,10 @@ export default function SignupSteps({
                     } catch (err) {
                       console.error(err);
                       setError(err instanceof Error ? err.message : String(err));
+                    } finally {
+                      submittingRef.current = false;
+                      setIsSubmitting(false);
                     }
-                  })();
                 });
               } else {
                 setCurrentStep(currentStep + 1);

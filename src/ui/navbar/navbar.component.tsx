@@ -9,6 +9,9 @@ import {
   LuUsers,
 } from "react-icons/lu";
 
+import { MdGroups } from "react-icons/md";
+
+
 import { useUser } from "@/app/context/user.context";
 import { useHorizontalSwipe } from "@/util/use-horizontal-swipe.hook";
 import { useIsMobile } from "@/util/use-media-query.hook";
@@ -82,6 +85,7 @@ const icons = {
       size={24}
     />
   ),
+  affiliates: <MdGroups size={24} />,
 };
 
 const iconsB = {
@@ -147,6 +151,7 @@ const iconsB = {
       size={24}
     />
   ),
+  affiliates: <MdGroups color="#fff" size={24} />,
 };
 
 export function Navbar() {

@@ -13,11 +13,12 @@ import {
     Collapse,
     Checkbox,
 } from "antd";
-import { ReactNode, useEffect, useState, useRef } from "react";
+import { ReactNode, createContext, useCallback, useContext, useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import Link from "next/link";
 import { AppConfirmModal } from "../AppConfirmModal";
 import { ReferralQuote } from "@/affiliates/referral-quote.component";
+import { isReferralCheckoutReady, ReferralReadiness } from "@/affiliates/referral-request-queue";
 import { AppLoading } from "../AppLoading";
 import {
     PaymentInfo,
@@ -26,6 +27,7 @@ import {
 
 const { Panel } = Collapse;
 const { Title } = Typography;
+const CheckoutSubmittingContext = createContext(false);
 
 const ProfileTitle = styled(Title)`
   color: #1890ff;
@@ -113,6 +115,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
     };
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const checkoutSubmittingRef = useRef(false);
     const [modalProps, setModalProps] = useState<ModalProps>({
         title: "",
         content: "",
@@ -129,6 +132,16 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
     const [selectedCycle, setSelectedCycle] = useState<string>("YEARLY");
     const [allTermsAccepted, setAllTermsAccepted] = useState(false);
     const allTermsAcceptedRef = useRef(false);
+    const [referralReadiness, setReferralReadiness] = useState<ReferralReadiness | null>(null);
+    const referralReadinessRef = useRef<ReferralReadiness | null>(null);
+    const handleReferralReadiness = useCallback((readiness: ReferralReadiness) => {
+        referralReadinessRef.current = readiness;
+        setReferralReadiness(readiness);
+    }, []);
+    const invalidateReferral = () => {
+        referralReadinessRef.current = null;
+        setReferralReadiness(null);
+    };
 
     const {
         form: paymentInfoForm,
@@ -176,6 +189,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
     };
 
     const resetModal = () => {
+        invalidateReferral();
         console.log("resetModal");
         setAllTermsAccepted(false);
         allTermsAcceptedRef.current = false;
@@ -185,6 +199,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
     };
 
     const handleSelectPlan = (planData: NewPlanModel) => {
+        invalidateReferral();
         const availableCycles = getAvailableCycles(planData);
 
         // Resetar ciclo se não estiver disponível
@@ -198,6 +213,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
 
         // Componente interno do modal que tem acesso aos availableCycles
         const ModalContent = () => {
+            const submitting = useContext(CheckoutSubmittingContext);
             const cycles = getAvailableCycles(planData);
 
             // Estado local para o ciclo selecionado dentro do modal
@@ -209,7 +225,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
             const [localAllTermsAccepted, setLocalAllTermsAccepted] = useState(allTermsAccepted);
 
             return (
-                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <div inert={submitting} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                         <span>
                             Escolha a assinatura para o plano{" "}
@@ -218,8 +234,10 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                         {cycles.length > 0 ? (
                             <>
                                 <Select
+                                    disabled={submitting}
                                     value={localSelectedCycle}
                                     onChange={(value) => {
+                                        invalidateReferral();
                                         setLocalSelectedCycle(value);
                                         setSelectedCycle(value);
                                         selectedCycleRef.current = value;
@@ -289,7 +307,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                         )}
                     </div>
 
-                    <ReferralQuote planId={planData.id} cycle={localSelectedCycle} />
+                    <ReferralQuote planId={planData.id} cycle={localSelectedCycle} onReadinessChange={handleReferralReadiness} disabled={submitting} />
                     <Collapse>
                         <Panel header="Dados de pagamento" key="payment">
                             <PaymentInfoThirdStep formV={paymentInfoForm} />
@@ -298,6 +316,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
 
                     <div style={{ marginTop: 16 }}>
                         <Checkbox
+                            disabled={submitting}
                             checked={localAllTermsAccepted}
                             onChange={(e) => {
                                 const isChecked = e.target.checked;
@@ -322,6 +341,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
             content: <ModalContent />,
             onConfirm: () => subscribePlan(planData, paymentInfoForm, allTermsAcceptedRef.current),
             onCancel: () => {
+                if (checkoutSubmittingRef.current) return;
                 resetModal();
                 setModalProps({ ...modalProps, visible: false });
             },
@@ -333,6 +353,13 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
     };
 
     async function subscribePlan(planData: NewPlanModel, paymentInfoForm: FormInstance<PaymentInfo>, termsAccepted: boolean) {
+        if (checkoutSubmittingRef.current) return;
+        const checkoutCycle = selectedCycleRef.current;
+        if (!isReferralCheckoutReady(referralReadinessRef.current, planData.id, checkoutCycle)) {
+            message.error("Confira o código de desconto ou continue pelo valor regular antes de confirmar.");
+            return;
+        }
+        checkoutSubmittingRef.current = true;
         setIsLoading(true);
 
         console.log(termsAccepted);
@@ -340,18 +367,27 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
         if (!termsAccepted) {
             message.error("Por favor, aceite os termos e condições");
             setIsLoading(false);
+            checkoutSubmittingRef.current = false;
             return;
         }
 
         try { await paymentInfoForm.validateFields(); } catch {
             message.error("Por favor, preencha os dados de pagamento corretamente");
             setIsLoading(false);
+            checkoutSubmittingRef.current = false;
+            return;
+        }
+        if (selectedCycleRef.current !== checkoutCycle || !isReferralCheckoutReady(referralReadinessRef.current, planData.id, checkoutCycle)) {
+            message.error("A assinatura selecionada mudou. Confira a oferta antes de confirmar.");
+            setIsLoading(false);
+            checkoutSubmittingRef.current = false;
             return;
         }
         const paymentData = paymentInfoForm.getFieldsValue() as PaymentInfo;
         if (!paymentData || !paymentData.expiryDate) {
             message.error("Por favor, preencha todos os dados de pagamento");
             setIsLoading(false);
+            checkoutSubmittingRef.current = false;
             return;
         }
 
@@ -359,7 +395,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
             planId: planData.id,
             saveCard: paymentData.saveCard || false,
             billingType: "CREDIT_CARD",
-            cycle: selectedCycleRef.current,
+            cycle: checkoutCycle,
             description: planData?.description ?? "",
             creditCard: {
                 holderName: paymentData.holderName,
@@ -392,6 +428,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
             message.error(error instanceof Error ? error.message : "Não foi possível concluir a assinatura.");
         } finally {
             setIsLoading(false);
+            checkoutSubmittingRef.current = false;
         }
 
     }
@@ -458,6 +495,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                 </FlipCardFace>
             </FlipCardInner>
 
+            <CheckoutSubmittingContext.Provider value={isLoading}>
             <AppConfirmModal
                 title={modalProps.title}
                 content={modalProps.content}
@@ -467,7 +505,13 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                 onConfirm={modalProps.onConfirm}
                 onCancel={modalProps.onCancel}
                 isDeclined={modalProps.isDeclined}
+                confirmDisabled={isLoading || !isReferralCheckoutReady(referralReadiness, plan.id, selectedCycleRef.current)}
+                destroyOnClose
+                closable={!isLoading}
+                maskClosable={!isLoading}
+                keyboard={!isLoading}
             />
+            </CheckoutSubmittingContext.Provider>
             <AppLoading
                 loadingModal
                 show={isLoading}

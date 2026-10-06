@@ -1,44 +1,98 @@
 "use client";
-import { useState } from "react";
-import { Alert, App, Button, Card, Col, Input, QRCode, Row, Space, Statistic, Table, Typography } from "antd";
+
+import { useEffect, useState } from "react";
+import { CopyOutlined, DownloadOutlined, ExportOutlined } from "@ant-design/icons";
+import { Alert, App, Button, Card, Input, QRCode, Skeleton, Table, Tabs, Tag, Typography } from "antd";
 import { useQuery } from "@tanstack/react-query";
-import { AffiliateLink, affiliateCustomers, affiliateDashboard, affiliateError } from "./affiliates.api";
+import { AffiliateCustomer, AffiliateLink, affiliateCustomers, affiliateDashboard, affiliateError } from "./affiliates.api";
+import { AffiliateMetrics } from "./overview.component";
+import styles from "./link-results.module.css";
 
 const money = (value: number) => (value / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-export function LinkResults({ link, userId }: { link: AffiliateLink; userId: string }) {
+const cycleLabels: Record<string, string> = { MONTHLY: "Mensal", QUARTERLY: "Trimestral", SEMIANNUALLY: "Semestral", YEARLY: "Anual", SEMIANNUAL: "Semestral", ANNUAL: "Anual" };
+type LinkResultsProps = { link: AffiliateLink; userId: string; initialTab?: "disclosure" | "results" };
+
+export function LinkResults(props: LinkResultsProps) {
+  return <LinkResultsContent key={`${props.userId}-${props.link.id}`} {...props} />;
+}
+
+function LinkResultsContent({ link, userId, initialTab = "disclosure" }: LinkResultsProps) {
   const { message } = App.useApp();
   const [page, setPage] = useState(1);
-  const url = `${window.location.origin}/r/${encodeURIComponent(link.slug)}`;
+  const [origin, setOrigin] = useState("");
+  useEffect(() => { setOrigin(window.location.origin); }, []);
+  const url = origin ? `${origin}/r/${encodeURIComponent(link.slug)}` : "";
   const key = ["affiliates-admin", userId, "results", link.id];
   const dashboard = useQuery({ queryKey: [...key, "dashboard"], queryFn: () => affiliateDashboard(link.id) });
   const customers = useQuery({ queryKey: [...key, "customers", page], queryFn: () => affiliateCustomers(link.id, page) });
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      message.success("Link copiado.");
+    } catch {
+      message.error("Selecione e copie o link acima.");
+    }
+  };
   const exportQr = () => {
     const canvas = document.getElementById(`campaign-qr-${link.id}`)?.querySelector("canvas");
     if (!canvas) return;
     const anchor = document.createElement("a");
-    anchor.href = canvas.toDataURL("image/png"); anchor.download = `${link.slug}-qr.png`; anchor.click();
+    anchor.href = canvas.toDataURL("image/png");
+    anchor.download = `${link.slug}-qr.png`;
+    anchor.click();
   };
-  return <Space direction="vertical" size="large" style={{ width: "100%" }}>
-    <Card title="Link para divulgação">
-      <Space direction="vertical" style={{ width: "100%" }}>
-        <Input readOnly value={url} />
-        <Space><Button onClick={async () => { try { await navigator.clipboard.writeText(url); message.success("Link copiado."); } catch { message.error("Selecione e copie o link acima."); } }}>Copiar link</Button><Button onClick={exportQr}>Baixar QR code</Button><Button href={url} target="_blank" rel="noopener noreferrer">Abrir link</Button></Space>
-        <div id={`campaign-qr-${link.id}`}><QRCode value={url} size={220} type="canvas" /></div>
-      </Space>
-    </Card>
-    {dashboard.error && <Alert type="error" message={affiliateError(dashboard.error)} />}
-    <Card loading={dashboard.isFetching} title="Resultados desta campanha">
-      {dashboard.data && <><Row gutter={[16, 16]}>
-        {[["Visitas", dashboard.data.visits], ["Visitantes", dashboard.data.uniqueVisitors], ["Contratações", dashboard.data.subscriptions], ["Aguardando pagamento", dashboard.data.pendingSubscriptions], ["Conversões pagas", dashboard.data.paidConversions], ["Conversão", `${dashboard.data.conversionRate.toLocaleString("pt-BR")}%`], ["Receita confirmada", money(dashboard.data.grossRevenueCents)], ["Estornos", money(dashboard.data.refundedRevenueCents)], ["Receita líquida", money(dashboard.data.netRevenueCents)]].map(([title, value]) => <Col xs={24} sm={12} md={8} key={title}><Statistic title={title} value={value} /></Col>)}
-      </Row><Typography.Paragraph type="secondary" style={{ marginTop: 16 }}>{dashboard.data.financialDefinition}</Typography.Paragraph></>}
-    </Card>
-    {customers.error && <Alert type="error" message={affiliateError(customers.error)} />}
-    <Table rowKey="subscriptionId" loading={customers.isFetching} dataSource={customers.data?.data} scroll={{ x: 900 }} pagination={{ current: page, total: customers.data?.total, pageSize: 20, showSizeChanger: false, onChange: setPage }} locale={{ emptyText: "Nenhuma contratação atribuída a este link." }} columns={[
-      { title: "Cliente", render: (_, row) => <><div>{row.name || "Conta removida"}</div><Typography.Text type="secondary">{row.email}</Typography.Text></> },
-      { title: "Plano", dataIndex: "planName" }, { title: "Ciclo", dataIndex: "cycle" }, { title: "Status", dataIndex: "status" },
-      { title: "Cobrança por ciclo", dataIndex: "finalAmountCents", render: money },
-      { title: "Contratação", dataIndex: "acceptedAt", render: value => new Date(value).toLocaleDateString("pt-BR") },
-      { title: "Primeiro pagamento", dataIndex: "firstPaymentConfirmedAt", render: value => value ? new Date(value).toLocaleDateString("pt-BR") : "Aguardando" },
+
+  return (
+    <Tabs defaultActiveKey={initialTab} items={[
+      { key: "disclosure", label: "Divulgação", children: (
+        <div className={styles.disclosure}>
+          {link.status !== "ACTIVE" && <Alert showIcon type="warning" message={link.status === "PAUSED" ? "Campanha pausada. O link está indisponível para novas adesões." : "Campanha arquivada. O link está indisponível para novas adesões."} />}
+          <div className={styles.disclosureCards}>
+            <Card title="Link de divulgação" className={styles.linkCard}>
+              <div className={styles.copyRow}>
+                <Input readOnly value={url} aria-label="Link de divulgação" className={styles.linkInput} size="large" />
+                <Button icon={<CopyOutlined />} onClick={copyLink} disabled={!url} size="large">Copiar link</Button>
+              </div>
+              <Typography.Paragraph type="secondary" className={styles.linkDescription}>Compartilhe este link ou QR code para divulgar a campanha.</Typography.Paragraph>
+              <Button type="link" icon={<ExportOutlined />} href={url || undefined} disabled={!url} target="_blank" rel="noopener noreferrer" className={styles.openLink}>Abrir link</Button>
+            </Card>
+            <Card title="QR code">
+              <div className={styles.qrContent}>
+                <div id={`campaign-qr-${link.id}`} className={styles.qrFrame}>
+                  {url ? <QRCode value={url} size={220} type="canvas" color="#163658" bgColor="#ffffff" /> : <Skeleton.Image active style={{ width: 220, height: 220 }} />}
+                </div>
+                <Button block size="large" icon={<DownloadOutlined />} onClick={exportQr} disabled={!url}>Baixar QR code (PNG)</Button>
+              </div>
+            </Card>
+          </div>
+        </div>
+      ) },
+      { key: "results", label: "Resultados", children: (
+        <div className={styles.results}>
+          {dashboard.error && <Alert type="error" showIcon message={affiliateError(dashboard.error)} action={<Button onClick={() => dashboard.refetch()}>Tentar novamente</Button>} />}
+          <AffiliateMetrics metrics={dashboard.data} loading={dashboard.isFetching} />
+          <Card className={styles.customers} title={<div className={styles.customerHeading}><Typography.Title level={4}>Clientes</Typography.Title><Typography.Text type="secondary">Assinaturas e contratações originadas pelo link da campanha.</Typography.Text></div>}>
+            {customers.error && <Alert className={styles.customerError} type="error" showIcon message={affiliateError(customers.error)} action={<Button onClick={() => customers.refetch()}>Tentar novamente</Button>} />}
+            <Table<AffiliateCustomer>
+              rowKey="subscriptionId"
+              loading={customers.isFetching}
+              dataSource={customers.data?.data}
+              scroll={{ x: 1000 }}
+              pagination={{ current: page, total: customers.data?.total, pageSize: 20, showSizeChanger: false, onChange: setPage, showTotal: (total, range) => `${range[0]}–${range[1]} de ${total} clientes` }}
+              locale={{ emptyText: "Nenhuma contratação atribuída a este link." }}
+              columns={[
+                { title: "Cliente", width: 220, render: (_, row) => <div className={styles.customerIdentity}><Typography.Text strong={Boolean(row.name)} type={row.name ? undefined : "secondary"}>{row.name || "Conta removida"}</Typography.Text><Typography.Text type="secondary">{row.email || "—"}</Typography.Text></div> },
+                { title: "Plano", dataIndex: "planName", width: 160 },
+                { title: "Ciclo", dataIndex: "cycle", width: 110, render: (value: string) => cycleLabels[value] || value },
+                { title: "Status da assinatura", dataIndex: "status", width: 130, render: (value: string | null) => <Tag color={value === "ACTIVE" ? "success" : value === "INACTIVE" ? "default" : undefined}>{value === "ACTIVE" ? "Ativa" : value === "INACTIVE" ? "Inativa" : "Não informado"}</Tag> },
+                { title: "Cobrança por ciclo", dataIndex: "finalAmountCents", width: 150, render: (value: number) => <Typography.Text strong>{money(value)}</Typography.Text> },
+                { title: "Contratação", dataIndex: "acceptedAt", width: 130, render: (value: string) => new Date(value).toLocaleDateString("pt-BR") },
+                { title: "Primeiro pagamento", dataIndex: "firstPaymentConfirmedAt", width: 170, render: (value: string | null) => value ? new Date(value).toLocaleDateString("pt-BR") : <Typography.Text type="secondary">Aguardando confirmação</Typography.Text> },
+              ]}
+            />
+          </Card>
+        </div>
+      ) },
     ]} />
-  </Space>;
+  );
 }

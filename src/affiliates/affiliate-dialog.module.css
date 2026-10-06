@@ -1,0 +1,204 @@
+.content {
+  color: inherit;
+}
+
+.title h4 {
+  margin: 0 0 4px;
+}
+
+.title {
+  padding-right: 24px;
+}
+
+.section {
+  margin-bottom: 26px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  margin: 0 0 14px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  color: var(--affiliate-dialog-muted) !important;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sectionHeader > span {
+  font-size: 12px;
+  text-align: right;
+}
+
+.panel,
+.planCard {
+  padding: 20px;
+  border: 1px solid var(--affiliate-dialog-border);
+  border-radius: 10px;
+}
+
+.panel > :last-child,
+.panel > div:last-child > :last-child {
+  margin-bottom: 0;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+.amount {
+  width: min(100%, 260px);
+}
+
+.planList {
+  display: grid;
+  gap: 12px;
+}
+
+.planCard {
+  padding: 16px 18px;
+  transition: border-color 150ms, background-color 150ms;
+}
+
+.selectedPlan {
+  border-color: var(--affiliate-dialog-primary);
+  background: var(--affiliate-dialog-selected);
+}
+
+.planName {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.cycles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 20px;
+  margin-top: 16px;
+  padding-left: 24px;
+}
+
+.cycleLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cyclePrice {
+  color: var(--affiliate-dialog-muted);
+  font-size: 12px;
+}
+
+.summary {
+  overflow: hidden;
+  border: 1px solid var(--affiliate-dialog-border);
+  border-radius: 10px;
+}
+
+.summary :global(.ant-table-thead > tr > th) {
+  background: var(--affiliate-dialog-surface);
+}
+
+.note {
+  margin: 14px 0 0 !important;
+  font-size: 13px;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.footer button {
+  height: 40px;
+  padding-inline: 20px;
+}
+
+.formError {
+  margin-bottom: 20px;
+}
+
+.drawer :global(.ant-drawer-body) {
+  padding: 28px;
+}
+
+.drawer :global(.ant-drawer-header-title) {
+  flex-direction: row-reverse;
+}
+
+.drawer :global(.ant-drawer-close) {
+  margin-inline: 12px 0;
+}
+
+.drawer :global(.ant-drawer-footer) {
+  padding: 14px 28px;
+}
+
+.modal :global(.ant-modal-body) {
+  max-height: calc(100dvh - 250px);
+  overflow-y: auto;
+  margin-top: 22px;
+}
+
+.modal :global(.ant-modal-footer) {
+  padding-top: 14px;
+  border-top: 1px solid rgba(128, 128, 128, 0.16);
+}
+
+@media (max-width: 600px) {
+  .drawer :global(.ant-drawer-body) {
+    padding: 20px 16px;
+  }
+
+  .drawer :global(.ant-drawer-footer) {
+    padding: 12px 16px;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 14px;
+  }
+
+  .sectionHeader .sectionTitle {
+    margin-bottom: 6px !important;
+  }
+
+  .sectionHeader > span {
+    text-align: left;
+  }
+
+  .fieldGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .cycles {
+    grid-template-columns: 1fr;
+  }
+
+  .footer {
+    gap: 8px;
+  }
+
+  .footer button {
+    padding-inline: 14px;
+  }
+}

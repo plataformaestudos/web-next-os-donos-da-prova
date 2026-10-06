@@ -1,0 +1,166 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  padding: 28px;
+  background: var(--affiliate-background);
+}
+
+.header :global(.ant-typography) {
+  margin: 0;
+}
+
+.header :global(h2.ant-typography) {
+  margin-bottom: 6px;
+  color: var(--affiliate-primary-text);
+  font-size: 28px;
+}
+
+.workspace {
+  overflow: hidden;
+  border-color: var(--affiliate-border);
+  background: var(--affiliate-container);
+  box-shadow: var(--affiliate-shadow);
+}
+
+.workspace :global(.ant-card-body) {
+  padding: 0;
+}
+
+.workspace :global(.ant-tabs-nav) {
+  margin: 0;
+  padding: 0 24px;
+}
+
+.workspace :global(.ant-tabs-tab) {
+  padding: 19px 0;
+}
+
+.workspace :global(.ant-tabs-tab-btn) {
+  color: var(--affiliate-secondary-text);
+  font-weight: 500;
+}
+
+.workspace :global(.ant-tabs-tab-active .ant-tabs-tab-btn) {
+  color: var(--affiliate-primary-text);
+}
+
+.workspace :global(.ant-tabs-ink-bar) {
+  background: var(--affiliate-primary);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+}
+
+.error {
+  margin: 0 24px 16px;
+}
+
+.table :global(.ant-table) {
+  color: var(--affiliate-text);
+}
+
+.table :global(.ant-table-thead > tr > th) {
+  padding: 14px 24px;
+  background: var(--affiliate-table-header);
+  color: var(--affiliate-secondary-text);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.table :global(.ant-table-thead > tr > th::before) {
+  display: none;
+}
+
+.table :global(.ant-table-tbody > tr > td) {
+  padding: 18px 24px;
+  border-bottom-color: var(--affiliate-border);
+}
+
+.table :global(.ant-table-pagination) {
+  margin: 0;
+  padding: 16px 24px;
+  background: var(--affiliate-container);
+}
+
+.table :global(.ant-pagination-total-text) {
+  margin-right: auto;
+  color: var(--affiliate-secondary-text);
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
+
+.name {
+  color: var(--affiliate-primary-text);
+  font-weight: 600;
+}
+
+.meta {
+  color: var(--affiliate-secondary-text);
+  font-size: 12px;
+}
+
+.status {
+  margin-inline-end: 0;
+  font-weight: 500;
+}
+
+.detailsButton {
+  color: var(--affiliate-primary-text);
+  font-weight: 500;
+}
+
+.moreButton {
+  border-color: var(--affiliate-border);
+  color: var(--affiliate-secondary-text);
+  box-shadow: none;
+}
+
+@media (max-width: 767px) {
+  .page {
+    gap: 18px;
+    padding: 18px 12px;
+  }
+
+  .header :global(h2.ant-typography) {
+    font-size: 24px;
+  }
+
+  .workspace :global(.ant-tabs-nav) {
+    padding: 0 16px;
+  }
+
+  .toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .table :global(.ant-table-thead > tr > th),
+  .table :global(.ant-table-tbody > tr > td) {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .table :global(.ant-table-pagination) {
+    padding: 14px 16px;
+  }
+
+  .error {
+    margin-right: 16px;
+    margin-left: 16px;
+  }
+}

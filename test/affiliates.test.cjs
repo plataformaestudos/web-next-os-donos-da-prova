@@ -11,18 +11,35 @@ function load(file, dependencies) {
   return mod.exports;
 }
 function checkout(backend) {
+  const referralServer = load('src/affiliates/referral-server.ts', { 'next/server': { NextRequest, NextResponse } });
   return load('src/app/api/affiliate-checkout/[kind]/route.ts', {
     'next/server': { NextRequest, NextResponse },
-    '@/affiliates/referral-server': { REFERRAL_COOKIE: 'odp_referral', QUOTE_COOKIE: 'odp_referral_quote', affiliateBackend: backend },
+    '@/affiliates/referral-server': { ...referralServer, affiliateBackend: backend },
   }).POST;
 }
+test('pausing a campaign updates only status and preserves concurrent title changes', async () => {
+  let forwarded;
+  const api = load('src/affiliates/affiliates.api.ts', {
+    '@/util/http-client/fetch-client.util': { default: { fetch: async (path, options) => {
+      forwarded = { path, method: options.method, body: JSON.parse(options.body) };
+      return { id: 'campaign', title: 'Título atualizado por outro administrador', status: 'PAUSED' };
+    } } },
+    '@/lib/errors': { HttpError: class extends Error {} },
+  });
+  const campaign = await api.updateAffiliateLinkStatus('campaign', 'PAUSED');
+  assert.deepEqual(forwarded, { path: '/affiliate-links/campaign', method: 'PATCH', body: { status: 'PAUSED' } });
+  assert.equal(campaign.title, 'Título atualizado por outro administrador');
+});
 test('checkout forwards only server cookie attribution and matching signed quote', async () => {
   let forwarded;
   const route = checkout(async (_, destination, body) => { forwarded = { destination, body }; return NextResponse.json({ ok: true }); });
-  const quote = encodeURIComponent(JSON.stringify({ planId: 'plan', cycle: 'QUARTERLY', quoteToken: 'signed', quoteId: 'quote' }));
-  await route(new NextRequest('https://example.test/api/affiliate-checkout/existing-user', { method: 'POST', headers: { cookie: `odp_referral=server-token; odp_referral_quote=${quote}`, origin: 'https://example.test', 'Content-Type': 'application/json' }, body: JSON.stringify({ planId: 'plan', cycle: 'QUARTERLY', referralToken: 'forged', quoteToken: 'forged' }) }), { params: Promise.resolve({ kind: 'existing-user' }) });
+  const referral = 'a'.repeat(43);
+  const signed = `payload.${'b'.repeat(64)}`;
+  const quoteId = '11111111-1111-4111-8111-111111111111';
+  const quote = encodeURIComponent(JSON.stringify({ planId: 'plan', cycle: 'QUARTERLY', quoteToken: signed, quoteId }));
+  await route(new NextRequest('https://example.test/api/affiliate-checkout/existing-user', { method: 'POST', headers: { cookie: `odp_referral=${referral}; odp_referral_quote=${quote}`, origin: 'https://example.test', 'Content-Type': 'application/json' }, body: JSON.stringify({ planId: 'plan', cycle: 'QUARTERLY', referralToken: 'forged', quoteToken: 'forged', idempotencyKey: 'forged' }) }), { params: Promise.resolve({ kind: 'existing-user' }) });
   assert.equal(forwarded.destination, '/subscription');
-  assert.deepEqual(forwarded.body, { planId: 'plan', cycle: 'QUARTERLY', referralToken: 'server-token', quoteToken: 'signed', idempotencyKey: 'quote' });
+  assert.deepEqual(forwarded.body, { planId: 'plan', cycle: 'QUARTERLY', referralToken: referral, quoteToken: signed, idempotencyKey: quoteId });
 });
 test('checkout rejects another website before reaching payment backend', async () => {
   let called = false;
@@ -30,10 +47,10 @@ test('checkout rejects another website before reaching payment backend', async (
   assert.equal(response.status, 403); assert.equal(called, false);
 });
 test('changing billing cycle cannot reuse previous signed quote', async () => {
-  let forwarded;
+  let called = false;
   const quote = encodeURIComponent(JSON.stringify({ planId: 'plan', cycle: 'MONTHLY', quoteToken: 'old' }));
-  await checkout(async (_, __, body) => { forwarded = body; return NextResponse.json({ ok: true }); })(new NextRequest('https://example.test/api/affiliate-checkout/new-user', { method: 'POST', headers: { cookie: `odp_referral=ref; odp_referral_quote=${quote}` }, body: JSON.stringify({ planId: 'plan', cycle: 'YEARLY' }) }), { params: Promise.resolve({ kind: 'new-user' }) });
-  assert.equal(forwarded.quoteToken, undefined); assert.equal(forwarded.referralToken, 'ref');
+  const response = await checkout(async () => { called = true; return NextResponse.json({ ok: true }); })(new NextRequest('https://example.test/api/affiliate-checkout/new-user', { method: 'POST', headers: { cookie: `odp_referral=${'a'.repeat(43)}; odp_referral_quote=${quote}` }, body: JSON.stringify({ planId: 'plan', cycle: 'YEARLY' }) }), { params: Promise.resolve({ kind: 'new-user' }) });
+  assert.equal(response.status, 409); assert.equal(called, false);
 });
 test('quarterly offer summary explains regular price, discount, final amount and first charge cadence', () => {
   const prices = load('src/plans/plan-price-display.ts', {});
