@@ -18,6 +18,8 @@ export interface MyPlanModel {
     quarterlyValue: number | null;
     semiannualValue: number | null;
     annualValue: number | null;
+    cardDisplayCycle?: "MONTHLY" | "QUARTERLY" | "SEMIANNUALLY" | "YEARLY" | null;
+    cardDisplayMode?: "CYCLE_TOTAL" | "MONTHLY_EQUIVALENT";
     lifetimeValue: number | null;
     durationDays: number | null;
     isFree: boolean;
@@ -33,6 +35,8 @@ export interface MyPlanModel {
 export interface NewPlanModel {
   allowLifetime: boolean;
   annualValue: number | null;
+  cardDisplayCycle?: "MONTHLY" | "QUARTERLY" | "SEMIANNUALLY" | "YEARLY" | null;
+  cardDisplayMode?: "CYCLE_TOTAL" | "MONTHLY_EQUIVALENT";
   description: string;
   id: string;
   lifetimeValue: number | null;

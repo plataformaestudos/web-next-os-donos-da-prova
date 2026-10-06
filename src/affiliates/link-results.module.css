@@ -1,0 +1,101 @@
+.disclosure,
+.results {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+  padding-top: 8px;
+}
+
+.disclosureCards {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  gap: 24px;
+}
+
+.linkCard {
+  min-width: 0;
+}
+
+.copyRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.linkInput {
+  min-width: 0;
+  font-family: monospace;
+}
+
+.linkDescription {
+  margin-top: 20px;
+  margin-bottom: 14px;
+}
+
+.openLink {
+  padding-inline: 0;
+}
+
+.qrContent {
+  display: grid;
+  justify-items: center;
+  gap: 24px;
+}
+
+.qrFrame {
+  width: max-content;
+  max-width: 100%;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.customers :global(.ant-card-body) {
+  padding: 0;
+}
+
+.customerHeading {
+  padding-block: 16px;
+  white-space: normal;
+}
+
+.customerHeading :global(.ant-typography) {
+  margin-bottom: 4px;
+}
+
+.customerHeading > span {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.customerError {
+  margin: 16px;
+}
+
+.customerIdentity {
+  display: grid;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+
+.customers :global(.ant-table-pagination) {
+  padding-inline: 20px;
+}
+
+@media (max-width: 760px) {
+  .disclosureCards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .copyRow {
+    flex-direction: column;
+  }
+
+  .copyRow > button {
+    width: 100%;
+  }
+
+  .customers :global(.ant-table-pagination) {
+    padding-inline: 12px;
+  }
+}

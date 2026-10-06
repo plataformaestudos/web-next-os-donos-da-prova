@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 
 import { LuFolders } from "react-icons/lu";
 import { NewPlanModel } from "@/model/plan.model";
+import { formatCycleCharge, getBestValueCycle, getPlanCardPrice, getPlanRecurringPrices } from "@/plans/plan-price-display";
 
 export function ChoosePlanFirstStep({
   plans,
@@ -22,7 +23,7 @@ export function ChoosePlanFirstStep({
   const [query, setQuery] = useState<string>("");
 
   const filteredPlans = useMemo(() => {
-    return plans.filter((plan) => plan.name.toLowerCase().includes(query));
+    return plans.filter((plan) => (plan.isFree || getPlanRecurringPrices(plan).length > 0) && plan.name.toLowerCase().includes(query));
   }, [query, plans]);
 
   return (
@@ -56,17 +57,6 @@ export function ChoosePlanFirstStep({
   );
 }
 
-function getMinimumValue(plan: NewPlanModel): number {
-  const values = [
-    plan.monthValue,
-    plan.quarterlyValue,
-    plan.semiannualValue,
-    plan.annualValue,
-  ].filter((v): v is number => v !== null && v !== undefined && !isNaN(v));
-
-  return values.length > 0 ? Math.min(...values) : 0;
-}
-
 function PlanCardComponent({
   plan,
   isSelected,
@@ -77,7 +67,7 @@ function PlanCardComponent({
   onClick: () => void;
 }) {
   const [modulesOpened, setModulesOpened] = useState<boolean>(false);
-  const minValue = getMinimumValue(plan);
+  const cardPrice = getPlanCardPrice(plan);
 
   return (
     <PlanCard key={plan.id} $selected={isSelected} onClick={() => onClick()}>
@@ -142,17 +132,12 @@ function PlanCardComponent({
         }}
       >
         <div>
-          <Typography.Text style={{ fontSize: 10, color: "inherit", opacity: 0.8 }}>
-            a partir de
-          </Typography.Text>
-          <div>
-            <b>
-              {new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(minValue)}/mês
-            </b>
-          </div>
+            {cardPrice && <>
+              <div><b>{cardPrice.headline}</b></div>
+              <Typography.Text style={{ fontSize: 10, color: "inherit", opacity: 0.8 }}>
+                {cardPrice.detail}
+              </Typography.Text>
+            </>}
         </div>
         {isSelected && <CheckCircleFilled style={{ fontSize: 16 }} />}
       </div>
@@ -169,23 +154,6 @@ export function CycleSelector({
   selectedCycle: string;
   onCycleChange: (cycle: string) => void;
 }) {
-  const getCycleInstallments = (cycleValue: string) => {
-    switch (cycleValue) {
-      case "MONTHLY":
-        return 1;
-      case "QUARTERLY":
-        return 3;
-      case "SEMIANNUALLY":
-        return 6;
-      case "YEARLY":
-        return 12;
-      case "LIFETIME":
-        return 1;
-      default:
-        return 1;
-    }
-  };
-
   const getAvailableCycles = (planData: NewPlanModel) => {
     const cycles = [];
     if (planData.monthValue) {
@@ -193,7 +161,6 @@ export function CycleSelector({
         value: "MONTHLY", 
         label: "Mensal", 
         price: planData.monthValue,
-        installments: getCycleInstallments("MONTHLY")
       });
     }
     if (planData.quarterlyValue) {
@@ -201,7 +168,6 @@ export function CycleSelector({
         value: "QUARTERLY", 
         label: "Trimestral", 
         price: planData.quarterlyValue,
-        installments: getCycleInstallments("QUARTERLY")
       });
     }
     if (planData.semiannualValue) {
@@ -209,7 +175,6 @@ export function CycleSelector({
         value: "SEMIANNUALLY", 
         label: "Semestral", 
         price: planData.semiannualValue,
-        installments: getCycleInstallments("SEMIANNUALLY")
       });
     }
     if (planData.annualValue) {
@@ -217,28 +182,15 @@ export function CycleSelector({
         value: "YEARLY", 
         label: "Anual", 
         price: planData.annualValue,
-        installments: getCycleInstallments("YEARLY")
       });
     }
-    if (planData.lifetimeValue && planData.allowLifetime) {
-      cycles.push({ 
-        value: "LIFETIME", 
-        label: "Vitalício", 
-        price: planData.lifetimeValue,
-        installments: getCycleInstallments("LIFETIME")
-      });
-    }
+
     return cycles;
   };
 
   const cycles = getAvailableCycles(plan);
 
-  // Determinar qual ciclo tem o maior período (melhor custo benefício)
-  const cycleOrder = ["MONTHLY", "QUARTERLY", "SEMIANNUALLY", "YEARLY", "LIFETIME"];
-  const getCycleIndex = (value: string) => cycleOrder.indexOf(value);
-  const bestValueCycle = [...cycles].sort((a, b) =>
-    getCycleIndex(b.value) - getCycleIndex(a.value)
-  )[0]?.value;
+  const bestValueCycle = getBestValueCycle(cycles);
 
   return (
     <Select
@@ -249,16 +201,11 @@ export function CycleSelector({
       optionLabelProp="label"
       optionRender={(option) => {
         const cycle = cycles.find(c => c.value === option.value);
-        const isLifetime = cycle?.value === "LIFETIME";
         
         return (
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
             <span>
-              {cycle?.label} - {isLifetime ? "Pagamento único de " : `${cycle?.installments}x de `}
-              {Number(cycle?.price).toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
+              {cycle?.label} - {cycle && formatCycleCharge(cycle.value, cycle.price)}
             </span>
             {option.value === bestValueCycle && (
               <span style={{
@@ -278,22 +225,13 @@ export function CycleSelector({
       }}
     >
       {cycles.map((cycle) => {
-        const isLifetime = cycle.value === "LIFETIME";
-        
         return (
           <Select.Option
             key={cycle.value}
             value={cycle.value}
-            label={`${cycle.label} - ${isLifetime ? "Pagamento único de " : `${cycle.installments}x de `}${Number(cycle.price).toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}${cycle.value === bestValueCycle ? " ⭐" : ""}`}
+            label={`${cycle.label} - ${formatCycleCharge(cycle.value, cycle.price)}${cycle.value === bestValueCycle ? " ⭐" : ""}`}
           >
-            {cycle.label} - {isLifetime ? "Pagamento único de " : `${cycle.installments}x de `}
-            {Number(cycle.price).toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
+            {cycle.label} - {formatCycleCharge(cycle.value, cycle.price)}
           </Select.Option>
         );
       })}

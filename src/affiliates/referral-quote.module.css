@@ -1,0 +1,42 @@
+.discount {
+  display: grid;
+  gap: 12px;
+  text-align: left;
+  min-width: 0;
+}
+
+.codeRow {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.codeRow > input {
+  min-width: 0;
+}
+
+.summary {
+  margin-bottom: 8px !important;
+}
+
+.discount :global(.ant-alert) {
+  align-items: flex-start;
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
+.discount :global(.ant-alert-content) {
+  min-width: 0;
+  flex-basis: 180px;
+}
+
+@media (max-width: 480px) {
+  .codeRow {
+    flex-direction: column;
+  }
+
+  .discount :global(.ant-alert-action) {
+    margin-inline-start: 0;
+    width: 100%;
+  }
+}

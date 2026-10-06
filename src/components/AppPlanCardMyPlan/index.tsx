@@ -1,5 +1,6 @@
 "use client";
 
+import { updateSubscriptionCreditCard } from '@/subscription/update-credit-card';
 import { MyPlanModel } from "@/model/plan.model";
 import {
     Button,
@@ -8,7 +9,7 @@ import {
     Form,
     App,
 } from "antd";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import styled from "styled-components";
 import { AppConfirmModal } from "../AppConfirmModal";
 import HttpClient from "@/util/http-client/fetch-client.util";
@@ -82,28 +83,7 @@ interface ModalProps {
 export const AppPlanCardMyPlan = ({ plan }: { plan: MyPlanModel }) => {
     const app = App.useApp?.();
     const message = app?.message;
-    const useForm = <T,>() => {
-        const [isValid, setIsFormValid] = useState<boolean | null>(null);
-        const [form] = Form.useForm<T>();
-        const formValues = Form.useWatch([], form);
-
-        useEffect(() => {
-            if (formValues) {
-                form
-                    .validateFields({ validateOnly: true })
-                    .then(() => {
-                        setIsFormValid(true);
-                    })
-                    .catch(() => setIsFormValid(false));
-            }
-        }, [form, formValues]);
-
-        return {
-            form,
-            values: formValues,
-            isValid,
-        };
-    };
+    const [paymentInfoForm] = Form.useForm<PaymentInfo>();
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [modalProps, setModalProps] = useState<ModalProps>({
@@ -118,12 +98,6 @@ export const AppPlanCardMyPlan = ({ plan }: { plan: MyPlanModel }) => {
     });
 
     const [flipped, setFlipped] = useState(false);
-
-    const {
-        form: paymentInfoForm,
-        values: paymentInfoValues,
-        isValid: isPaymentInfoValid,
-    } = useForm<PaymentInfo>();
 
     const handleFlip = () => setFlipped(!flipped);
 
@@ -146,6 +120,7 @@ export const AppPlanCardMyPlan = ({ plan }: { plan: MyPlanModel }) => {
     };
 
     const handleUpdatePayment = (planData: MyPlanModel) => {
+        paymentInfoForm.resetFields();
         setModalProps({
             title: "Atualizar dados de pagamento",
             content: (
@@ -160,7 +135,10 @@ export const AppPlanCardMyPlan = ({ plan }: { plan: MyPlanModel }) => {
                 </div>
             ),
             onConfirm: () => updatePlan(planData),
-            onCancel: () => setModalProps({ ...modalProps, visible: false }),
+            onCancel: () => {
+                paymentInfoForm.resetFields();
+                setModalProps(previous => ({ ...previous, visible: false }));
+            },
             confirmText: "Sim, atualizar",
             cancelText: "Não",
             visible: true,
@@ -188,44 +166,15 @@ export const AppPlanCardMyPlan = ({ plan }: { plan: MyPlanModel }) => {
 
     async function updatePlan(planData: MyPlanModel) {
         setIsLoading(true);
-        if (!isPaymentInfoValid) {
-            message.error("Por favor, preencha os dados de pagamento corretamente");
-            setIsLoading(false);
-            return;
-        }
-
-        const paymentData = paymentInfoValues as PaymentInfo;
-        if (!paymentData || !paymentData.expiryDate) {
-            message.error("Por favor, preencha todos os dados de pagamento");
-            setIsLoading(false);
-            return;
-        }
-
-        const payload = {
-            planId: planData.id,
-            saveCard: paymentData.saveCard || false,
-            billingType: "CREDIT_CARD",
-            cycle: planData.billingRecurrencyType ?? "MONTHLY",
-            description: planData?.description ?? "",
-            creditCard: {
-                holderName: paymentInfoValues.holderName,
-                number: paymentInfoValues.number,
-                expiryMonth: paymentInfoValues.expiryDate.split("/")[0],
-                expiryYear: paymentInfoValues.expiryDate.split("/")[1],
-                ccv: paymentInfoValues.cvv,
-            },
-        };
-
         try {
-            await HttpClient.fetch(`/subscription/update-credit-card`, {
-                method: "PUT",
-                body: JSON.stringify(payload),
-            },
-                false
-            );
+            await updateSubscriptionCreditCard(planData.id, paymentInfoForm);
+            paymentInfoForm.resetFields();
             message.success("Dados de pagamento atualizados com sucesso");
-            setModalProps({ ...modalProps, visible: false });
+            setModalProps(previous => ({ ...previous, visible: false }));
             setTimeout(() => window.location.reload(), 200);
+        } catch (error) {
+            if (error instanceof Error) message.error(error.message);
+            else message.error("Por favor, preencha os dados de pagamento corretamente");
         } finally {
             setIsLoading(false);
         }

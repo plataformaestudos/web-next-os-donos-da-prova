@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "test:affiliates": "node --test test/affiliates.test.cjs test/affiliate-referral-code.test.cjs test/affiliate-discount-ui.test.cjs",
     "test:auth": "node --test test/auth-logout.test.cjs",
     "test:staff-users": "node --test test/staff-users.test.cjs",
     "test:question-imports": "node --test test/question-imports.test.cjs",

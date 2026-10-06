@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Alert, Tabs } from "antd";
 import { AppPayments } from "@/components/AppPayments";
 import { AppMyPlans } from "@/components/AppMyPlans";
@@ -10,6 +11,8 @@ import { FullPageLoading } from "@/ui/loading/full-page-loading";
 
 const UserProfile = () => {
     const { user, loading, allowed } = useAuthGuard();
+    const [activeTab, setActiveTab] = useState("1");
+    useEffect(() => { if (new URLSearchParams(window.location.search).has("campaign")) setActiveTab("3"); }, []);
     if (loading) return <FullPageLoading />;
     if (!allowed) return null;
     if (hasStaffAccess(user)) return <Alert style={{ margin: 24 }} type="info" showIcon
@@ -45,7 +48,8 @@ const UserProfile = () => {
             className="subscription-page"
         >
             <Tabs
-                defaultActiveKey="1"
+                activeKey={activeTab}
+                onChange={setActiveTab}
                 items={items}
                 style={{ width: "100%", maxWidth: "1300px", padding: "20px" }}
                 tabBarStyle={{ fontSize: "20px", fontWeight: 600 }}
