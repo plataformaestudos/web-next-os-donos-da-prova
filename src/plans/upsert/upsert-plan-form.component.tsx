@@ -222,10 +222,8 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
           </>
         )}
 
-        <Label>Valores cobrados uma vez por ciclo</Label>
-        <Typography.Text type="secondary">
-          O valor trimestral é cobrado integralmente a cada 3 meses; o semestral a cada 6 meses e o anual a cada 12 meses.
-        </Typography.Text>
+        <Label>Valores</Label>
+        
         <Flex style={{ gap: 16, flexWrap: 'wrap' }}>
           <Flex vertical style={{ flex: 1, minWidth: 120 }}>
             <Label>Mensal</Label>
