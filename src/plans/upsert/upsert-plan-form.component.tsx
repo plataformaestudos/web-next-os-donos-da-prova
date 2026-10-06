@@ -1,13 +1,14 @@
 "use client";
 
-import { Divider, Flex, Input, InputNumber, Typography, Checkbox, Tag, Space, AutoComplete, Tooltip } from "antd";
+import { Divider, Flex, Input, InputNumber, Typography, Checkbox, Tag, Space, AutoComplete, Tooltip, Select } from "antd";
 import styled from "styled-components";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ModuleViewModel } from "@/model/module.model";
 import { ModulesTree } from "@/modules/tree/modules-tree.component";
 import { UPSERT_PLAN_FORM_ID } from "./upsert-plan-form.constant";
 import { useUpsertPlan } from "./upsert-plan.context";
 import { queryModules } from "@/modules/tree/load-modules.action";
+import { recurringCycles } from "@/plans/plan-price-display";
 
 export interface PlanFormValues {
   id?: string;
@@ -20,6 +21,8 @@ export interface PlanFormValues {
   quarterlyValue?: number;
   semiannualValue?: number;
   annualValue?: number;
+  cardDisplayCycle?: "MONTHLY" | "QUARTERLY" | "SEMIANNUALLY" | "YEARLY" | null;
+  cardDisplayMode: "CYCLE_TOTAL" | "MONTHLY_EQUIVALENT";
   lifetimeValue?: number;
   modules: string[];
 }
@@ -46,6 +49,8 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
     quarterlyValue: plan?.quarterlyValue || 0,
     semiannualValue: plan?.semiannualValue || 0,
     annualValue: plan?.annualValue || 0,
+    cardDisplayCycle: plan?.cardDisplayCycle ?? (plan?.monthValue ? "MONTHLY" : plan?.quarterlyValue ? "QUARTERLY" : plan?.semiannualValue ? "SEMIANNUALLY" : plan?.annualValue ? "YEARLY" : null),
+    cardDisplayMode: plan?.cardDisplayMode ?? "MONTHLY_EQUIVALENT",
     lifetimeValue: plan?.lifetimeValue || 0,
     modules: plan?.modules || []
   });
@@ -54,6 +59,14 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
   const [filteredModules, setFilteredModules] = useState<ModuleViewModel[]>([]);
   const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
   const [addedModules, setAddedModules] = useState<ModuleViewModel[]>([]);
+
+  const availableDisplayCycles = useMemo(() => recurringCycles.filter(({ value }) => {
+    const price = value === "MONTHLY" ? values.monthValue
+      : value === "QUARTERLY" ? values.quarterlyValue
+      : value === "SEMIANNUALLY" ? values.semiannualValue
+      : values.annualValue;
+    return price != null && price > 0;
+  }), [values.monthValue, values.quarterlyValue, values.semiannualValue, values.annualValue]);
 
   const handleChange = <K extends keyof PlanFormValues>(
     field: K,
@@ -92,6 +105,16 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
       }
     };
   }, [debounceTimeout]);
+
+  useEffect(() => {
+    if (values.isFree || !availableDisplayCycles.length) {
+      if (values.cardDisplayCycle !== null) handleChange("cardDisplayCycle", null);
+      return;
+    }
+    if (availableDisplayCycles.length && !availableDisplayCycles.some(cycle => cycle.value === values.cardDisplayCycle)) {
+      handleChange("cardDisplayCycle", availableDisplayCycles[0].value);
+    }
+  }, [values.isFree, values.cardDisplayCycle, availableDisplayCycles]);
 
 
   const getSelectedModules = () => {
@@ -199,7 +222,10 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
           </>
         )}
 
-        <Label>Faixa de Valores</Label>
+        <Label>Valores cobrados uma vez por ciclo</Label>
+        <Typography.Text type="secondary">
+          O valor trimestral é cobrado integralmente a cada 3 meses; o semestral a cada 6 meses e o anual a cada 12 meses.
+        </Typography.Text>
         <Flex style={{ gap: 16, flexWrap: 'wrap' }}>
           <Flex vertical style={{ flex: 1, minWidth: 120 }}>
             <Label>Mensal</Label>
@@ -262,6 +288,38 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
             />
           </Flex>
         </Flex>
+
+        {!values.isFree && <>
+          <Divider />
+          <Label>Preço destacado no card de assinatura</Label>
+          <Flex style={{ gap: 16, flexWrap: 'wrap' }}>
+            <Flex vertical style={{ flex: 1, minWidth: 220 }}>
+              <Label>Ciclo usado para divulgar o preço</Label>
+              <Select
+                value={values.cardDisplayCycle ?? undefined}
+                placeholder="Selecione um ciclo com valor cadastrado"
+                options={availableDisplayCycles.map(cycle => ({ value: cycle.value, label: cycle.label }))}
+                onChange={value => handleChange("cardDisplayCycle", value)}
+                disabled={!availableDisplayCycles.length}
+              />
+            </Flex>
+            <Flex vertical style={{ flex: 1, minWidth: 220 }}>
+              <Label>Como mostrar o valor</Label>
+              <Select
+                value={values.cardDisplayMode}
+                options={[
+                  { value: "CYCLE_TOTAL", label: "Valor total cobrado no ciclo" },
+                  { value: "MONTHLY_EQUIVALENT", label: "Equivalente mensal do ciclo" },
+                ]}
+                onChange={value => handleChange("cardDisplayMode", value)}
+                disabled={!availableDisplayCycles.length}
+              />
+            </Flex>
+          </Flex>
+          <Typography.Text type="secondary">
+            Mesmo quando o card mostrar o equivalente mensal, ele também informará o total cobrado e a frequência da cobrança.
+          </Typography.Text>
+        </>}
 
         <Divider />
 

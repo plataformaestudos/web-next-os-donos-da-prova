@@ -26,6 +26,7 @@ export function useMenus() {
   const menus = data?.filter((menu) => {
     if (/^\/subscription(\/|$)/.test(menu.link) && hasStaffAccess(user)) return false;
     if (/^\/gerenciar-usuarios(\/|$)/.test(menu.link)) return canAccess(user, [Roles.ADMIN]);
+    if (/^\/afiliados(\/|$)/.test(menu.link)) return canAccess(user, [Roles.ADMIN]);
     const isImport = /^\/(importacao-questoes|question-imports)(\/|$)/.test(menu.link);
     return !isImport || canAccess(user, [Roles.ADMIN, Roles.COLLABORATOR]);
   });

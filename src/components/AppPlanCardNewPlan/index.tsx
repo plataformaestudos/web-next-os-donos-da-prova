@@ -1,6 +1,7 @@
 "use client";
 
 import { NewPlanModel } from "@/model/plan.model";
+import { formatCycleCharge, getBestValueCycle, getPlanCardPrice } from "@/plans/plan-price-display";
 import {
     Button,
     Descriptions,
@@ -16,7 +17,7 @@ import { ReactNode, useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import Link from "next/link";
 import { AppConfirmModal } from "../AppConfirmModal";
-import HttpClient from "@/util/http-client/fetch-client.util";
+import { ReferralQuote } from "@/affiliates/referral-quote.component";
 import { AppLoading } from "../AppLoading";
 import {
     PaymentInfo,
@@ -124,33 +125,16 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
     });
 
     const [flipped, setFlipped] = useState(false);
+    const selectedCycleRef = useRef<string>("YEARLY");
     const [selectedCycle, setSelectedCycle] = useState<string>("YEARLY");
     const [allTermsAccepted, setAllTermsAccepted] = useState(false);
     const allTermsAcceptedRef = useRef(false);
 
     const {
         form: paymentInfoForm,
-        isValid: isPaymentInfoValid,
     } = useForm<PaymentInfo>();
 
     const handleFlip = () => setFlipped(!flipped);
-
-    const getCycleInstallments = (cycleValue: string) => {
-        switch (cycleValue) {
-            case "MONTHLY":
-                return 1;
-            case "QUARTERLY":
-                return 3;
-            case "SEMIANNUALLY":
-                return 6;
-            case "YEARLY":
-                return 12;
-            case "LIFETIME":
-                return 1;
-            default:
-                return 1;
-        }
-    };
 
     const getAvailableCycles = (planData: NewPlanModel) => {
         const cycles = [];
@@ -159,7 +143,6 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                 value: "MONTHLY", 
                 label: "Mensal", 
                 price: planData.monthValue,
-                installments: getCycleInstallments("MONTHLY")
             });
         }
         if (planData.quarterlyValue) {
@@ -167,7 +150,6 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                 value: "QUARTERLY", 
                 label: "Trimestral", 
                 price: planData.quarterlyValue,
-                installments: getCycleInstallments("QUARTERLY")
             });
         }
         if (planData.semiannualValue) {
@@ -175,7 +157,6 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                 value: "SEMIANNUALLY", 
                 label: "Semestral", 
                 price: planData.semiannualValue,
-                installments: getCycleInstallments("SEMIANNUALLY")
             });
         }
         if (planData.annualValue) {
@@ -183,18 +164,15 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                 value: "YEARLY", 
                 label: "Anual", 
                 price: planData.annualValue,
-                installments: getCycleInstallments("YEARLY")
             });
         }
-        if (planData.lifetimeValue && planData.allowLifetime) {
-            cycles.push({ 
-                value: "LIFETIME", 
-                label: "Vitalício", 
-                price: planData.lifetimeValue,
-                installments: getCycleInstallments("LIFETIME")
-            });
-        }
+
         return cycles;
+    };
+
+    const cyclesForSelection = (planData: NewPlanModel, cycle: string) => {
+        const cycles = getAvailableCycles(planData);
+        return cycles.find(item => item.value === cycle)?.value || cycles[0]?.value || "MONTHLY";
     };
 
     const resetModal = () => {
@@ -202,6 +180,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
         setAllTermsAccepted(false);
         allTermsAcceptedRef.current = false;
         setSelectedCycle("YEARLY");
+        selectedCycleRef.current = "YEARLY";
         paymentInfoForm.resetFields();
     };
 
@@ -213,12 +192,9 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
             setSelectedCycle(availableCycles[0].value);
         }
 
-        // Determinar qual ciclo tem o maior período (melhor custo benefício)
-        const cycleOrder = ["MONTHLY", "QUARTERLY", "SEMIANNUALLY", "YEARLY", "LIFETIME"];
-        const getCycleIndex = (value: string) => cycleOrder.indexOf(value);
-        const bestValueCycle = [...getAvailableCycles(planData)].sort((a, b) =>
-            getCycleIndex(b.value) - getCycleIndex(a.value)
-        )[0]?.value;
+        const bestValueCycle = getBestValueCycle(getAvailableCycles(planData));
+
+        selectedCycleRef.current = cyclesForSelection(planData, selectedCycle);
 
         // Componente interno do modal que tem acesso aos availableCycles
         const ModalContent = () => {
@@ -246,21 +222,17 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                                     onChange={(value) => {
                                         setLocalSelectedCycle(value);
                                         setSelectedCycle(value);
+                                        selectedCycleRef.current = value;
                                     }}
                                     style={{ width: "100%" }}
                                     placeholder="Selecione uma assinatura"
                                     optionLabelProp="label"
                                     optionRender={(option) => {
                                         const cycle = cycles.find(c => c.value === option.value);
-                                        const isLifetime = cycle?.value === "LIFETIME";
                                         return (
                                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
                                                 <span>
-                                                    {cycle?.label} - {isLifetime ? "Pagamento único de " : `${cycle?.installments}x de `}
-                                                    {Number(cycle?.price || 0).toLocaleString("pt-BR", {
-                                                        style: "currency",
-                                                        currency: "BRL",
-                                                    })}
+                                                    {cycle?.label} - {cycle && formatCycleCharge(cycle.value, cycle.price)}
                                                 </span>
                                                 {option.value === bestValueCycle && (
                                                     <span style={{
@@ -280,23 +252,15 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                                     }}
                                 >
                                     {cycles.map((cycle) => {
-                                        const isLifetime = cycle.value === "LIFETIME";
                                         return (
                                             <Select.Option
                                                 key={cycle.value}
                                                 value={cycle.value}
-                                                label={`${cycle.label} - ${isLifetime ? "Pagamento único de " : `${cycle.installments}x de `}${Number(cycle.price).toLocaleString("pt-BR", {
-                                                    style: "currency",
-                                                    currency: "BRL",
-                                                })}${cycle.value === bestValueCycle ? " ⭐" : ""}`}
+                                        label={`${cycle.label} - ${formatCycleCharge(cycle.value, cycle.price)}${cycle.value === bestValueCycle ? " ⭐" : ""}`}
                                             >
                                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
                                                     <span>
-                                                        {cycle.label} - {isLifetime ? "Pagamento único de " : `${cycle.installments}x de `}
-                                                        {Number(cycle.price).toLocaleString("pt-BR", {
-                                                            style: "currency",
-                                                            currency: "BRL",
-                                                        })}
+                                                        {cycle.label} - {formatCycleCharge(cycle.value, cycle.price)}
                                                     </span>
                                                     {cycle.value === bestValueCycle && (
                                                         <span style={{
@@ -325,6 +289,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                         )}
                     </div>
 
+                    <ReferralQuote planId={planData.id} cycle={localSelectedCycle} />
                     <Collapse>
                         <Panel header="Dados de pagamento" key="payment">
                             <PaymentInfoThirdStep formV={paymentInfoForm} />
@@ -378,7 +343,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
             return;
         }
 
-        if (!isPaymentInfoValid) {
+        try { await paymentInfoForm.validateFields(); } catch {
             message.error("Por favor, preencha os dados de pagamento corretamente");
             setIsLoading(false);
             return;
@@ -394,7 +359,7 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
             planId: planData.id,
             saveCard: paymentData.saveCard || false,
             billingType: "CREDIT_CARD",
-            cycle: selectedCycle,
+            cycle: selectedCycleRef.current,
             description: planData?.description ?? "",
             creditCard: {
                 holderName: paymentData.holderName,
@@ -410,16 +375,21 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
         };
 
         try {
-            await HttpClient.fetch(`/subscription`, {
+            const response = await fetch(`/api/affiliate-checkout/existing-user`, {
+                headers: { "Content-Type": "application/json" },
                 method: "POST",
                 body: JSON.stringify(payload),
-            },
-                false
-            );
+            });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || "Não foi possível concluir a assinatura.");
+            }
             message.success("Plano assinado com sucesso");
             resetModal();
             setModalProps({ ...modalProps, visible: false });
             setTimeout(() => window.location.reload(), 200);
+        } catch (error) {
+            message.error(error instanceof Error ? error.message : "Não foi possível concluir a assinatura.");
         } finally {
             setIsLoading(false);
         }
@@ -443,36 +413,11 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                         bordered
                         column={1}
                     >
-                        <Descriptions.Item label="A partir de">
-                            {(() => {
-                                const values = [
-                                    plan?.monthValue,
-                                    plan?.quarterlyValue ? plan.quarterlyValue : null,
-                                    plan?.semiannualValue ? plan.semiannualValue : null,
-                                    plan?.annualValue ? plan.annualValue : null,
-                                ].filter((v): v is number => v !== null && v !== undefined && !isNaN(v));
+                        {getPlanCardPrice(plan) && <Descriptions.Item label="Assinatura">
+                            <div>{getPlanCardPrice(plan)?.headline}</div>
+                            <Typography.Text type="secondary">{getPlanCardPrice(plan)?.detail}</Typography.Text>
+                        </Descriptions.Item>}
 
-                                const minValue = values.length > 0 ? Math.min(...values) : 0;
-                                return Number(minValue).toLocaleString(
-                                    "pt-BR",
-                                    {
-                                        style: "currency",
-                                        currency: "BRL",
-                                    }
-                                );
-                            })()}/mês
-                        </Descriptions.Item>
-                        {plan?.allowLifetime && plan?.lifetimeValue && (
-                            <Descriptions.Item label="Pagamento único">
-                                {Number(plan.lifetimeValue).toLocaleString(
-                                    "pt-BR",
-                                    {
-                                        style: "currency",
-                                        currency: "BRL",
-                                    }
-                                )}
-                            </Descriptions.Item>
-                        )}
                         {plan?.questionLimit !== undefined && plan?.questionLimit !== 0 && (
                             <Descriptions.Item label="Limite de questões">
                                 {plan.questionLimit}
@@ -490,9 +435,10 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                             <Button
                                 type="primary"
                                 size="large"
+                                disabled={getAvailableCycles(plan).length === 0}
                                 onClick={() => handleSelectPlan(plan)}
                             >
-                                Assinar Plano
+                                {getAvailableCycles(plan).length ? "Assinar Plano" : "Contratação indisponível"}
                             </Button>
                             <Button type="default" size="large" onClick={handleFlip}>Ver Módulos</Button>
                         </div>

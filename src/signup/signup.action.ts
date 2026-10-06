@@ -24,10 +24,14 @@ export interface DefaultResponse<T> {
 
 export async function signUpClient(dto: SignupDTO): Promise<{ success: boolean; error: string | null; payload?: DefaultResponse<SignupData> }> {
   try {
-    const payload = await HttpClient.fetch<DefaultResponse<SignupData>>('/subscription/new-user', {
+    const response = await fetch('/api/affiliate-checkout/new-user', {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dto),
     });
+
+    const payload = await response.json() as DefaultResponse<SignupData>;
+    if (!response.ok) throw new Error(payload.message || "Não foi possível concluir o cadastro.");
 
     await HttpClient.fetch('/auth/login', {
       method: "POST",

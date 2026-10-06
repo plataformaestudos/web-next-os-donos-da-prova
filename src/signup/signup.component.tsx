@@ -15,9 +15,11 @@ import { ChoosePlanFirstStep, CycleSelector } from "./choose-plan.component";
 import { TermsCheckbox } from "./terms-checkbox.component";
 import Link from "next/link";
 import Title from "antd/es/typography/Title";
+import { ReferralQuote } from "@/affiliates/referral-quote.component";
 import { signUpClient } from "./signup.action";
 import { useIsMobile } from "@/util/use-media-query.hook";
 import { NewPlanModel } from "@/model/plan.model";
+import { getPlanRecurringPrices } from "@/plans/plan-price-display";
 
 const useForm = <T,>() => {
   const [isValid, setIsFormValid] = useState<boolean | null>(null);
@@ -50,6 +52,9 @@ export default function SignupSteps({
   const [currentStep, setCurrentStep] = useState<number>(1);
   const router = useRouter();
 
+  const [campaignUnavailable, setCampaignUnavailable] = useState(false);
+  useEffect(() => { setCampaignUnavailable(new URLSearchParams(window.location.search).get("campaign") === "unavailable"); }, []);
+
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedCycle, setSelectedCycle] = useState<string>("YEARLY");
 
@@ -70,6 +75,12 @@ export default function SignupSteps({
   const selectedPlanData = useMemo(() => {
     return plans.find((p) => p.id === selectedPlan);
   }, [plans, selectedPlan]);
+
+  useEffect(() => {
+    if (!selectedPlanData || selectedPlanData.isFree) return;
+    const cycles = getPlanRecurringPrices(selectedPlanData);
+    if (cycles.length && !cycles.some(item => item.value === selectedCycle)) setSelectedCycle(cycles[0].value);
+  }, [selectedPlanData, selectedCycle]);
 
   const isPlanFree = useMemo(() => {
     return selectedPlanData?.isFree ?? false;
@@ -134,6 +145,7 @@ export default function SignupSteps({
         </Header>
         <Divider />
         <Content>
+          {campaignUnavailable && <Typography.Paragraph type="warning">Este link de campanha não está disponível. Você pode escolher um plano pelo valor regular.</Typography.Paragraph>}
           <div
             style={{
               display: currentStep === 1 ? "block" : "none",
@@ -170,6 +182,7 @@ export default function SignupSteps({
                     selectedCycle={selectedCycle}
                     onCycleChange={setSelectedCycle}
                   />
+                  <ReferralQuote planId={selectedPlanData.id} cycle={selectedCycle} />
                 </div>
               )}
 

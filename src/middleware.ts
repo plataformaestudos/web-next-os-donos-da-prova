@@ -5,6 +5,9 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("access_token")?.value; 
   const publicPaths = [
     "/login",
+    "/r",
+    "/api/affiliate-referral/quote",
+    "/api/affiliate-checkout/new-user",
     "/cadastro",
     "/signup",
     "/forgot-password",
