@@ -1,4 +1,4 @@
-import { Col, Flex, Form, FormInstance, Input, Row } from "antd";
+import { Alert, Col, Flex, Form, FormInstance, Input, Row, Spin } from "antd";
 
 import { MaskedInput } from "@/ui/masked-input/masked-input.component";
 import { PasswordField } from "./password-fields";
@@ -21,12 +21,12 @@ export interface PersonalInfo {
     addressComplement?: string;
 }
 
-async function fetchAddressByCep(cep: string) {
+async function fetchAddressByCep(cep: string, signal?: AbortSignal) {
     const cleaned = cep.replace(/\D/g, "");
     if (cleaned.length !== 8) {
       throw new Error("CEP inválido");
     }
-    const resp = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
+    const resp = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`, { signal });
     if (!resp.ok) {
       throw new Error("Falha na requisição CEP");
     }
@@ -43,38 +43,58 @@ export function PersonalInfoSecondStep({
     form: FormInstance<PersonalInfo>;
 }) {
     const cepValue = Form.useWatch("postalCode", form);
-    const [addressDisabled, setAddressDisabled] = useState(false);
+    const [cepLookupStatus, setCepLookupStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+    const cleanedCep = (cepValue ?? "").replace(/\D/g, "");
+    const showAddressFields = cleanedCep.length === 8;
+
     useEffect(() => {
-        if (!cepValue) return;
-    
-        const cleaned = cepValue.replace(/\D/g, "");
-        if (cleaned.length === 8) {
-          fetchAddressByCep(cleaned)
-            .then((data) => {
-              form.setFieldsValue({
-                address: data.logradouro,
-                addressNeighborhood: data.bairro,
-                addressCity: data.localidade,
-                addressState: data.uf,
-                addressCountry: "Brasil",
-              });
-              setAddressDisabled(true);
-            })
-            .catch((err) => {
-              console.error("Erro ao buscar CEP:", err);
-              form.setFieldsValue({
-                address: "",
-                addressNeighborhood: "",
-                addressCity: "",
-                addressState: "",
-                addressCountry: "",
-              });
-              setAddressDisabled(false);
-            });
-        }else{
-            setAddressDisabled(false);
+        const addressFields = {
+            address: "",
+            addressNeighborhood: "",
+            addressCity: "",
+            addressState: "",
+            addressCountry: "",
+        };
+
+        if (cleanedCep.length !== 8) {
+            form.setFieldsValue(addressFields);
+            setCepLookupStatus("idle");
+            return;
         }
-      }, [cepValue, form]);
+
+        const controller = new AbortController();
+        let timedOut = false;
+        const timeoutId = window.setTimeout(() => {
+            timedOut = true;
+            controller.abort();
+        }, 8000);
+        form.setFieldsValue(addressFields);
+        setCepLookupStatus("loading");
+
+        fetchAddressByCep(cleanedCep, controller.signal)
+            .then((data) => {
+                form.setFieldsValue({
+                    address: data.logradouro ?? "",
+                    addressNeighborhood: data.bairro ?? "",
+                    addressCity: data.localidade ?? "",
+                    addressState: data.uf ?? "",
+                    addressCountry: "Brasil",
+                });
+                setCepLookupStatus("success");
+            })
+            .catch(() => {
+                if (controller.signal.aborted && !timedOut) return;
+                form.setFieldsValue(addressFields);
+                setCepLookupStatus("error");
+            })
+            .finally(() => window.clearTimeout(timeoutId));
+
+        return () => {
+            window.clearTimeout(timeoutId);
+            controller.abort();
+        };
+    }, [cleanedCep, form]);
+
     return (
         <>
             <Form<PersonalInfo>
@@ -124,7 +144,7 @@ export function PersonalInfoSecondStep({
 
                 <Flex gap={12}>
                     <Form.Item
-                        style={{ flex: 0.2 }}
+                        style={{ flex: showAddressFields ? 0.2 : 0.34 }}
                         label="CEP"
                         name="postalCode"
                         rules={[{ required: true, message: "Por favor preencha seu cep" }]}
@@ -132,18 +152,19 @@ export function PersonalInfoSecondStep({
                         <MaskedInput mask="_____-___" replacement={{ _: /\d/ }} />
                     </Form.Item>
 
-                    <Form.Item
-                        style={{ flex: 0.4 }}
-                        label="Rua"
-                        name="address"
-                        rules={[{ required: true, message: "Por favor preencha seu endereço" }]}
+                    {showAddressFields && (
+                        <Form.Item
+                            style={{ flex: 0.4 }}
+                            label="Rua"
+                            name="address"
+                            rules={[{ required: true, message: "Por favor preencha seu endereço" }]}
+                        >
+                            <Input disabled={cepLookupStatus === "loading"} />
+                        </Form.Item>
+                    )}
 
-                    >
-                        <Input disabled={addressDisabled}/>
-                    </Form.Item>
-
                     <Form.Item
-                        style={{ flex: 0.15 }}
+                        style={{ flex: showAddressFields ? 0.15 : 0.25 }}
                         label="Número"
                         name="addressNumber"
                         rules={[{ required: true, message: "Por favor preencha o número" }]}
@@ -153,7 +174,7 @@ export function PersonalInfoSecondStep({
 
                     
                     <Form.Item
-                        style={{ flex: 0.25 }}
+                        style={{ flex: showAddressFields ? 0.25 : 0.41 }}
                         label="Complemento"
                         name="addressComplement"
                     >
@@ -162,37 +183,54 @@ export function PersonalInfoSecondStep({
 
                 </Flex>
 
-                <Flex gap={12}>
-                <Form.Item
-                        style={{ flex: 0.35 }}
-                        label="Bairro"
-                        name="addressNeighborhood"
-                    >
-                        <Input disabled={addressDisabled}/>
-                    </Form.Item>
-                    <Form.Item
-                        style={{ flex: 0.35 }}
-                        label="Cidade"
-                        name="addressCity"
-                    >
-                        <Input disabled={addressDisabled} />
-                    </Form.Item>
+                {showAddressFields && (
+                    <>
+                        {cepLookupStatus === "loading" && <Spin size="small" tip="Buscando endereço pelo CEP..." />}
+                        {cepLookupStatus === "error" && (
+                            <Alert
+                                type="info"
+                                showIcon
+                                message="Não encontramos esse CEP. Preencha o endereço manualmente."
+                                style={{ marginBottom: 16 }}
+                            />
+                        )}
+                        <Flex gap={12}>
+                            <Form.Item
+                                style={{ flex: 0.35 }}
+                                label="Bairro"
+                                name="addressNeighborhood"
+                                rules={[{ required: true, message: "Por favor preencha seu bairro" }]}
+                            >
+                                <Input disabled={cepLookupStatus === "loading"} />
+                            </Form.Item>
+                            <Form.Item
+                                style={{ flex: 0.35 }}
+                                label="Cidade"
+                                name="addressCity"
+                                rules={[{ required: true, message: "Por favor preencha sua cidade" }]}
+                            >
+                                <Input disabled={cepLookupStatus === "loading"} />
+                            </Form.Item>
 
-                    <Form.Item
-                        style={{ flex: 0.15 }}
-                        label="Estado"
-                        name="addressState"
-                    >
-                        <Input disabled={addressDisabled}/>
-                    </Form.Item>
-                    <Form.Item
-                        style={{ flex: 0.25}}
-                        label="País"
-                        name="addressCountry"
-                    >
-                        <Input disabled={addressDisabled}/>
-                    </Form.Item>
-                </Flex>
+                            <Form.Item
+                                style={{ flex: 0.15 }}
+                                label="Estado"
+                                name="addressState"
+                                rules={[{ required: true, message: "Por favor preencha seu estado" }]}
+                            >
+                                <Input disabled={cepLookupStatus === "loading"} />
+                            </Form.Item>
+                            <Form.Item
+                                style={{ flex: 0.25 }}
+                                label="País"
+                                name="addressCountry"
+                                rules={[{ required: true, message: "Por favor preencha seu país" }]}
+                            >
+                                <Input disabled={cepLookupStatus === "loading"} />
+                            </Form.Item>
+                        </Flex>
+                    </>
+                )}
 
                 <Row gutter={16}>
 
