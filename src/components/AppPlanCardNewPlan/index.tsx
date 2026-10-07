@@ -1,7 +1,7 @@
 "use client";
 
 import { NewPlanModel } from "@/model/plan.model";
-import { formatCycleCharge, getBestValueCycle, getPlanCardPrice } from "@/plans/plan-price-display";
+import { getPlanCardPrice, getPlanRecurringPrices } from "@/plans/plan-price-display";
 import {
     Button,
     Descriptions,
@@ -9,14 +9,12 @@ import {
     Form,
     FormInstance,
     App,
-    Select,
-    Collapse,
     Checkbox,
 } from "antd";
 import { ReactNode, createContext, useCallback, useContext, useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import Link from "next/link";
-import { AppConfirmModal } from "../AppConfirmModal";
+import { PlanCheckoutModal } from "./checkout.style";
 import { ReferralQuote } from "@/affiliates/referral-quote.component";
 import { isReferralCheckoutReady, ReferralReadiness } from "@/affiliates/referral-request-queue";
 import { AppLoading } from "../AppLoading";
@@ -24,13 +22,14 @@ import {
     PaymentInfo,
     PaymentInfoThirdStep,
 } from "@/signup/payment-info.component";
+import { PaymentConsents } from "@/signup/payment-info.style";
+import { CycleSelector } from "@/signup/choose-plan.component";
 
-const { Panel } = Collapse;
 const { Title } = Typography;
 const CheckoutSubmittingContext = createContext(false);
 
 const ProfileTitle = styled(Title)`
-  color: #1890ff;
+  color: ${({ theme }) => theme.colorText};
   text-align: center;
 `;
 
@@ -42,39 +41,43 @@ const ButtonContent = styled.div`
 
 const FlipCardContainer = styled.div`
   perspective: 1000px;
-  width: 100%;
-  min-width: 350px;
+  width: min(350px, calc(100% - 20px));
+  min-width: 0;
   max-width: 350px;
   margin: 10px;
-  flex: 0 0 auto;
+  flex: 0 1 350px;
 `;
 
-const FlipCardInner = styled.div<{ flipped: boolean }>`
+const FlipCardInner = styled.div<{ $flipped: boolean }>`
   position: relative;
   width: 100%;
   height: fit-content;
   min-height: 400px;
+  display: grid;
   transform-style: preserve-3d;
   transition: transform 0.6s;
-  transform: ${({ flipped }) => (flipped ? "rotateY(180deg)" : "rotateY(0deg)")};
+  transform: ${({ $flipped }) => ($flipped ? "rotateY(180deg)" : "rotateY(0deg)")};
+  @media (prefers-reduced-motion: reduce) { transition: none; }
 `;
 
-const FlipCardFace = styled.div<{ back?: boolean }>`
-  position: absolute;
+const FlipCardFace = styled.div<{ $back?: boolean }>`
+  position: relative;
+  grid-area: 1 / 1;
+  min-width: 0;
   width: 100%;
   height: fit-content;
   min-height: 400px;
-  top: 0;
-  left: 0;
   backface-visibility: hidden;
   background: ${({ theme }) => (theme.colorBgContainer)};
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid ${({ theme }) => theme.colorBorderSecondary};
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
   padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transform: ${({ back }) => (back ? "rotateY(180deg)" : "none")};
+  transform: ${({ $back }) => ($back ? "rotateY(180deg)" : "none")};
+  overflow-wrap: anywhere;
 `;
 
 interface ModalProps {
@@ -128,6 +131,14 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
     });
 
     const [flipped, setFlipped] = useState(false);
+    const previousFlippedRef = useRef(flipped);
+    const modulesButtonRef = useRef<HTMLButtonElement>(null);
+    const returnButtonRef = useRef<HTMLButtonElement>(null);
+    useEffect(() => {
+        if (previousFlippedRef.current === flipped) return;
+        (flipped ? returnButtonRef : modulesButtonRef).current?.focus({ preventScroll: true });
+        previousFlippedRef.current = flipped;
+    }, [flipped]);
     const selectedCycleRef = useRef<string>("YEARLY");
     const [selectedCycle, setSelectedCycle] = useState<string>("YEARLY");
     const [allTermsAccepted, setAllTermsAccepted] = useState(false);
@@ -149,39 +160,8 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
 
     const handleFlip = () => setFlipped(!flipped);
 
-    const getAvailableCycles = (planData: NewPlanModel) => {
-        const cycles = [];
-        if (planData.monthValue) {
-            cycles.push({ 
-                value: "MONTHLY", 
-                label: "Mensal", 
-                price: planData.monthValue,
-            });
-        }
-        if (planData.quarterlyValue) {
-            cycles.push({ 
-                value: "QUARTERLY", 
-                label: "Trimestral", 
-                price: planData.quarterlyValue,
-            });
-        }
-        if (planData.semiannualValue) {
-            cycles.push({ 
-                value: "SEMIANNUALLY", 
-                label: "Semestral", 
-                price: planData.semiannualValue,
-            });
-        }
-        if (planData.annualValue) {
-            cycles.push({ 
-                value: "YEARLY", 
-                label: "Anual", 
-                price: planData.annualValue,
-            });
-        }
-
-        return cycles;
-    };
+    const getAvailableCycles = (planData: NewPlanModel) =>
+        getPlanRecurringPrices(planData).map(cycle => ({ ...cycle, price: cycle.amount }));
 
     const cyclesForSelection = (planData: NewPlanModel, cycle: string) => {
         const cycles = getAvailableCycles(planData);
@@ -207,8 +187,6 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
             setSelectedCycle(availableCycles[0].value);
         }
 
-        const bestValueCycle = getBestValueCycle(getAvailableCycles(planData));
-
         selectedCycleRef.current = cyclesForSelection(planData, selectedCycle);
 
         // Componente interno do modal que tem acesso aos availableCycles
@@ -225,96 +203,37 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
             const [localAllTermsAccepted, setLocalAllTermsAccepted] = useState(allTermsAccepted);
 
             return (
-                <div inert={submitting} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        <span>
-                            Escolha a assinatura para o plano{" "}
-                            <strong>{planData.name}</strong>:
-                        </span>
+                <div inert={submitting} aria-busy={submitting} className="plan-checkout-content">
+                    <p className="plan-checkout-intro">Confira a assinatura do plano <strong>{planData.name}</strong> e preencha os dados de pagamento.</p>
+                    <div className="plan-checkout-cycle">
+                        <label htmlFor={`checkout-cycle-${planData.id}`}>Assinatura selecionada</label>
                         {cycles.length > 0 ? (
                             <>
-                                <Select
+                                <CycleSelector
+                                    id={`checkout-cycle-${planData.id}`}
+                                    plan={planData}
+                                    selectedCycle={localSelectedCycle}
                                     disabled={submitting}
-                                    value={localSelectedCycle}
-                                    onChange={(value) => {
+                                    onCycleChange={(value) => {
                                         invalidateReferral();
                                         setLocalSelectedCycle(value);
                                         setSelectedCycle(value);
                                         selectedCycleRef.current = value;
                                     }}
-                                    style={{ width: "100%" }}
-                                    placeholder="Selecione uma assinatura"
-                                    optionLabelProp="label"
-                                    optionRender={(option) => {
-                                        const cycle = cycles.find(c => c.value === option.value);
-                                        return (
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                                                <span>
-                                                    {cycle?.label} - {cycle && formatCycleCharge(cycle.value, cycle.price)}
-                                                </span>
-                                                {option.value === bestValueCycle && (
-                                                    <span style={{
-                                                        fontSize: 12,
-                                                        fontWeight: 600,
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        gap: 4,
-                                                        padding: "2px 6px",
-                                                        borderRadius: "4px",
-                                                    }}>
-                                                        ⭐ Melhor custo-benefício
-                                                    </span>
-                                                )}
-                                            </div>
-                                        );
-                                    }}
-                                >
-                                    {cycles.map((cycle) => {
-                                        return (
-                                            <Select.Option
-                                                key={cycle.value}
-                                                value={cycle.value}
-                                        label={`${cycle.label} - ${formatCycleCharge(cycle.value, cycle.price)}${cycle.value === bestValueCycle ? " ⭐" : ""}`}
-                                            >
-                                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                                                    <span>
-                                                        {cycle.label} - {formatCycleCharge(cycle.value, cycle.price)}
-                                                    </span>
-                                                    {cycle.value === bestValueCycle && (
-                                                        <span style={{
-                                                            fontSize: 12,
-                                                            fontWeight: 600,
-                                                            display: "flex",
-                                                            alignItems: "center",
-                                                            gap: 4,
-                                                            padding: "2px 6px",
-                                                            borderRadius: "4px",
-                                                        }}>
-                                                            ⭐ Melhor custo-benefício
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </Select.Option>
-                                        );
-                                    })}
-                                </Select>
+                                />
                                 
                             </>
                         ) : (
-                            <div style={{ color: "#ff4d4f", fontSize: 14 }}>
+                            <div className="plan-checkout-unavailable" role="status">
                                 Nenhuma assinatura disponível para este plano.
                             </div>
                         )}
                     </div>
 
                     <ReferralQuote planId={planData.id} cycle={localSelectedCycle} onReadinessChange={handleReferralReadiness} disabled={submitting} />
-                    <Collapse>
-                        <Panel header="Dados de pagamento" key="payment">
-                            <PaymentInfoThirdStep formV={paymentInfoForm} />
-                        </Panel>
-                    </Collapse>
+                    <PaymentInfoThirdStep formV={paymentInfoForm} />
 
-                    <div style={{ marginTop: 16 }}>
+                    <PaymentConsents>
                         <Checkbox
                             disabled={submitting}
                             checked={localAllTermsAccepted}
@@ -327,17 +246,17 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                             }}
                         >
                             Li e concordo com os{" "}
-                            <Link href="/termos-e-politicas" target="_blank" style={{ color: "#1890ff", textDecoration: "underline" }}>
+                            <Link href="/termos-e-politicas" target="_blank" rel="noopener noreferrer">
                                 termos e políticas
                             </Link>
                         </Checkbox>
-                    </div>
+                    </PaymentConsents>
                 </div>
             );
         };
 
         setModalProps({
-            title: "Assinar novo plano",
+            title: "Finalize sua assinatura",
             content: <ModalContent />,
             onConfirm: () => subscribePlan(planData, paymentInfoForm, allTermsAcceptedRef.current),
             onCancel: () => {
@@ -345,8 +264,8 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                 resetModal();
                 setModalProps({ ...modalProps, visible: false });
             },
-            confirmText: "Sim, assinar",
-            cancelText: "Não",
+            confirmText: "Confirmar e assinar",
+            cancelText: "Voltar",
             visible: true,
             isDeclined: false,
         });
@@ -435,8 +354,8 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
 
     return (
         <FlipCardContainer>
-            <FlipCardInner flipped={flipped}>
-                <FlipCardFace>
+            <FlipCardInner $flipped={flipped}>
+                <FlipCardFace inert={flipped} aria-hidden={flipped}>
                     <ProfileTitle level={3}>
                         {plan?.name ?? plan?.name ?? "Nome não informado"}
                     </ProfileTitle>
@@ -477,11 +396,11 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                             >
                                 {getAvailableCycles(plan).length ? "Assinar Plano" : "Contratação indisponível"}
                             </Button>
-                            <Button type="default" size="large" onClick={handleFlip}>Ver Módulos</Button>
+                            <Button ref={modulesButtonRef} type="default" size="large" onClick={handleFlip}>Ver Módulos</Button>
                         </div>
                     </ButtonContent>
                 </FlipCardFace>
-                <FlipCardFace back>
+                <FlipCardFace $back inert={!flipped} aria-hidden={!flipped}>
                     <ProfileTitle level={4}>Módulos do Plano</ProfileTitle>
                     {plan.modules && plan.modules.length > 0 ? (
                         <ul>
@@ -490,13 +409,15 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                     ) : <p>Nenhum módulo disponível</p>}
 
                     <ButtonContent>
-                        <Button type="default" size="large" onClick={handleFlip}>Voltar</Button>
+                        <Button ref={returnButtonRef} type="default" size="large" onClick={handleFlip}>Voltar</Button>
                     </ButtonContent>
                 </FlipCardFace>
             </FlipCardInner>
 
             <CheckoutSubmittingContext.Provider value={isLoading}>
-            <AppConfirmModal
+            <PlanCheckoutModal
+                width={680}
+                useModalHeader
                 title={modalProps.title}
                 content={modalProps.content}
                 confirmText={modalProps.confirmText}

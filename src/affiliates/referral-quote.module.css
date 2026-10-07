@@ -5,6 +5,138 @@
   min-width: 0;
 }
 
+.codeLabel {
+  font-size: 13px;
+}
+
+.codeRow > input,
+.codeRow > button {
+  min-height: 44px;
+  border-radius: 10px;
+}
+
+.codeRow > button {
+  padding-inline: 20px;
+  font-weight: 600;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.discount .offer {
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: transparent;
+}
+
+.discount .offer :global(.ant-alert-icon) {
+  margin-inline-end: 8px;
+  margin-top: 2px;
+  font-size: 16px;
+}
+
+.discount .offer :global(.ant-alert-message) {
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.offerSummary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 16px;
+}
+
+.appliedCode {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
+  font-size: 13px;
+}
+
+.total strong {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.prices {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.priceItem {
+  white-space: nowrap;
+}
+
+.originalPrice {
+  opacity: 0.65;
+  font-size: 13px;
+  text-decoration-thickness: 1px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.offerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 4px 12px;
+  margin-top: 4px;
+}
+
+.offerDetails {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.offerDetails[open] {
+  flex-basis: 100%;
+}
+
+.offerDetails summary {
+  padding-block: 6px;
+  cursor: pointer;
+}
+
+.offerDetails summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.discount .offer .removeCode {
+  flex-shrink: 0;
+  min-height: 30px;
+  padding-inline: 0;
+  font-size: 12px;
+}
+
 .codeRow {
   display: flex;
   gap: 8px;
@@ -16,13 +148,29 @@
 }
 
 .summary {
+  margin-top: 8px;
   margin-bottom: 8px !important;
+  color: inherit;
+  line-height: 1.6;
+  font-size: 12px;
 }
 
 .discount :global(.ant-alert) {
   align-items: flex-start;
   flex-wrap: wrap;
   row-gap: 10px;
+  overflow-wrap: anywhere;
+}
+
+.discount :global(.ant-alert-action) {
+  align-self: flex-start;
+}
+
+.discount :global(.ant-alert-action .ant-btn) {
+  min-height: 36px;
+  height: auto;
+  white-space: normal;
+  text-align: center;
 }
 
 .discount :global(.ant-alert-content) {

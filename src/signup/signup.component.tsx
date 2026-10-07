@@ -1,8 +1,9 @@
 "use client";
 
 import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
-import { Button, Divider, Form, Steps, Typography } from "antd";
-import { Card, Container, Content, Footer, Header, Span } from "./signup.style";
+import { Alert, Button, Form, Steps, Typography } from "antd";
+import { Card, CheckoutLogin, Container, Content, Footer, Header, ProgressContainer, Span, StageDescription, StageHeading } from "./signup.style";
+import { CheckoutBrand } from "./checkout-brand.component";
 import { PaymentInfo, PaymentInfoThirdStep } from "./payment-info.component";
 import {
   PersonalInfo,
@@ -14,11 +15,9 @@ import { useRouter } from "next/navigation";
 import { ChoosePlanFirstStep, CycleSelector } from "./choose-plan.component";
 import { TermsCheckbox } from "./terms-checkbox.component";
 import Link from "next/link";
-import Title from "antd/es/typography/Title";
 import { ReferralQuote } from "@/affiliates/referral-quote.component";
 import { isReferralCheckoutReady, ReferralReadiness, referralRequestQueue } from "@/affiliates/referral-request-queue";
 import { signUpClient } from "./signup.action";
-import { useIsMobile } from "@/util/use-media-query.hook";
 import { NewPlanModel } from "@/model/plan.model";
 import { getPlanRecurringPrices } from "@/plans/plan-price-display";
 
@@ -46,15 +45,23 @@ export default function SignupSteps({
 }: {
   plans: NewPlanModel[];
 }) {
-  const isMobile = useIsMobile();
-
   const [isPending, startTransition] = useTransition();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
   const pendingReferralRequests = useSyncExternalStore(referralRequestQueue.subscribe, referralRequestQueue.getPending, () => 0);
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const previousStep = useRef(currentStep);
   const router = useRouter();
+
+  useEffect(() => {
+    if (previousStep.current !== currentStep) {
+      headingRef.current?.focus({ preventScroll: true });
+      window.scrollTo({ top: 0, behavior: "auto" });
+      previousStep.current = currentStep;
+    }
+  }, [currentStep]);
 
   const [campaignUnavailable, setCampaignUnavailable] = useState(false);
   useEffect(() => { setCampaignUnavailable(new URLSearchParams(window.location.search).get("campaign") === "unavailable"); }, []);
@@ -108,28 +115,26 @@ export default function SignupSteps({
     return (
       pendingReferralRequests > 0 ||
       (currentStep === 1 && !selectedPlan) ||
-      (currentStep === 2 && !personalInfoFormValid) ||
-      (currentStep === 3 && !isPlanFree && (!paymentInfoFormValid || !termsAccepted || !autoBillingAccepted || !isReferralCheckoutReady(referralReadiness, selectedPlan || "", selectedCycle)))
+      (currentStep === 2 && (!selectedPlan || !personalInfoFormValid)) ||
+      (currentStep === 3 && !isPlanFree && (!selectedPlan || !personalInfoFormValid || !paymentInfoFormValid || !termsAccepted || !autoBillingAccepted || !isReferralCheckoutReady(referralReadiness, selectedPlan || "", selectedCycle)))
     );
   }, [currentStep, selectedPlan, selectedCycle, personalInfoFormValid, paymentInfoFormValid, termsAccepted, autoBillingAccepted, isPlanFree, referralReadiness, pendingReferralRequests]);
 
   return (
     <Container>
-      <Card>
+      <CheckoutBrand />
+      <Card as="section" aria-labelledby="checkout-heading">
         <Header>
-          <Title level={2} style={{ marginBottom: 24, marginTop: 8 }}>
-            Cadastro
-          </Title>
-          {isMobile !== null && (
+          <ProgressContainer as="nav" aria-label="Etapas do cadastro">
             <Steps
               responsive={false}
-              type={isMobile ? "inline" : "default"}
+              size="small"
               current={currentStep - 1}
               onChange={(step) => {
                 if (submittingRef.current) return;
                 if (
                   (step === 1 && !selectedPlan) ||
-                  (step === 2 && !personalInfoFormValid)
+                  (step === 2 && (!selectedPlan || !personalInfoFormValid))
                 ) {
                   return;
                 }
@@ -158,16 +163,21 @@ export default function SignupSteps({
                       },
                       {
                         title: "Pagamento",
-                        disabled: isSubmitting || !personalInfoFormValid,
+                        disabled: isSubmitting || !selectedPlan || !personalInfoFormValid,
                       },
                     ]
               }
             />
-          )}
+          </ProgressContainer>
+          <StageHeading id="checkout-heading" ref={headingRef} tabIndex={-1}>Cadastro</StageHeading>
+          <StageDescription>
+            {currentStep === 1 ? "Escolha o plano ideal para seus estudos." : currentStep === 2
+              ? "Preencha seus dados para criar seu acesso à plataforma."
+              : "Confira sua assinatura e preencha os dados de pagamento."}
+          </StageDescription>
         </Header>
-        <Divider />
-        <Content inert={isSubmitting}>
-          {campaignUnavailable && <Typography.Paragraph type="warning">Este link de campanha não está disponível. Você pode escolher um plano pelo valor regular.</Typography.Paragraph>}
+        <Content inert={isSubmitting} aria-busy={isPending || isSubmitting}>
+          {campaignUnavailable && <Alert showIcon type="warning" message="Este link de campanha não está disponível. Você pode escolher um plano pelo valor regular." style={{ marginBottom: 20 }} />}
           <div
             style={{
               display: currentStep === 1 ? "block" : "none",
@@ -192,20 +202,21 @@ export default function SignupSteps({
                 display: currentStep === 3 ? "block" : "none",
               }}
             >
-              <Typography.Paragraph>
-                Preencha as informações de pagamento
-              </Typography.Paragraph>
-              
               {selectedPlanData && (
-                <div style={{ marginBottom: 20 }}>
-                  <Typography.Text strong>Assinatura:</Typography.Text>
-                  <CycleSelector
-                    plan={selectedPlanData}
-                    selectedCycle={selectedCycle}
-                    onCycleChange={cycle => { if (cycle !== selectedCycle) { invalidateReferral(); setSelectedCycle(cycle); } }}
-                  />
+                <section aria-label="Resumo da assinatura" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", minWidth: 0, gap: 16, marginBottom: 28 }}>
+                  <div style={{ minWidth: 0 }}>
+                    <label htmlFor="signup-cycle"><Typography.Text strong>Assinatura selecionada</Typography.Text></label>
+                    <Typography.Paragraph type="secondary" style={{ margin: "4px 0 0" }}>{selectedPlanData.name}</Typography.Paragraph>
+                    <CycleSelector
+                      id="signup-cycle"
+                      disabled={isPending || isSubmitting}
+                      plan={selectedPlanData}
+                      selectedCycle={selectedCycle}
+                      onCycleChange={cycle => { if (cycle !== selectedCycle) { invalidateReferral(); setSelectedCycle(cycle); } }}
+                    />
+                  </div>
                   <ReferralQuote planId={selectedPlanData.id} cycle={selectedCycle} onReadinessChange={handleReferralReadiness} disabled={isPending || isSubmitting} />
-                </div>
+                </section>
               )}
 
               <PaymentInfoThirdStep formV={paymentInfoForm} />
@@ -216,14 +227,14 @@ export default function SignupSteps({
             </div>
           )}
 
-          {error && <Typography.Text type="danger">{error}</Typography.Text>}
+          {error && <Alert showIcon type="error" message={error} style={{ marginTop: 20 }} />}
         </Content>
         <Footer>
           {currentStep > 1 && (
             <Button
               style={{ padding: 0 }}
               type="link"
-              icon={<ArrowLeftOutlined />}
+              icon={<ArrowLeftOutlined aria-hidden="true" />}
               iconPosition="start"
               disabled={isSubmitting || isPending}
               onClick={() => { if (!submittingRef.current) setCurrentStep(currentStep - 1); }}
@@ -231,9 +242,11 @@ export default function SignupSteps({
               Voltar
             </Button>
           )}
+          {currentStep === 1 && <Typography.Text type="secondary">Etapa 1 de {isPlanFree ? 2 : 3}</Typography.Text>}
           <Button
-            type="link"
-            icon={<ArrowRightOutlined />}
+            type="primary"
+            size="large"
+            icon={<ArrowRightOutlined aria-hidden="true" />}
             iconPosition="end"
             disabled={isDisabled || isPending || isSubmitting}
             loading={isPending || isSubmitting}
@@ -317,16 +330,14 @@ export default function SignupSteps({
                 setCurrentStep(currentStep + 1);
               }
             }}
-            style={{ marginLeft: "auto", padding: 0 }}
+            style={{ marginLeft: "auto" }}
           >
-            Confirmar
+            {isPlanFree && currentStep === 2 ? "Criar conta" : currentStep === 3 ? "Confirmar e assinar" : "Continuar"}
           </Button>
         </Footer>
       </Card>
 
-      <Link href="/login">
-        <Span>Já tenho uma conta</Span>
-      </Link>
+      <CheckoutLogin>Já tem uma conta? <Link href="/login"><Span>Entrar</Span></Link></CheckoutLogin>
     </Container>
   );
 }

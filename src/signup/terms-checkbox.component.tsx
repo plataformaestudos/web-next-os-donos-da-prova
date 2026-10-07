@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Checkbox, Typography, Alert, Button } from "antd";
+import { Checkbox, Typography, Alert } from "antd";
 import { getTermsFromAPI } from "@/terms/terms-client.action";
 import { TermsOfUse, PrivacyPolicy } from "@/types/terms.types";
+import { PaymentConsents } from "./payment-info.style";
 
 const { Text } = Typography;
 
@@ -58,15 +59,11 @@ export function TermsCheckbox({ onAcceptanceChange, onAutoBillingChange }: Terms
     setAutoBillingAccepted(checked);
   };
 
-  const handleTermsClick = () => {
-    window.open('/termos-e-politicas', '_blank');
-  };
-
   if (loading) {
     return (
-      <div style={{ marginTop: "20px", textAlign: "center" }}>
+      <PaymentConsents role="status">
         <Text type="secondary">Carregando termos de uso...</Text>
-      </div>
+      </PaymentConsents>
     );
   }
   if (error || !termsOfUse || !privacyPolicy) {
@@ -81,21 +78,16 @@ export function TermsCheckbox({ onAcceptanceChange, onAutoBillingChange }: Terms
   }
 
   return (
-    <div style={{ marginTop: "20px" }}>
+    <PaymentConsents>
       <Checkbox
         checked={termsAccepted}
         onChange={(e) => handleCheckboxChange(e.target.checked)}
-        style={{ marginBottom: "16px" }}
       >
         <Text>
           Li e concordo com os{" "}
-          <Button
-            type="link"
-            onClick={handleTermsClick}
-            style={{ padding: 0 }}
-          >
+          <a href="/termos-e-politicas" target="_blank" rel="noopener noreferrer">
             Termos de Uso, a Política de Privacidade e a Política de Reembolso
-          </Button>
+          </a>
           {" "} da OS DONOS DA PROVA{" "}
         </Text>
       </Checkbox>
@@ -105,9 +97,9 @@ export function TermsCheckbox({ onAcceptanceChange, onAutoBillingChange }: Terms
         onChange={(e) => handleAutoBillingChange(e.target.checked)}
       >
         <Text>
-          Concordo com a cobrança automática após o período gratuito
+          Concordo com a cobrança automática após o período contratado.
         </Text>
       </Checkbox>
-    </div>
+    </PaymentConsents>
   );
 }
