@@ -18,6 +18,7 @@ import Link from "next/link";
 import { ReferralQuote } from "@/affiliates/referral-quote.component";
 import { isReferralCheckoutReady, ReferralReadiness, referralRequestQueue } from "@/affiliates/referral-request-queue";
 import { signUpClient } from "./signup.action";
+import { clearSignupSuccessStatus, saveSignupSuccessStatus, signupSuccessStatus } from "./signup-success.state";
 import { NewPlanModel } from "@/model/plan.model";
 import { getPlanRecurringPrices } from "@/plans/plan-price-display";
 
@@ -54,6 +55,8 @@ export default function SignupSteps({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const previousStep = useRef(currentStep);
   const router = useRouter();
+
+  useEffect(() => { clearSignupSuccessStatus(); }, []);
 
   useEffect(() => {
     if (previousStep.current !== currentStep) {
@@ -314,6 +317,7 @@ export default function SignupSteps({
                       const result = await signUpClient(payload);
 
                       if (result.success) {
+                        saveSignupSuccessStatus(signupSuccessStatus(result.payload?.data?.emailConfirmationRequired));
                         router.push("/signup/success");
                       } else {
                         setError(result.error ?? "Erro desconhecido no cadastro");

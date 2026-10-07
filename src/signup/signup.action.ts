@@ -1,15 +1,7 @@
 import { SignupDTO } from "./signup.dto";
-import HttpClient from "@/util/http-client/fetch-client.util";
 
 export interface SignupData {
-  id: string;
-  costumerId?: string;
-  value: number;
-  creditCard?: {
-    creditCardNumber: string;
-    creditCardBrand: string;
-    creditCardToken: string;
-  };
+  emailConfirmationRequired?: boolean;
 }
 
 export interface DefaultResponse<T> {
@@ -31,15 +23,12 @@ export async function signUpClient(dto: SignupDTO): Promise<{ success: boolean; 
     });
 
     const payload = await response.json() as DefaultResponse<SignupData>;
-    if (!response.ok) throw new Error(payload.message || "Não foi possível concluir o cadastro.");
-
-    await HttpClient.fetch('/auth/login', {
-      method: "POST",
-      body: JSON.stringify({
-        username: dto.userInfo.email,
-        password: dto.userInfo.password,
-      }),
-    });
+    if (!response.ok) {
+      const message = typeof payload.error === "string" && payload.error.trim()
+        ? payload.error
+        : payload.message;
+      throw new Error(message || "Não foi possível concluir o cadastro.");
+    }
 
     return { success: true, error: null, payload };
   } catch (error: unknown) {
@@ -50,4 +39,3 @@ export async function signUpClient(dto: SignupDTO): Promise<{ success: boolean; 
     };
   }
 }
-
