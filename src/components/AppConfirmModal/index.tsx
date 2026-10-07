@@ -13,6 +13,7 @@ interface AppConfirmModalProps extends ModalProps {
   visible: boolean;
   isDeclined?: boolean;
   confirmDisabled?: boolean;
+  useModalHeader?: boolean;
 }
 
 export function AppConfirmModal({
@@ -25,25 +26,26 @@ export function AppConfirmModal({
   visible,
   isDeclined = false,
   confirmDisabled = false,
+  useModalHeader = false,
   ...modalProps
 }: AppConfirmModalProps) {
   const { Text } = Typography;
 
   return (
     <Modal
-      title={null}
+      title={useModalHeader ? title : null}
       open={visible}
       onCancel={onCancel}
       footer={null}
       centered
       {...modalProps}
     >
-      <Text
+      {!useModalHeader && <Text
         strong
         style={{ fontSize: 18, textAlign: "center" }}
       >
         {title}
-      </Text>
+      </Text>}
       <div style={{ marginTop: 32, marginBottom: 32, textAlign: "center" }}>
         {content}
       </div>

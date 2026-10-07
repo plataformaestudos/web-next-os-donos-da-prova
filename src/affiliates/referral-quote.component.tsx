@@ -88,14 +88,14 @@ export function ReferralQuote({ planId, cycle, onReadinessChange, disabled = fal
 
   return (
     <section className={styles.discount} aria-label="Código de desconto" aria-busy={busy}>
-      <label htmlFor={inputId}><Typography.Text strong>Tem um código de desconto?</Typography.Text></label>
+      <label className={styles.codeLabel} htmlFor={inputId}><Typography.Text strong>Tem um código de desconto?</Typography.Text></label>
       <div className={styles.codeRow}>
         <Input
           id={inputId}
           value={code}
           onChange={event => setCode(event.target.value)}
           onPressEnter={event => { event.preventDefault(); if (code.trim() && !busy && !disabled) run("apply"); }}
-          placeholder="Ex.: marina-enem"
+          placeholder="Digite seu código"
           autoComplete="off"
           maxLength={100}
           disabled={busy || disabled}
@@ -103,7 +103,7 @@ export function ReferralQuote({ planId, cycle, onReadinessChange, disabled = fal
         />
         <Button onClick={() => run("apply")} disabled={!code.trim() || busy || disabled}>Aplicar</Button>
       </div>
-      {busy && <div role="status"><Spin size="small" /> <Typography.Text type="secondary">Consultando desconto...</Typography.Text></div>}
+      {busy && <div className={styles.loading} role="status"><Spin size="small" /> <Typography.Text type="secondary">Consultando desconto...</Typography.Text></div>}
       {state.error && state.selection === selection && <Alert
         id={errorId}
         type="warning"
@@ -113,11 +113,36 @@ export function ReferralQuote({ planId, cycle, onReadinessChange, disabled = fal
         action={!state.valid ? <Space wrap><Button onClick={() => run("revalidate")} disabled={busy || disabled}>Tentar novamente</Button><Button onClick={() => run("remove")} disabled={busy || disabled}>Continuar pelo valor regular</Button></Space> : undefined}
       />}
       {offer && state.valid && <Alert
+        className={styles.offer}
         type="success"
         showIcon
         message={`Oferta ${offer.campaign.title}`}
-        description={<><Typography.Paragraph className={styles.summary}>{quoteSummary(cycle, offer)}</Typography.Paragraph><Typography.Text type="secondary">Disponível para contas novas ou Free. A elegibilidade será confirmada na contratação.</Typography.Text></>}
-        action={<Button onClick={() => run("remove")} disabled={busy || disabled}>Remover código</Button>}
+        description={<>
+          <div className={styles.offerSummary}>
+            {offer.campaign.slug && <span className={styles.appliedCode}>Código aplicado: <strong>{offer.campaign.slug}</strong></span>}
+            <span className={styles.total}>
+              Total por ciclo
+              <span className={styles.prices}>
+                <span className={styles.priceItem}>
+                  <span className={styles.visuallyHidden}>Valor original: </span>
+                  <del className={styles.originalPrice}>{(offer.baseAmountCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</del>
+                </span>
+                <span className={styles.priceItem}>
+                  <span className={styles.visuallyHidden}>Valor com desconto: </span>
+                  <strong>{(offer.finalAmountCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong>
+                </span>
+              </span>
+            </span>
+          </div>
+          <div className={styles.offerActions}>
+            <details className={styles.offerDetails}>
+              <summary>Detalhes do desconto</summary>
+              <Typography.Paragraph className={styles.summary}>{quoteSummary(cycle, offer)}</Typography.Paragraph>
+              <Typography.Text type="secondary">Disponível para contas novas ou Free. A elegibilidade será confirmada na contratação.</Typography.Text>
+            </details>
+            <Button type="link" size="small" className={styles.removeCode} onClick={() => run("remove")} disabled={busy || disabled}>Remover código</Button>
+          </div>
+        </>}
       />}
     </section>
   );

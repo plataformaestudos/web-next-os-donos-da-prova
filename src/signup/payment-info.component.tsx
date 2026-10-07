@@ -1,6 +1,7 @@
-import { Checkbox, Flex, Form, FormInstance, Input, Typography } from "antd";
+import { Checkbox, Form, FormInstance, Input } from "antd";
 
 import { MaskedInput } from "@/ui/masked-input/masked-input.component";
+import { PaymentSection } from "./payment-info.style";
 
 export interface PaymentInfo {
   holderName: string;
@@ -16,10 +17,8 @@ export function PaymentInfoThirdStep({
   formV: FormInstance<PaymentInfo>;
 }) {
   return (
-    <>
-      <Typography.Paragraph>
-        Preencha as informações de pagamento
-      </Typography.Paragraph>
+    <PaymentSection aria-label="Dados do cartão de crédito">
+      <h3 className="payment-section-title">Dados do cartão de crédito</h3>
       <Form<PaymentInfo>
         form={formV}
         name="payment=info"
@@ -27,6 +26,14 @@ export function PaymentInfoThirdStep({
         autoComplete="off"
         layout="vertical"
       >
+        <Form.Item
+          label="Nome no cartão"
+          name="holderName"
+          rules={[{ required: true, message: "Por favor preencha o nome" }]}
+        >
+          <Input placeholder="Como impresso no cartão" autoComplete="cc-name" />
+        </Form.Item>
+
         <Form.Item
           style={{ flex: 1 }}
           label="Número do cartão"
@@ -38,10 +45,16 @@ export function PaymentInfoThirdStep({
             },
           ]}
         >
-          <MaskedInput mask="____-____-____-____" replacement={{ _: /\d/ }} />
+          <MaskedInput
+            mask="____-____-____-____"
+            replacement={{ _: /\d/ }}
+            placeholder="0000-0000-0000-0000"
+            inputMode="numeric"
+            autoComplete="cc-number"
+          />
         </Form.Item>
 
-        <Flex gap={12}>
+        <div className="payment-card-row">
           <Form.Item
             style={{ flex: 1 }}
             label="Validade"
@@ -51,9 +64,11 @@ export function PaymentInfoThirdStep({
             ]}
           >
             <MaskedInput
-              placeholder="mm/yy"
+              placeholder="mm/aa"
               mask="__/__"
               replacement={{ _: /\d/ }}
+              inputMode="numeric"
+              autoComplete="cc-exp"
             />
           </Form.Item>
 
@@ -61,6 +76,7 @@ export function PaymentInfoThirdStep({
             style={{ flex: 1 }}
             label="CVV"
             name="cvv"
+            extra={<span className="payment-card-help">Código de 3 dígitos no verso do cartão.</span>}
             rules={[
               {
                 required: true,
@@ -68,22 +84,20 @@ export function PaymentInfoThirdStep({
               },
             ]}
           >
-            <MaskedInput mask="___" replacement={{ _: /\d/ }} />
+            <MaskedInput
+              mask="___"
+              replacement={{ _: /\d/ }}
+              placeholder="123"
+              inputMode="numeric"
+              autoComplete="cc-csc"
+            />
           </Form.Item>
-        </Flex>
+        </div>
 
-        <Form.Item
-          label="Nome no cartão"
-          name="holderName"
-          rules={[{ required: true, message: "Por favor preencha o nome" }]}
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item name="saveCard" valuePropName="checked" label={null} style={{ marginBottom: 10 }}>
+        <Form.Item name="saveCard" valuePropName="checked" label={null} className="payment-save-card">
           <Checkbox>Salvar cartão para compras futuras</Checkbox>
         </Form.Item>
       </Form>
-    </>
+    </PaymentSection>
   );
 }

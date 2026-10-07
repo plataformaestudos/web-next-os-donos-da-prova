@@ -1,42 +1,29 @@
 "use client";
 
 import * as Styled from "./page.style";
-import { Button, Typography } from "antd";
+import { Button } from "antd";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
-
-const { Title, Paragraph } = Typography;
+import CheckoutBrand from "@/signup/checkout-brand.component";
+import { StageHeading } from "@/signup/signup.style";
 
 export default function SignupSuccessPage() {
   const router = useRouter();
 
   return (
     <Styled.Container>
+      <CheckoutBrand />
       <Styled.Card>
-        <Styled.IconContainer>
-          <CheckCircleOutlined style={{ fontSize: 80, color: "#52c41a" }} />
+        <Styled.IconContainer aria-hidden="true">
+          <CheckCircleOutlined />
         </Styled.IconContainer>
-        
-        <Title level={2} style={{ textAlign: "center", marginTop: 24 }}>
-          Parabéns! Cadastro realizado com sucesso
-        </Title>
-        
+        <StageHeading>Cadastro realizado com sucesso</StageHeading>
         <Styled.MessageContainer>
-          <Paragraph style={{ textAlign: "center", fontSize: 16, marginBottom: 8 }}>
-            Seja bem-vindo!
-          </Paragraph>
-          <Paragraph style={{ textAlign: "center", fontSize: 16 }}>
-            Estamos muito felizes de ter você conosco.
-          </Paragraph>
+          <p>Seja bem-vindo aos Donos da Prova!</p>
+          <p>Entre na sua conta para continuar seus estudos.</p>
         </Styled.MessageContainer>
-
         <Styled.ButtonContainer>
-          <Button
-            type="primary"
-            size="large"
-            block
-            onClick={() => router.push("/login")}
-          >
+          <Button type="primary" size="large" block onClick={() => router.push("/login")}>
             Ir para o login
           </Button>
         </Styled.ButtonContainer>
@@ -44,4 +31,3 @@ export default function SignupSuccessPage() {
     </Styled.Container>
   );
 }
-
