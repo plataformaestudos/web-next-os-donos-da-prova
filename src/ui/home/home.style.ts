@@ -14,7 +14,8 @@ export const Container = styled.div`
   }
 `;
 
-export const CardPerformance = styled.div<{ $large?: boolean }>`
+export const CardPerformance = styled.div<{ $large?: boolean; $hasFreePlanUsage?: boolean }>`
+  grid-area: performance;
   display: flex;
   position: relative;
   flex-direction: column;
@@ -28,6 +29,13 @@ export const CardPerformance = styled.div<{ $large?: boolean }>`
   transition: filter 0.15s ease-in-out;
   flex: 0 0 auto;
   min-width: fit-content;
+
+  @media (min-width: 1025px) {
+    ${({ $hasFreePlanUsage }) => $hasFreePlanUsage && `
+      align-self: start;
+      height: fit-content;
+    `}
+  }
 
   &:hover {
     filter: brightness(0.95);
@@ -149,10 +157,15 @@ export const Info = styled.span<InfoProps>`
   }
 `;
 
-export const Content = styled.div`
-  display: flex;
+export const Content = styled.div<{ $hasFreePlanUsage?: boolean }>`
+  display: ${({ $hasFreePlanUsage }) => $hasFreePlanUsage ? "grid" : "flex"};
   flex-direction: row;
   flex-wrap: nowrap;
+  grid-template-columns: repeat(5, max-content);
+  grid-template-rows: 200px auto;
+  grid-template-areas:
+    "card1 card2 card3 card4 performance"
+    "freePlan freePlan freePlan freePlan performance";
   gap: 16px;
   margin-top: 40px;
   
@@ -163,9 +176,9 @@ export const Content = styled.div`
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: auto auto;
-    grid-template-areas: 
-      "card1 card2 card3"
-      "card4 performance performance";
+    grid-template-areas: ${({ $hasFreePlanUsage }) => $hasFreePlanUsage
+      ? `"card1 card2 card3" "card4 performance performance" "freePlan freePlan freePlan"`
+      : `"card1 card2 card3" "card4 performance performance"`};
     width: 100%;
     max-width: 900px;
     margin-left: auto;
@@ -178,10 +191,9 @@ export const Content = styled.div`
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto auto;
-    grid-template-areas: 
-      "card1 card2"
-      "card3 card4"
-      "performance performance";
+    grid-template-areas: ${({ $hasFreePlanUsage }) => $hasFreePlanUsage
+      ? `"freePlan freePlan" "card1 card2" "card3 card4" "performance performance"`
+      : `"card1 card2" "card3 card4" "performance performance"`};
     width: 100%;
     max-width: 600px;
     margin-left: auto;
