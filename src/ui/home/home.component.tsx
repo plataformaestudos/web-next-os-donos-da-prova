@@ -7,8 +7,13 @@ import { WhatsAppFloatButton } from "@/components/WhatsAppFloatButton";
 import { ResponseModel } from "@/model/common.model";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import { Progress } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@/app/context/user.context";
+import { hasStaffAccess } from "@/util/roles";
+import { FreePlanUsageCard } from "./free-plan-usage.component";
+import { FreePlanUsage, hasFreePlanIndicators, nextUsageRefreshDelay } from "./free-plan-usage.model";
 
 export interface UserAnswersCurrentMonthDto {
     answeredAt: Date;
@@ -16,6 +21,7 @@ export interface UserAnswersCurrentMonthDto {
 }
 
 interface DashboardData {
+    freePlanUsage?: FreePlanUsage | null;
     loginsInCurrentMonth: string[];
     totalAnswers: number;
     totalBooksFavorited: number;
@@ -35,7 +41,24 @@ interface HomeContentProps {
 }
 
 export function HomeContent({ userProfile }: HomeContentProps) {
-    const [dashData, setDashData] = useState<DashboardData>({
+    const { user } = useUser();
+    const dashboard = useQuery({
+        queryKey: ["dashboard", user?.id, user?.profile?.role_id],
+        enabled: Boolean(user?.profile),
+        queryFn: async ({ signal }) => {
+            const response = await HttpClient.fetch<ResponseModel<DashboardData>>(
+                "/dashboard",
+                { method: "GET", cache: "no-store", signal },
+                false
+            );
+            return response.data;
+        },
+        staleTime: 0,
+        refetchOnMount: "always",
+        refetchOnWindowFocus: "always",
+        retry: 1,
+    });
+    const dashData: DashboardData = dashboard.data ?? {
         loginsInCurrentMonth: [],
         totalAnswers: 0,
         totalBooksFavorited: 0,
@@ -45,30 +68,30 @@ export function HomeContent({ userProfile }: HomeContentProps) {
             nameBook: "Nenhum caderno respondido",
             idBook: "",
         },
-    });
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    };
+    const isLoading = dashboard.isLoading;
+    const freePlanUsage = !hasStaffAccess(user) && !dashboard.isError ? dashData.freePlanUsage : null;
+    const { refetch } = dashboard;
 
     useEffect(() => {
-        async function getData() {
-            setIsLoading(true);
-            try {
-                const response = await HttpClient.fetch<ResponseModel<DashboardData>>(
-                    `/dashboard`,
-                    { method: "GET" },
-                    false
-                );
-                return response.data;
-            } finally {
-                setIsLoading(false);
-            }
-        }
+        const refresh = () => { void refetch(); };
+        const handlePageShow = (event: PageTransitionEvent) => {
+            if (event.persisted) refresh();
+        };
+        window.addEventListener("focus", refresh);
+        window.addEventListener("pageshow", handlePageShow);
+        return () => {
+            window.removeEventListener("focus", refresh);
+            window.removeEventListener("pageshow", handlePageShow);
+        };
+    }, [refetch]);
 
-        getData()
-            .then((response) =>
-                setDashData((prev) => (response ? response : prev))
-            )
-            .catch(() => { });
-    }, []);
+    useEffect(() => {
+        const delay = nextUsageRefreshDelay(freePlanUsage);
+        if (delay === null) return;
+        const timer = window.setTimeout(() => { void refetch(); }, delay);
+        return () => window.clearTimeout(timer);
+    }, [freePlanUsage, refetch, dashboard.dataUpdatedAt]);
 
     const today = new Date();
     const currentYear = today.getFullYear();
@@ -115,8 +138,10 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                 />
             ) : (
                 <S.Container>
-                    <S.Content>
+                    <S.Content $hasFreePlanUsage={hasFreePlanIndicators(freePlanUsage)}>
+                        <FreePlanUsageCard usage={freePlanUsage} />
                         <S.Card
+                            style={{ gridArea: "card1" }}
                             onClick={() => {
                                 if (dashData?.statsLastBookAnswered) {
                                     window.location.href = `/question-books/${dashData.statsLastBookAnswered.idBook}`;
@@ -149,7 +174,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                                 }}
                             />
                         </S.Card>
-                        <S.Card onClick={() => {
+                        <S.Card style={{ gridArea: "card2" }} onClick={() => {
                                     window.location.href = "/question-books";
                                 }}>
                             <S.CardTitle
@@ -165,7 +190,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                                     : "1 questão respondida"}{" "}
                             </S.Info>
                         </S.Card>
-                        <S.Card onClick={() => {
+                        <S.Card style={{ gridArea: "card3" }} onClick={() => {
                                     window.location.href = "/question-books";
                                 }}>
                             <S.CardTitle  >Cadernos</S.CardTitle>
@@ -188,7 +213,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                                 />
                             </S.Flex>
                         </S.Card>
-                        <S.Card>
+                        <S.Card style={{ gridArea: "card4" }}>
                             <S.CardTitle>
                                 Concursos{" "}
                                 <Image
@@ -200,7 +225,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                             </S.CardTitle>
                                 <S.CardText style={{ fontSize: 13, color: "#999", textAlign: "center" }}>Em breve..</S.CardText>
                         </S.Card>
-                        <S.CardPerformance $large>
+                        <S.CardPerformance $large $hasFreePlanUsage={hasFreePlanIndicators(freePlanUsage)}>
                             <S.CardTitle>Meu Desempenho</S.CardTitle>
                             <S.Spacer />
 
