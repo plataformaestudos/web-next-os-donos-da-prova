@@ -1,6 +1,16 @@
 import { QuestionType } from "@/model/question.model";
 
+export interface QuestionDailyUsage {
+    planName: string;
+    hasDailyQuestionLimit: true;
+    dailyQuestionLimit: number;
+    questionsViewedToday: number;
+    questionsRemainingToday: number;
+    dailyResetAt: string;
+}
+
 export interface QuestionBookNextQuestionModel {
+    dailyUsage?: QuestionDailyUsage | null;
     id: string;
     text: string;
     comment: string | null;

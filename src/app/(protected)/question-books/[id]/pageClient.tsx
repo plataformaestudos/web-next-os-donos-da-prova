@@ -38,20 +38,17 @@ import { FullPageLoading } from "@/ui/loading/full-page-loading";
 import { QuestionBookModel } from "@/question-books/question-book.model";
 import { AppQuestionCounter } from "@/components/AppQuestionCounter";
 import { OwlTimer } from "@/components/OwlTimer";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { DailyQuestionUsage } from "@/question-books/daily-question-usage.component";
 import { QuestionGeneralStats } from "@/model/question.model";
 import { getQuestionGeneralStats } from "../question-stats.api";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import { ResponseModel } from "@/model/common.model";
 export function QuestionBookPageClient({
     id,
-    seq,
-    seqRandom,
     questionBook,
 }: {
     id: string;
-    seq: string;
-    seqRandom: boolean;
     questionBook: QuestionBookModel;
 }) {
     const { user, loading, allowed } = useAuthGuard({
@@ -68,6 +65,10 @@ export function QuestionBookPageClient({
     const [questionStats, setQuestionStats] = useState<QuestionGeneralStats | null>(null);
     const [isLoadingStats, setIsLoadingStats] = useState(false);
     const [isStatsVisible, setIsStatsVisible] = useState(true);
+    useEffect(() => {
+        setCurrentQuestionBook(questionBook);
+        setQuestion(questionBook.nextQuestion);
+    }, [questionBook]);
 
     useEffect(() => {
         const checkScreenSize = () => {
@@ -80,7 +81,7 @@ export function QuestionBookPageClient({
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
 
-    const fetchQuestionStats = async () => {
+    const fetchQuestionStats = useCallback(async () => {
         if (!question?.questionId) return;
 
         setIsLoadingStats(true);
@@ -93,16 +94,16 @@ export function QuestionBookPageClient({
         } finally {
             setIsLoadingStats(false);
         }
-    };
+    }, [question?.questionId]);
 
     const reloadQuestionBook = async () => {
         try {
-            const response = await HttpClient.fetch<ResponseModel<QuestionBookModel>>(
-                `/question-books/${id}`,
-                { method: "GET" },
-                true
+            const response = await HttpClient.fetch<ResponseModel<QuestionBookModel["questionBookStats"]>>(
+                `/question-books/${id}/stats`,
+                { method: "GET", cache: "no-store" },
+                false
             );
-            setCurrentQuestionBook(response.data);
+            setCurrentQuestionBook(previous => ({ ...previous, questionBookStats: response.data }));
         } catch (error) {
             console.error('Erro ao recarregar dados do caderno:', error);
         }
@@ -117,7 +118,7 @@ export function QuestionBookPageClient({
 
     useEffect(() => {
         fetchQuestionStats();
-    }, [question?.questionId]);
+    }, [fetchQuestionStats]);
 
     if (loading) return <FullPageLoading />;
 
@@ -147,6 +148,7 @@ export function QuestionBookPageClient({
     }));
     return (
         <Container>
+            <Flex align="center" gap={isMobile ? 0 : 20} wrap>
             {/* Layout para Desktop */}
             {!isMobile ? (
                 <Flex align="center" style={{ marginBottom: 16 }}>
@@ -186,6 +188,7 @@ export function QuestionBookPageClient({
                             <Button
                                 type="text"
                                 size="large"
+                                aria-label={isStatsVisible ? "Ocultar estatísticas" : "Mostrar estatísticas"}
                                 icon={isStatsVisible ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                                 onClick={() => setIsStatsVisible(!isStatsVisible)}
                                 style={{
@@ -200,12 +203,13 @@ export function QuestionBookPageClient({
                 </Flex>
             ) : (
                 /* Layout para Mobile */
-                <div style={{ marginBottom: 6 }}>
+                <div style={{ marginBottom: 6, width: "100%" }}>
                     <Flex align="center" justify="space-between" style={{ marginBottom: isStatsVisible ? 12 : 0 }}>
                         <AppQuestionCounter question={question.orderDetails.questionOrder} total={currentQuestionBook.questionsCount} />
                         <Button
                             type="text"
                             size="small"
+                            aria-label={isStatsVisible ? "Ocultar estatísticas" : "Mostrar estatísticas"}
                             icon={isStatsVisible ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                             onClick={() => setIsStatsVisible(!isStatsVisible)}
                             style={{
@@ -252,6 +256,9 @@ export function QuestionBookPageClient({
                     )}
                 </div>
             )}
+
+            <DailyQuestionUsage question={question} mobile={isMobile} />
+            </Flex>
 
             {question.module.name && (
                 <Typography.Paragraph
@@ -323,9 +330,7 @@ export function QuestionBookPageClient({
                                 children: (
                                     <AppQuestionLoader
                                         id={id}
-                                        seq={seq}
                                         questionBook={questionBook}
-                                        seqRandom={seqRandom}
                                         question={question}
                                         setQuestion={setQuestion}
                                         onAnswerSubmitted={handleAnswerSubmitted}

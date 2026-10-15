@@ -123,7 +123,7 @@ export const NavButton = styled(Button)<{ $enabled?: boolean; $variant?: "pill" 
   align-items: center;
   justify-content: center;
   gap: ${(p) => (p.$compact ? "4px" : "8px")};
-  height: ${(p) => (p.$compact ? "38px" : "44px")};
+  height: ${(p) => (p.$compact ? "38px" : "32px")};
   min-width: ${(p) => (p.$compact ? "38px" : "55px")};
   padding: ${(p) => (p.$compact ? "4px 8px" : "6px 12px")};
   font-weight: 600;

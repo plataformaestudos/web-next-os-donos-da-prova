@@ -2,6 +2,7 @@
 
 import { NewPlanModel } from "@/model/plan.model";
 import { getPlanCardPrice, getPlanRecurringPrices } from "@/plans/plan-price-display";
+import { ReferralPlanPrice, useReferralPlans } from "@/affiliates/referral-plans.component";
 import {
     Button,
     Descriptions,
@@ -37,6 +38,14 @@ const ButtonContent = styled.div`
   display: flex;
   justify-content: center;
   margin-top: 20px;
+`;
+
+const CardPrice = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  strong { color: ${({ theme }) => theme.colorTextHeading}; font-size: 24px; }
+  del, span { color: ${({ theme }) => theme.colorTextSecondary}; font-size: 12px; }
 `;
 
 const FlipCardContainer = styled.div`
@@ -180,23 +189,19 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
 
     const handleSelectPlan = (planData: NewPlanModel) => {
         invalidateReferral();
-        const availableCycles = getAvailableCycles(planData);
-
-        // Resetar ciclo se não estiver disponível
-        if (availableCycles.length > 0 && !availableCycles.find(c => c.value === selectedCycle)) {
-            setSelectedCycle(availableCycles[0].value);
-        }
-
-        selectedCycleRef.current = cyclesForSelection(planData, selectedCycle);
+        const initialCycle = getPlanCardPrice(planData)?.cycle ?? cyclesForSelection(planData, selectedCycle);
+        setSelectedCycle(initialCycle);
+        selectedCycleRef.current = initialCycle;
 
         // Componente interno do modal que tem acesso aos availableCycles
         const ModalContent = () => {
             const submitting = useContext(CheckoutSubmittingContext);
+            const referralPlans = useReferralPlans();
             const cycles = getAvailableCycles(planData);
 
             // Estado local para o ciclo selecionado dentro do modal
-            const [localSelectedCycle, setLocalSelectedCycle] = useState(
-                cycles.find(c => c.value === selectedCycle) ? selectedCycle : cycles[0]?.value || "YEARLY"
+            const [localSelectedCycle, setLocalSelectedCycle] = useState<string>(
+                initialCycle
             );
 
             // Estado local único para os termos
@@ -230,7 +235,8 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                         )}
                     </div>
 
-                    <ReferralQuote planId={planData.id} cycle={localSelectedCycle} onReadinessChange={handleReferralReadiness} disabled={submitting} />
+                    <ReferralQuote planId={planData.id} cycle={localSelectedCycle} onReadinessChange={handleReferralReadiness} disabled={submitting}
+                        hideCodeInput refreshKey={referralPlans?.revision} onOfferChange={referralPlans?.reconcileQuote} onReferralChange={() => referralPlans?.run("load")} />
                     <PaymentInfoThirdStep formV={paymentInfoForm} />
 
                     <PaymentConsents>
@@ -369,9 +375,8 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
                         bordered
                         column={1}
                     >
-                        {getPlanCardPrice(plan) && <Descriptions.Item label="Assinatura">
-                            <div>{getPlanCardPrice(plan)?.headline}</div>
-                            <Typography.Text type="secondary">{getPlanCardPrice(plan)?.detail}</Typography.Text>
+                        {getPlanRecurringPrices(plan).length > 0 && <Descriptions.Item label="Assinatura">
+                            <CardPrice><ReferralPlanPrice plan={plan} /></CardPrice>
                         </Descriptions.Item>}
 
                         {plan?.questionLimit !== undefined && plan?.questionLimit !== 0 && (

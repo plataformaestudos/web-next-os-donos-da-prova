@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ResponseModel } from "@/model/common.model";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import { NewPlanModel } from "@/model/plan.model";
+import { ReferralPlanCode, ReferralPlansProvider } from "@/affiliates/referral-plans.component";
 
 export const AppNewPlans = () => {
   const [plans, setPlans] = useState<NewPlanModel[]>([]);
@@ -38,6 +39,8 @@ export const AppNewPlans = () => {
     getAvailablePlans();
   }, [message]);
   return (
+    <ReferralPlansProvider>
+    <div style={{ width: "100%", maxWidth: 900, margin: "0 auto", padding: "24px 20px 0" }}><ReferralPlanCode /></div>
     <Flex
       wrap="wrap"
       justify="center"
@@ -58,5 +61,6 @@ export const AppNewPlans = () => {
         />
       ))}
     </Flex>
+    </ReferralPlansProvider>
   );
 };

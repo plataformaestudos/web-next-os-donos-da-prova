@@ -20,7 +20,8 @@ import { isReferralCheckoutReady, ReferralReadiness, referralRequestQueue } from
 import { signUpClient } from "./signup.action";
 import { clearSignupSuccessStatus, saveSignupSuccessStatus, signupSuccessStatus } from "./signup-success.state";
 import { NewPlanModel } from "@/model/plan.model";
-import { getPlanRecurringPrices } from "@/plans/plan-price-display";
+import { getPlanCardPrice, getPlanRecurringPrices } from "@/plans/plan-price-display";
+import { ReferralPlansProvider, useReferralPlans } from "@/affiliates/referral-plans.component";
 
 const useForm = <T,>() => {
   const [isValid, setIsFormValid] = useState<boolean | null>(null);
@@ -46,6 +47,11 @@ export default function SignupSteps({
 }: {
   plans: NewPlanModel[];
 }) {
+  return <ReferralPlansProvider><SignupStepsContent plans={plans} /></ReferralPlansProvider>;
+}
+
+function SignupStepsContent({ plans }: { plans: NewPlanModel[] }) {
+  const referralPlans = useReferralPlans();
   const [isPending, startTransition] = useTransition();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
@@ -80,6 +86,11 @@ export default function SignupSteps({
   const invalidateReferral = () => {
     referralReadinessRef.current = null;
     setReferralReadiness(null);
+  };
+  const goToStep = (step: number) => {
+    if (step === currentStep) return;
+    invalidateReferral();
+    setCurrentStep(step);
   };
 
   const {
@@ -141,7 +152,7 @@ export default function SignupSteps({
                 ) {
                   return;
                 }
-                setCurrentStep(step + 1);
+                goToStep(step + 1);
               }}
               items={
                 isPlanFree
@@ -189,7 +200,11 @@ export default function SignupSteps({
             <ChoosePlanFirstStep
               plans={plans}
               selectedPlan={selectedPlan}
-              onSelectPlan={planId => { if (planId !== selectedPlan) { invalidateReferral(); setSelectedPlan(planId); } }}
+              onSelectPlan={planId => { if (planId !== selectedPlan) {
+                invalidateReferral(); setSelectedPlan(planId);
+                const plan = plans.find(item => item.id === planId);
+                if (plan && !plan.isFree) setSelectedCycle(getPlanCardPrice(plan)?.cycle ?? "MONTHLY");
+              } }}
             />
           </div>
           <div
@@ -218,12 +233,14 @@ export default function SignupSteps({
                       onCycleChange={cycle => { if (cycle !== selectedCycle) { invalidateReferral(); setSelectedCycle(cycle); } }}
                     />
                   </div>
-                  <ReferralQuote planId={selectedPlanData.id} cycle={selectedCycle} onReadinessChange={handleReferralReadiness} disabled={isPending || isSubmitting} />
+                  {currentStep === 3 && <ReferralQuote planId={selectedPlanData.id} cycle={selectedCycle} onReadinessChange={handleReferralReadiness} disabled={isPending || isSubmitting}
+                    hideCodeInput refreshKey={referralPlans?.revision} onOfferChange={referralPlans?.reconcileQuote} onReferralChange={() => referralPlans?.run("load")} />}
                 </section>
               )}
 
               <PaymentInfoThirdStep formV={paymentInfoForm} />
               <TermsCheckbox 
+                enabled={currentStep === 3}
                 onAcceptanceChange={setTermsAccepted}
                 onAutoBillingChange={setAutoBillingAccepted}
               />
@@ -240,7 +257,7 @@ export default function SignupSteps({
               icon={<ArrowLeftOutlined aria-hidden="true" />}
               iconPosition="start"
               disabled={isSubmitting || isPending}
-              onClick={() => { if (!submittingRef.current) setCurrentStep(currentStep - 1); }}
+              onClick={() => { if (!submittingRef.current) goToStep(currentStep - 1); }}
             >
               Voltar
             </Button>
@@ -331,7 +348,7 @@ export default function SignupSteps({
                     }
                 });
               } else {
-                setCurrentStep(currentStep + 1);
+                goToStep(currentStep + 1);
               }
             }}
             style={{ marginLeft: "auto" }}
