@@ -39,6 +39,7 @@ export function ImportItemDialog({
   importId,
   itemId,
   rootName,
+  startQuestionNumber = 1,
   editable,
   onClose,
   onSaved,
@@ -46,6 +47,7 @@ export function ImportItemDialog({
   importId: string;
   itemId: string;
   rootName?: string;
+  startQuestionNumber?: number;
   editable: boolean;
   onClose: () => void;
   onSaved: (result: ImportMutationResult) => void;
@@ -111,6 +113,7 @@ export function ImportItemDialog({
           key={itemId}
           detail={detail.data}
           rootName={rootName}
+          startQuestionNumber={startQuestionNumber}
           importId={importId}
           editable={editable && !detail.isError}
           onDirty={setDirty}
@@ -126,6 +129,7 @@ export function ImportItemDialog({
 function EditorForm({
   detail,
   rootName,
+  startQuestionNumber,
   importId,
   editable,
   onDirty,
@@ -135,6 +139,7 @@ function EditorForm({
 }: {
   detail: ImportItemDetail;
   rootName?: string;
+  startQuestionNumber: number;
   importId: string;
   editable: boolean;
   onDirty: (dirty: boolean) => void;
@@ -250,12 +255,25 @@ function EditorForm({
         onChange={(html) => payload(name, html)}
       />,
     );
+  const saveButton = writable && (
+    <Button
+      type="primary"
+      loading={busy}
+      disabled={!reviewed.length || Boolean(conflict)}
+      onClick={save}
+    >
+      Salvar e revalidar
+    </Button>
+  );
 
   return (
     <Flex vertical gap={18}>
-      <Typography.Title level={4}>
-        Questão {base.item.itemOrder}
-      </Typography.Title>
+      <Flex align="center" justify="space-between" gap={12} wrap>
+        <Typography.Title level={4} style={{ margin: 0 }}>
+          Questão {base.item.sourceNumber ?? base.item.itemOrder}
+        </Typography.Title>
+        {saveButton}
+      </Flex>
       {!writable && (
         <Alert type="info" message="Questão disponível somente para leitura." />
       )}
@@ -352,7 +370,7 @@ function EditorForm({
           />
           <Typography.Text type="secondary">
             {" "}
-            Número esperado: {base.item.itemOrder}
+            Número esperado: {startQuestionNumber + base.item.itemOrder - 1}
           </Typography.Text>
         </>,
       )}
@@ -518,16 +536,7 @@ function EditorForm({
         <Button onClick={onClose} disabled={busy}>
           Fechar
         </Button>
-        {writable && (
-          <Button
-            type="primary"
-            loading={busy}
-            disabled={!reviewed.length || Boolean(conflict)}
-            onClick={save}
-          >
-            Salvar rascunho e revalidar
-          </Button>
-        )}
+        {saveButton}
       </Flex>
     </Flex>
   );

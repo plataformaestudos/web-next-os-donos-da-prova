@@ -118,7 +118,7 @@ export function ImportStatus({
         </Link>,
       ]}
     >
-      <Flex vertical gap={24}>
+      <Flex vertical gap={24} className={preview ? "import-review-page" : undefined}>
         {query.isError && (
           <Alert
             type="warning"
@@ -158,6 +158,12 @@ export function ImportStatus({
             </div>
             <Typography.Text type="secondary" copyable={{ text: id }}>
               Identificador: {id}
+            </Typography.Text>
+            <Typography.Text type="secondary">
+              Intervalo no DOCX: questão {batch.startQuestionNumber ?? 1}
+              {batch.endQuestionNumber != null
+                ? ` até ${batch.endQuestionNumber}, inclusive`
+                : " até o fim do documento"}
             </Typography.Text>
             {processing && (
               <div role="status" aria-live="polite">

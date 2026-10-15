@@ -45,9 +45,14 @@ import { ImportItemView } from "./import-item-view.component";
 import { ImportItemDialog } from "./import-item-editor.component";
 import { ImportErrorsDialog } from "./import-errors-dialog.component";
 import { ImportConfirmation } from "./import-confirmation.component";
+import {
+  ImportReviewNavigation,
+  useReviewPageNavigation,
+} from "./import-review-navigation";
 
 interface ReviewResult {
   order: number;
+  number: number;
   status: "success" | "error" | "skipped";
   message: string;
 }
@@ -88,6 +93,16 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
   });
   const editable = canEditImport(batch) && !items.isError;
   const rows = items.data?.items ?? [];
+  const navigationKey = JSON.stringify([user?.id, batch.id, filters]);
+  const { startRef, endRef, requestScroll, cancelScroll, redirectScroll } =
+    useReviewPageNavigation(
+      navigationKey,
+      items.isSuccess &&
+        !items.isPlaceholderData &&
+        items.data.page === filters.page &&
+        items.data.pageSize === filters.pageSize &&
+        filters.page <= Math.max(1, items.data.totalPages),
+    );
 
   useEffect(() => {
     mounted.current = true;
@@ -106,14 +121,15 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
   }, [busy]);
 
   useEffect(() => {
-    if (items.data && filters.page > Math.max(1, items.data.totalPages))
-      setFilters((old) => ({
-        ...old,
-        page: Math.max(1, items.data!.totalPages),
-      }));
-  }, [items.data, filters.page]);
+    if (items.data && filters.page > Math.max(1, items.data.totalPages)) {
+      const next = { ...filters, page: Math.max(1, items.data.totalPages) };
+      redirectScroll(JSON.stringify([user?.id, batch.id, next]));
+      setFilters(next);
+    }
+  }, [items.data, filters, user?.id, batch.id, redirectScroll]);
 
   function changeFilters(next: Partial<ItemFilters>) {
+    cancelScroll();
     setFilters((old) => ({ ...old, ...next, page: 1 }));
     setSelected([]);
   }
@@ -151,6 +167,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
         ) {
           outcomes.push({
             order: item.itemOrder,
+            number: item.sourceNumber ?? item.itemOrder,
             status: "skipped",
             message: "Questão ignorada: não está disponível para esta ação.",
           });
@@ -161,12 +178,14 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
             else await revalidateImportItem(batch.id, item.id, item.version);
             outcomes.push({
               order: item.itemOrder,
+              number: item.sourceNumber ?? item.itemOrder,
               status: "success",
               message: review ? reviewLabels[review] : "Revalidada",
             });
           } catch (cause) {
             outcomes.push({
               order: item.itemOrder,
+              number: item.sourceNumber ?? item.itemOrder,
               status: "error",
               message: draftErrorMessage(cause),
             });
@@ -174,6 +193,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
               for (const remaining of targets.slice(outcomes.length))
                 outcomes.push({
                   order: remaining.itemOrder,
+                  number: remaining.sourceNumber ?? remaining.itemOrder,
                   status: "skipped",
                   message: "Ação interrompida; confira sua sessão e acesso.",
                 });
@@ -207,7 +227,8 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
   const approvable = selection.filter(canApproveItem);
 
   return (
-    <Flex vertical gap={20}>
+    <Flex vertical gap={20} className="import-review-navigation-space">
+      <ImportReviewNavigation startRef={startRef} endRef={endRef} />
       <ImportConfirmation batch={batch} />
       <Flex gap={12} wrap>
         <Button onClick={() => setErrorsOpen(true)}>
@@ -240,7 +261,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
             aria-label="Filtrar por validade"
             placeholder="Todas as validades"
             allowClear
-            style={{ minWidth: 210 }}
+            style={{ minWidth: "min(210px, 100%)", maxWidth: "100%" }}
             disabled={busy}
             value={filters.validationStatus}
             onChange={(value) => changeFilters({ validationStatus: value })}
@@ -253,7 +274,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
             aria-label="Filtrar por revisão"
             placeholder="Todas as revisões"
             allowClear
-            style={{ minWidth: 210 }}
+            style={{ minWidth: "min(210px, 100%)", maxWidth: "100%" }}
             disabled={busy}
             value={filters.reviewStatus}
             onChange={(value) => changeFilters({ reviewStatus: value })}
@@ -268,7 +289,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
             allowClear
             showSearch
             optionFilterProp="label"
-            style={{ minWidth: 230, maxWidth: "100%", flex: 1 }}
+            style={{ minWidth: "min(230px, 100%)", maxWidth: "100%", flex: 1 }}
             loading={modules.isFetching}
             disabled={busy || modules.isError}
             value={
@@ -302,6 +323,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
           <Button
             disabled={busy}
             onClick={() => {
+              cancelScroll();
               setFilters({ page: 1, pageSize: filters.pageSize });
               setSelected([]);
             }}
@@ -387,13 +409,14 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
               <summary>Ver resultado por questão</summary>
               {results.map((result) => (
                 <p key={result.order}>
-                  Questão {result.order}: {result.message}
+                  Questão {result.number}: {result.message}
                 </p>
               ))}
             </details>
           }
         />
       )}
+      <div ref={startRef} className="import-review-list-start" />
       {items.isPending && <Spin />}
       {items.isError && (
         <Alert
@@ -424,7 +447,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
               title={
                 <Flex gap={12}>
                   <Checkbox
-                    aria-label={`Selecionar questão ${item.itemOrder}`}
+                    aria-label={`Selecionar questão ${item.sourceNumber ?? item.itemOrder}`}
                     disabled={busy || !editable || !canEditItem(item)}
                     checked={selected.includes(item.id)}
                     onChange={(event) =>
@@ -435,7 +458,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
                       )
                     }
                   />
-                  <span>Questão {item.itemOrder}</span>
+                  <span>Questão {item.sourceNumber ?? item.itemOrder}</span>
                 </Flex>
               }
             >
@@ -486,22 +509,28 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
               </Flex>
             </Card>
           ))}
-          <Pagination
-            current={filters.page}
-            pageSize={filters.pageSize}
-            total={items.data.total}
-            pageSizeOptions={[10, 20, 50]}
-            showSizeChanger
-            showTotal={(total) => `${total} questões`}
-            disabled={busy}
-            responsive
-            onChange={(page, pageSize) => {
-              setFilters((old) => ({ ...old, page, pageSize }));
-              setSelected([]);
-            }}
-          />
+          <div ref={endRef} className="import-review-pagination">
+            <Pagination
+              current={filters.page}
+              pageSize={filters.pageSize}
+              total={items.data.total}
+              pageSizeOptions={[10, 20, 50]}
+              showSizeChanger
+              showTotal={(total) => `${total} questões`}
+              disabled={busy}
+              responsive
+              onChange={(page, pageSize) => {
+                if (page === filters.page && pageSize === filters.pageSize) return;
+                const next = { ...filters, page, pageSize };
+                requestScroll(JSON.stringify([user?.id, batch.id, next]));
+                setFilters(next);
+                setSelected([]);
+              }}
+            />
+          </div>
         </>
       )}
+      {(!items.data || items.isError) && <div ref={endRef} />}
       {errorsOpen && (
         <ImportErrorsDialog
           importId={batch.id}
@@ -520,6 +549,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
           rootName={
             roots.data?.find((root) => root.id === batch.rootModuleId)?.name
           }
+          startQuestionNumber={batch.startQuestionNumber ?? 1}
           editable={editable && !busy}
           onClose={() => setItemId(undefined)}
           onSaved={saved}
