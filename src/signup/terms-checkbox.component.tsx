@@ -1,47 +1,44 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Checkbox, Typography, Alert } from "antd";
+import { Checkbox, Typography, Alert, Button } from "antd";
+import { useQuery } from "@tanstack/react-query";
 import { getTermsFromAPI } from "@/terms/terms-client.action";
-import { TermsOfUse, PrivacyPolicy } from "@/types/terms.types";
 import { PaymentConsents } from "./payment-info.style";
 
 const { Text } = Typography;
 
 interface TermsCheckboxProps {
+  enabled: boolean;
   onAcceptanceChange: (accepted: boolean) => void;
   onAutoBillingChange: (accepted: boolean) => void;
 }
 
-export function TermsCheckbox({ onAcceptanceChange, onAutoBillingChange }: TermsCheckboxProps) {
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [autoBillingAccepted, setAutoBillingAccepted] = useState(false);
-  const [termsOfUse, setTermsOfUse] = useState<TermsOfUse | null>(null);
-  const [privacyPolicy, setPrivacyPolicy] = useState<PrivacyPolicy | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadTerms = async () => {
-      try {
-        const result = await getTermsFromAPI();
-        
-        if (result.error) {
-          setError(result.error || "Erro ao carregar termos de uso");
-          return;
-        }
-        setTermsOfUse(result.termsOfUse);
-        setPrivacyPolicy(result.privacyPolicy);
-      } catch (err) {
-        console.error("Erro ao carregar termos:", err);
-        setError("Erro ao carregar termos de uso");
-      } finally {
-        setLoading(false);
+export function TermsCheckbox({ enabled, onAcceptanceChange, onAutoBillingChange }: TermsCheckboxProps) {
+  const [acceptedTermsVersion, setAcceptedTermsVersion] = useState<string | null>(null);
+  const [acceptedBillingVersion, setAcceptedBillingVersion] = useState<string | null>(null);
+  const terms = useQuery({
+    queryKey: ["checkout-active-terms"],
+    enabled,
+    queryFn: async () => {
+      const result = await getTermsFromAPI();
+      if (result.error || !result.termsOfUse || !result.privacyPolicy) {
+        throw new Error(result.error || "Termos de uso indisponíveis.");
       }
-    };
-
-    loadTerms();
-  }, []);
+      return result;
+    },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+  const ready = enabled && terms.isSuccess && !terms.isFetching;
+  const data = terms.data;
+  const version = data ? JSON.stringify([
+    data.termsOfUse, data.privacyPolicy, data.legalNotice,
+    data.cancellationPolicy, data.acceptanceTerms, data.autoRenewalTerms,
+  ].map(document => [document?.version, document?.updatedAt])) : null;
+  const termsAccepted = ready && version !== null && acceptedTermsVersion === version;
+  const autoBillingAccepted = ready && version !== null && acceptedBillingVersion === version;
 
   useEffect(() => {
     onAcceptanceChange(termsAccepted);
@@ -52,27 +49,28 @@ export function TermsCheckbox({ onAcceptanceChange, onAutoBillingChange }: Terms
   }, [autoBillingAccepted, onAutoBillingChange]);
 
   const handleCheckboxChange = (checked: boolean) => {
-    setTermsAccepted(checked);
+    setAcceptedTermsVersion(checked ? version : null);
   };
 
   const handleAutoBillingChange = (checked: boolean) => {
-    setAutoBillingAccepted(checked);
+    setAcceptedBillingVersion(checked ? version : null);
   };
 
-  if (loading) {
+  if (terms.isPending || terms.isFetching) {
     return (
       <PaymentConsents role="status">
         <Text type="secondary">Carregando termos de uso...</Text>
       </PaymentConsents>
     );
   }
-  if (error || !termsOfUse || !privacyPolicy) {
+  if (terms.isError || !data?.termsOfUse || !data.privacyPolicy) {
     return (
       <Alert
         message="Erro"
         description="Não foi possível carregar os termos de uso. Tente novamente."
         type="error"
         showIcon
+        action={<Button onClick={() => { void terms.refetch(); }}>Tentar novamente</Button>}
       />
     );
   }

@@ -73,6 +73,20 @@ Build de produção em cópia isolada, ESLint do componente, verificação de es
 
 Script preservado: `test/browser/checkout/subscription-options-browser.cjs`.
 
+## Desconto durante a escolha de planos — 15/10/2026
+
+Cadastro e contratação autenticada têm um campo único de código acima dos cards. A indicação recebida pelo link de campanha carrega os preços nessa etapa. Aplicar/remover o código atualiza os cards; original riscado, final destacado e economia por ciclo usam valores em centavos calculados pelo backend. Os cards respeitam `cardDisplayCycle` e `cardDisplayMode`: equivalente mensal continua acompanhado do total cobrado no ciclo, sem representação de parcelas. A seleção inicial da contratação usa o ciclo apresentado pelo card.
+
+A prévia é uma leitura em lote por campanha (`/api/affiliate-referral/preview`), sem emitir ou substituir a cotação da contratação. Código manual usa `/api/affiliate-referral/apply-code`, que estabelece a indicação antes da escolha de plano. As mutações dos cookies e as consultas dependentes continuam na fila compartilhada. Respostas antigas não restauram uma campanha depois de uma remoção mais recente; erro de código com resposta definitiva preserva a oferta anterior, enquanto falha de rede de resultado incerto exige nova consulta ou remoção explícita.
+
+No cadastro, selecionar/trocar cards e preencher dados pessoais reutiliza a prévia, sem consultar `/quote`. O componente de cotação só é montado na etapa Pagamento; voltar e entrar novamente nela exige nova validação da seleção. Os formulários permanecem montados para preservar os dados preenchidos, e a liberação da confirmação é invalidada a cada mudança de etapa. Na contratação autenticada, a cotação continua sendo obtida ao abrir o modal de pagamento.
+
+Os termos do cadastro também são consultados apenas no Pagamento, com cache compartilhado pelo React Query por cinco minutos e deduplicação de requisições em andamento. Voltar entre etapas ou alternar Free/pago reutiliza os documentos enquanto estiverem válidos no cache. Foco da janela não dispara novas consultas; após expiração, uma nova entrada no pagamento atualiza os termos. Falha permite tentar novamente e bloqueia os aceites; se a versão dos documentos mudar, é necessário marcá-los de novo.
+
+O seletor de ciclo exibe os preços da campanha. Seleções fora dela mostram o valor regular com indicação explícita e preservam a campanha para outras seleções. O resumo final mantém os detalhes e a cotação assinada, com revalidação no servidor antes da cobrança; seu campo de código fica oculto para evitar duplicidade. Quando a cotação final revela mudança de preço ou exclusão, o preço selecionado da prévia é reconciliado sem gerar um ciclo de novas cotações. A prévia expirada é consultada novamente.
+
+Validação focada: testes de cálculo/prévia/DTO/limite público no backend, testes dos handlers Next (origem, projeção, cookies, exclusão e expiração), fila e reconciliação da interface, além das suítes de afiliados existentes. Fixtures locais não fazem cobranças nem consultam dados reais. Publicar a API compatível antes do frontend; não há migration necessária.
+
 ## Limites
 
 Testes locais com fixtures verificam a interface e o encaminhamento das requisições, sem validar Asaas, Supabase ou webhooks reais. A integração financeira em homologação/Asaas Sandbox continua sendo uma etapa externa, com contas descartáveis. Nenhum commit, push, PR ou deploy foi realizado nesta entrega.

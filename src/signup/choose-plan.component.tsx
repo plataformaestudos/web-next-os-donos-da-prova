@@ -3,7 +3,9 @@ import { Button, Empty, Input, Typography } from "antd";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { LuFolders } from "react-icons/lu";
 import { NewPlanModel } from "@/model/plan.model";
-import { formatCycleCharge, getPlanCardPrice, getPlanRecurringPrices } from "@/plans/plan-price-display";
+import { formatCycleCharge, getPlanRecurringPrices } from "@/plans/plan-price-display";
+import { ReferralPlanCode, ReferralPlanPrice, useReferralPlans } from "@/affiliates/referral-plans.component";
+import { previewPrice } from "@/affiliates/referral-preview";
 import { PlansContainer, PlansModules } from "./signup.style";
 import { CycleOption, CycleSelect, CyclePopup, ModuleActions, PlanDescription, PlanFlipCard, PlanFlipFace, PlanFlipInner, PlanHeading, PlanPrice, PlanSelection, PlanSelectionIndicator, PlanSearchHeader } from "./choose-plan.style";
 
@@ -22,6 +24,7 @@ export function ChoosePlanFirstStep({ plans, selectedPlan, onSelectPlan }: {
 
   return (
     <section aria-label="Escolha seu plano">
+      <ReferralPlanCode />
       <PlanSearchHeader>
         <label htmlFor={searchId}>Escolha seu plano</label>
         <Typography.Text type="secondary" role="status">
@@ -71,7 +74,6 @@ function PlanCardComponent({ plan, isSelected, onClick }: {
   const modulesButtonRef = useRef<HTMLButtonElement>(null);
   const returnButtonRef = useRef<HTMLButtonElement>(null);
   const modulesId = useId();
-  const cardPrice = getPlanCardPrice(plan);
   const modules = plan.modules ?? [];
 
   useEffect(() => {
@@ -93,8 +95,7 @@ function PlanCardComponent({ plan, isSelected, onClick }: {
             </PlanHeading>
             {plan.description && <PlanDescription id={`${modulesId}-description`}>{plan.description}</PlanDescription>}
             <PlanPrice id={`${modulesId}-price`}>
-              <strong>{plan.isFree ? "Gratuito" : cardPrice?.headline}</strong>
-              <span>{plan.isFree ? "Sem cobrança" : cardPrice?.detail}</span>
+              <ReferralPlanPrice plan={plan} />
             </PlanPrice>
           </PlanSelection>
           <ModuleActions>
@@ -147,10 +148,16 @@ export function CycleSelector({ plan, selectedCycle, onCycleChange, id, disabled
   id?: string;
   disabled?: boolean;
 }) {
+  const referral = useReferralPlans();
+  const preview = referral?.valid ? referral.preview : undefined;
   const cycles = getPlanRecurringPrices(plan).map(cycle => {
-    const monthlyAmount = Math.round(Math.round(cycle.amount * 100) / cycle.months) / 100;
+    const offer = previewPrice(preview, plan.id, cycle.value);
+    const finalAmount = offer ? offer.finalAmountCents / 100 : cycle.amount;
+    const monthlyAmount = Math.round(Math.round(finalAmount * 100) / cycle.months) / 100;
     const monthlyPrice = monthlyAmount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    return { ...cycle, displayLabel: `${cycle.label} — ${formatCycleCharge(cycle.value, cycle.amount)} — ${monthlyPrice}/mês` };
+    const original = offer ? `${(offer.baseAmountCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} → ` : "";
+    const status = preview && !offer ? " — valor regular, sem desconto neste ciclo" : "";
+    return { ...cycle, displayLabel: `${cycle.label} — ${original}${formatCycleCharge(cycle.value, finalAmount)} — ${monthlyPrice}/mês${status}` };
   });
 
   return (

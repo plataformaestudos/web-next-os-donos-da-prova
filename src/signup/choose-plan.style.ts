@@ -99,7 +99,6 @@ export const PlanSelectionIndicator = styled.span<{ $selected: boolean }>`
 `;
 
 export const PlanDescription = styled.span`
-  flex: 1;
   color: ${({ theme }) => theme.colorTextSecondary};
   font-size: 13px;
   line-height: 1.6;
@@ -109,6 +108,8 @@ export const PlanDescription = styled.span`
 export const PlanPrice = styled.span`
   display: flex;
   flex-direction: column;
+  flex: 1;
+  justify-content: center;
   gap: 4px;
   margin-top: 4px;
 
@@ -121,6 +122,12 @@ export const PlanPrice = styled.span`
   span {
     color: ${({ theme }) => theme.colorTextSecondary};
     font-size: 12px;
+    line-height: 1.5;
+  }
+
+  del {
+    color: ${({ theme }) => theme.colorTextSecondary};
+    font-size: 14px;
     line-height: 1.5;
   }
 `;

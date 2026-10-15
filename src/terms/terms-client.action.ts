@@ -16,7 +16,7 @@ export interface TermsData {
 
 export async function getTermsFromAPI(): Promise<TermsData> {
   try {
-    const {data} = await HttpClient.fetch<DefaultResponse<TermsResponse>>('/terms');
+    const {data} = await HttpClient.fetch<DefaultResponse<TermsResponse>>('/terms', {}, false);
 
     return {
       termsOfUse: data.termsOfUse,

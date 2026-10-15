@@ -109,6 +109,7 @@ interface AnswerQuestionProps {
     userAnswer: QuestionBookNextQuestionModel["userAnswer"];
     totalQuestions: number;
     onAnswerSubmitted?: () => void;
+    onNavigateQuestion?: (seq?: number | null, random?: boolean) => void;
 }
 
 export function AnswerQuestion({
@@ -122,6 +123,7 @@ export function AnswerQuestion({
     orderDetails,
     totalQuestions,
     onAnswerSubmitted,
+    onNavigateQuestion,
 }: AnswerQuestionProps) {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<boolean>(false);
@@ -179,6 +181,10 @@ export function AnswerQuestion({
     const router = useRouter();
     const goTo = (seq?: number | null, seqRandom?: boolean) => {
         if (!seq && seq !== 0 && !seqRandom) return;
+        if (onNavigateQuestion) {
+            onNavigateQuestion(seq, seqRandom);
+            return;
+        }
         if (seqRandom) {
             router.push(`/question-books/${questionBookId}?seqRandom=true`);
             return;
@@ -193,7 +199,7 @@ export function AnswerQuestion({
             return;
         }
         const seq = questionNumber;
-        router.push(`/question-books/${questionBookId}?seq=${seq}`);
+        goTo(seq);
         setNavigationInput("");
     };
 

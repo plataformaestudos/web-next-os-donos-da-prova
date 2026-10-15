@@ -31,26 +31,29 @@ export function getPlanRecurringPrices(plan: Pick<NewPlanModel,
 }
 
 export function getPlanCardPrice(plan: Pick<NewPlanModel,
-  'monthValue' | 'quarterlyValue' | 'semiannualValue' | 'annualValue' | 'cardDisplayCycle' | 'cardDisplayMode'>) {
+  'monthValue' | 'quarterlyValue' | 'semiannualValue' | 'annualValue' | 'cardDisplayCycle' | 'cardDisplayMode'>, totalCents?: number) {
   const prices = getPlanRecurringPrices(plan);
   const displayed = prices.find(price => price.value === plan.cardDisplayCycle) || prices[0];
   if (!displayed) return null;
 
-  const amountCents = Math.round(displayed.amount * 100);
+  const amountCents = totalCents ?? Math.round(displayed.amount * 100);
+  const total = amountCents / 100;
   if (plan.cardDisplayMode === 'CYCLE_TOTAL' || displayed.months === 1) {
     const cadence = displayed.months === 1 ? 'todo mês' : `a cada ${displayed.months} meses`;
     return {
-      amount: displayed.amount,
-      headline: currency(displayed.amount),
+      cycle: displayed.value,
+      amount: total,
+      headline: currency(total),
       detail: `cobrados ${cadence}`,
     };
   }
 
   const monthlyCents = Math.round(amountCents / displayed.months);
   return {
+    cycle: displayed.value,
     amount: monthlyCents / 100,
     headline: `${currency(monthlyCents / 100)}/mês`,
-    detail: `${currency(displayed.amount)} cobrados a cada ${displayed.months} meses`,
+    detail: `${currency(total)} cobrados a cada ${displayed.months} meses`,
   };
 }
 

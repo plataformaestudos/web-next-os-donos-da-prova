@@ -11,6 +11,17 @@ As expectativas registradas devem ser reavaliadas quando o checkout mudar.
 - `discount-prices-browser.cjs`: apresentação dos valores regular e final.
 - `subscription-options-browser.cjs`: opções de ciclo, texto e equivalente mensal.
 - `api-fixture.cjs`: API local simulada, sem banco, cobrança ou SMTP.
+- `plan-discount-selection-browser.cjs`: prévia automática ou por código nos cards,
+  descontos percentual/em reais, exclusão por plano/ciclo, resumo e remoção nos dois checkouts.
+- `daily-question-usage-browser.cjs`: consumo junto da questão, uma entrega por
+  navegação, histórico, links diretos, estatísticas sem consumo, planos sem
+  indicador, foco após inatividade e falha/recuperação sem bloquear a questão.
+- `terms-cache-browser.cjs`: termos carregados só no pagamento, reutilização de
+  cache, expiração, mudança de versão e bloqueio/recuperação após falha.
+
+Os três últimos scripts cobrem as features de 15/10/2026. Os scripts anteriores
+preservam expectativas do checkout de 06/10 e alguns seletores pressupõem o campo
+de código na etapa Pagamento; não devem ser tratados como a suíte atual dessas features.
 
 ## Execução local
 
@@ -19,6 +30,8 @@ de Playwright com Chromium disponível. Ela pode ficar fora do repositório:
 `ODP_PLAYWRIGHT_MODULE` aceita o caminho do módulo `playwright`; quando omitida,
 os scripts usam a resolução normal do Node. `PLAYWRIGHT_BROWSERS_PATH` pode apontar
 para a instalação local dos navegadores. Não foram adicionadas dependências aos lockfiles.
+Os scripts de 15/10 também aceitam `ODP_CHROMIUM_EXECUTABLE_PATH` para usar
+um executável Chromium já instalado.
 
 Em terminais separados:
 
@@ -38,6 +51,11 @@ O frontend deve ser aberto em `http://localhost:3137`; a API de teste atende em
 `127.0.0.1:4029`. Esses endereços são compartilhados pelos scripts e pela fixture.
 Os cenários interceptam o CEP e bloqueiam hosts externos. Encerre somente os
 processos de teste criados para essa execução.
+
+A fixture de consumo tem estado global descartável, configurado pelo script diário
+em `/__fixture/config`. Execute esse script sem outras instâncias do mesmo teste.
+Os códigos `checkout20` e `fixed20` representam respectivamente 20% e R$ 20 de
+desconto; o plano Semestral e o ciclo Trimestral do Essencial ficam fora da campanha.
 
 As novas capturas e os resultados JSON ficam em `odp-checkout-artifacts/` dentro
 do diretório temporário do sistema, separados por cenário. Use

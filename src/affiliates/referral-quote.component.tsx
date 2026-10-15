@@ -11,6 +11,10 @@ interface ReferralQuoteProps {
   cycle: string;
   onReadinessChange?: (readiness: ReferralReadiness) => void;
   disabled?: boolean;
+  hideCodeInput?: boolean;
+  refreshKey?: number;
+  onReferralChange?: () => void;
+  onOfferChange?: (planId: string, cycle: string, offer: ReferralOffer | undefined, excluded: boolean) => void;
 }
 interface QuoteState {
   selection: string;
@@ -18,10 +22,11 @@ interface QuoteState {
   loading: boolean;
   offer?: ReferralOffer;
   error?: string;
+  excluded?: boolean;
 }
 type Action = "revalidate" | "apply" | "remove";
 
-export function ReferralQuote({ planId, cycle, onReadinessChange, disabled = false }: ReferralQuoteProps) {
+export function ReferralQuote({ planId, cycle, onReadinessChange, disabled = false, hideCodeInput = false, refreshKey = 0, onReferralChange, onOfferChange }: ReferralQuoteProps) {
   const inputId = useId();
   const errorId = `${inputId}-error`;
   const [code, setCode] = useState("");
@@ -68,12 +73,15 @@ export function ReferralQuote({ planId, cycle, onReadinessChange, disabled = fal
       }
       const nextOffer = parseReferralOffer(data);
       if (action === "apply" && !nextOffer) throw new Error("Não foi possível aplicar este código de desconto.");
-      return nextOffer;
-    }).then(nextOffer => {
+      const excluded = data !== null && typeof data === "object" && "excluded" in data && data.excluded === true;
+      return { nextOffer, excluded };
+    }).then(({ nextOffer, excluded }) => {
       if (!mounted.current || revision.current !== version) return;
-      setState({ selection, valid: true, loading: false, offer: nextOffer });
+      setState({ selection, valid: true, loading: false, offer: nextOffer, excluded });
+      onOfferChange?.(planId, cycle, nextOffer, excluded);
       if (action === "remove") setCode("");
       else if (nextOffer?.campaign.slug) setCode(nextOffer.campaign.slug);
+      if (action !== "revalidate") onReferralChange?.();
     }).catch(error => {
       if (!mounted.current || revision.current !== version) return;
       setState(previous => ({ ...previous, valid: previous.valid && error instanceof ReferralRequestError && error.preservesPreviousOffer, loading: false, error: error instanceof Error ? error.message : "Não foi possível consultar o desconto. Tente novamente." }));
@@ -84,11 +92,11 @@ export function ReferralQuote({ planId, cycle, onReadinessChange, disabled = fal
 
   useEffect(() => {
     runRef.current("revalidate");
-  }, [planId, cycle]);
+  }, [planId, cycle, refreshKey]);
 
   return (
     <section className={styles.discount} aria-label="Código de desconto" aria-busy={busy}>
-      <label className={styles.codeLabel} htmlFor={inputId}><Typography.Text strong>Tem um código de desconto?</Typography.Text></label>
+      {!hideCodeInput && <><label className={styles.codeLabel} htmlFor={inputId}><Typography.Text strong>Tem um código de desconto?</Typography.Text></label>
       <div className={styles.codeRow}>
         <Input
           id={inputId}
@@ -102,7 +110,7 @@ export function ReferralQuote({ planId, cycle, onReadinessChange, disabled = fal
           aria-describedby={state.error ? errorId : undefined}
         />
         <Button onClick={() => run("apply")} disabled={!code.trim() || busy || disabled}>Aplicar</Button>
-      </div>
+      </div></>}
       {busy && <div className={styles.loading} role="status"><Spin size="small" /> <Typography.Text type="secondary">Consultando desconto...</Typography.Text></div>}
       {state.error && state.selection === selection && <Alert
         id={errorId}
@@ -112,6 +120,7 @@ export function ReferralQuote({ planId, cycle, onReadinessChange, disabled = fal
         description={state.valid ? offer ? "O desconto anterior foi mantido." : "A contratação permanece pelo valor regular." : "Confira a oferta ou remova o código para continuar pelo valor regular."}
         action={!state.valid ? <Space wrap><Button onClick={() => run("revalidate")} disabled={busy || disabled}>Tentar novamente</Button><Button onClick={() => run("remove")} disabled={busy || disabled}>Continuar pelo valor regular</Button></Space> : undefined}
       />}
+      {state.excluded && state.selection === selection && state.valid && <Alert type="info" showIcon message="Este plano e ciclo não participam da campanha. A contratação será pelo valor regular." />}
       {offer && state.valid && <Alert
         className={styles.offer}
         type="success"
@@ -119,7 +128,7 @@ export function ReferralQuote({ planId, cycle, onReadinessChange, disabled = fal
         message={`Oferta ${offer.campaign.title}`}
         description={<>
           <div className={styles.offerSummary}>
-            {offer.campaign.slug && <span className={styles.appliedCode}>Código aplicado: <strong>{offer.campaign.slug}</strong></span>}
+            {offer.campaign.slug && <span className={styles.appliedCode}><strong>Código aplicado!</strong></span>}
             <span className={styles.total}>
               Total por ciclo
               <span className={styles.prices}>
@@ -138,7 +147,7 @@ export function ReferralQuote({ planId, cycle, onReadinessChange, disabled = fal
             <details className={styles.offerDetails}>
               <summary>Detalhes do desconto</summary>
               <Typography.Paragraph className={styles.summary}>{quoteSummary(cycle, offer)}</Typography.Paragraph>
-              <Typography.Text type="secondary">Disponível para contas novas ou Free. A elegibilidade será confirmada na contratação.</Typography.Text>
+              <Typography.Text type="secondary">A elegibilidade será confirmada na contratação.</Typography.Text>
             </details>
             <Button type="link" size="small" className={styles.removeCode} onClick={() => run("remove")} disabled={busy || disabled}>Remover código</Button>
           </div>

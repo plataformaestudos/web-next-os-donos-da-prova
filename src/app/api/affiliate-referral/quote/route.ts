@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { affiliateBackend, REFERRAL_COOKIE, QUOTE_COOKIE, clearReferralCookie, isPlanCycle, isReferralToken, quoteResponse, referralJson, sameOrigin, setQuoteCookie, validQuote } from "@/affiliates/referral-server";
+import { affiliateBackend, REFERRAL_COOKIE, QUOTE_COOKIE, clearReferralCookie, isPlanCycle, isRecord, isReferralToken, quoteResponse, referralCookieOptions, referralJson, sameOrigin, setQuoteCookie, validQuote } from "@/affiliates/referral-server";
 
 export async function POST(request: NextRequest) {
   if (!sameOrigin(request)) return referralJson({ message: "Origem inválida." }, 403);
@@ -11,6 +11,14 @@ export async function POST(request: NextRequest) {
   const { planId, cycle } = body;
   const response = await affiliateBackend(request, "/affiliate-links/public/quote", { referralToken, planId, cycle });
   if (!response.ok) {
+    const detail: unknown = await response.clone().json().catch(() => null);
+    if (response.status === 400 && isRecord(detail) && detail.code === "AFFILIATE_SELECTION_EXCLUDED") {
+      const expiresAt = new Date(Date.now() + 15 * 60_000);
+      const regular = referralJson({ active: false, excluded: true });
+      // Server-established regular selection, while preserving the campaign for other cycles.
+      regular.cookies.set(QUOTE_COOKIE, JSON.stringify({ regular: true, planId, cycle, expiresAt: expiresAt.toISOString() }), { ...referralCookieOptions, expires: expiresAt });
+      return regular;
+    }
     clearReferralCookie(response, QUOTE_COOKIE);
     return response;
   }

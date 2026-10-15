@@ -8,6 +8,8 @@ export function middleware(request: NextRequest) {
     "/r",
     "/api/affiliate-referral/quote",
     "/api/affiliate-referral/code",
+    "/api/affiliate-referral/preview",
+    "/api/affiliate-referral/apply-code",
     "/api/affiliate-checkout/new-user",
     "/cadastro",
     "/signup",
