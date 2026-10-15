@@ -1,6 +1,6 @@
 # Redesenho do checkout
 
-Implementação de 06/10/2026 na branch `feat/checkout-redesign`, criada a partir de `feat/affiliate-discounts` para preservar a integração de campanhas existente. Referências: telas Plano, Dados pessoais e Pagamento do projeto Stitch `4326224785775341960`, fornecidas no workspace em `screens/`.
+Implementação de 06/10/2026 na branch `feat/checkout-redesign`, criada a partir de `feat/affiliate-discounts` para preservar a integração de campanhas existente. Referências: telas Plano, Dados pessoais e Pagamento do projeto Stitch `4326224785775341960`. Os arquivos locais dessas referências foram removidos após a entrega, na limpeza de 14/10/2026.
 
 ## Interface
 
@@ -43,7 +43,7 @@ Validação final em Chromium/Playwright contra a API local: **22 checks funcion
 
 Os cenários cobrem busca/seleção por teclado, módulos, navegação/foco, senha divergente, CEP consultado/manual, preservação de campos, cadastro Free, consentimentos explícitos, campanha válida/inválida/removida, mudança de plano/ciclo, cotação pendente/expirada, envio repetido e recuperação de erro nos dois checkouts. O Free chegou à tela de sucesso e manteve o destino de login. As falhas pagas foram respostas deliberadas da fixture; os logs de 404/409 correspondem aos cenários negativos.
 
-As capturas e os relatórios Playwright ficam em `screens/checkout-implementado/` no workspace local. O harness de navegador usa uma instalação temporária em `/tmp/odp-checkout-browser`; esses artefatos não fazem parte do repositório frontend.
+As capturas, galerias e resultados históricos foram removidos na limpeza de 14/10/2026. Os seis scripts de validação foram preservados em [test/browser/checkout](../test/browser/checkout/README.md). As novas capturas e resultados são gravados no diretório temporário do sistema; os comandos e requisitos de execução manual estão no README dessa pasta. Os resultados descritos neste documento se referem à validação original, não a uma nova execução após a limpeza.
 
 Next, API de teste e navegador criados para esta execução foram encerrados após salvar os artefatos. Nenhum serviço externo real foi chamado pelo navegador; a consulta de CEP foi interceptada com respostas de teste.
 
@@ -53,7 +53,7 @@ O card usa rotação 3D de 500 ms, frente/verso com altura natural e transferên
 
 Build, ESLint focado e `git diff --check` aprovados após essa alteração. Nove cenários de navegador aprovados: os dois temas em 360/390/768/1440 px e a preferência de movimento reduzido. Verificados rotação, seleção preservada, plano não selecionado permanecendo assim, retorno por teclado, módulos vazios, foco, continuação para dados pessoais e ausência de overflow/exceções JavaScript.
 
-Capturas específicas: `screens/checkout-implementado/plan-flip/`.
+Script preservado: `test/browser/checkout/plan-flip-browser.cjs`.
 
 ### Validação do desconto compacto
 
@@ -61,9 +61,9 @@ O bloco aplicado tem fundo discreto, padding menor, valor original riscado ao la
 
 Build, ESLint focado, `git diff --check` dos arquivos de desconto e testes de afiliados aprovados. Oito cenários adicionais no navegador aprovados: cadastro/modal, claro/escuro, 360/1440 px; preço original riscado e preços lado a lado, detalhes por teclado, manutenção da oferta após código inválido e remoção. Bloco fechado medido entre 102 e 165 px, sem overflow ou exceções JavaScript. Validação com fixtures locais, sem cobranças.
 
-Capturas específicas: `screens/checkout-implementado/compact-discount/`.
+Script preservado: `test/browser/checkout/compact-discount-browser.cjs`.
 
-Capturas com comparação de preços: `screens/checkout-implementado/discount-prices/`.
+Script de comparação de preços preservado: `test/browser/checkout/discount-prices-browser.cjs`.
 
 ### Validação das opções de assinatura
 
@@ -71,7 +71,7 @@ Equivalente mensal calculado em centavos, arredondado para duas casas e formatad
 
 Build de produção em cópia isolada, ESLint do componente, verificação de espaços focada e testes de afiliados aprovados. Oito cenários no navegador aprovados (cadastro/modal, claro/escuro, 360/1440 px): valores dos quatro ciclos, troca trimestral/anual, estrela visível, texto sem corte, desconto aplicado/removido e ausência de overflow/exceções JavaScript. O build isolado preservou os arquivos gerados pelo servidor de desenvolvimento do workspace.
 
-Capturas das opções de ciclo: `screens/checkout-implementado/subscription-options/`.
+Script preservado: `test/browser/checkout/subscription-options-browser.cjs`.
 
 ## Limites
 

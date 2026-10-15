@@ -95,7 +95,8 @@ Os avisos de `experimental.appDir` e Browserslist também já existem no ambient
 2. Abrir a tela sem escolher raiz/arquivo: o envio permanece desabilitado.
 3. Selecionar `.doc`, PDF, DOCX vazio e arquivo maior que 30 MB: ver erro local e
    não enviar. Trocar por DOCX válido remove o erro. Não inferir raiz pelo nome.
-4. Selecionar uma raiz e um DOCX em `scripts/import-samples` (na raiz do workspace).
+4. Selecionar uma raiz e um DOCX em `backend/test/fixtures/question-imports/documents/`
+   (a partir da raiz do workspace; as amostras ficam no repositório backend).
    Observar progresso do envio, fila e processamento. Duplo clique não duplica POST.
 5. Copiar o endereço com ID, atualizar e reabrir durante o processamento: continuar
    no mesmo lote. Quando pronto, abrir o resumo automaticamente, inclusive com erros

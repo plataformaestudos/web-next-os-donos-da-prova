@@ -83,7 +83,8 @@ Esse arquivo não foi alterado por esta entrega; o build frontend segue pendente
 
 ## Roteiro manual pendente
 
-1. Importar cada DOCX de `scripts/import-samples` e percorrer todas as páginas;
+1. Importar cada DOCX de `backend/test/fixtures/question-imports/documents/`
+   (a partir do workspace; as amostras ficam no repositório backend) e percorrer todas as páginas;
    conferir também questões com imagens, fórmulas e tabelas no desktop e celular.
 2. Abrir “N erros encontrados”; alternar erros/avisos, paginar e abrir uma questão
    que não está na página/filtro atual. Fechar e conferir manutenção da navegação.
