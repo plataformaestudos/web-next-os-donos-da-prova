@@ -4,6 +4,23 @@ export const DOCX_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 export const MAX_DOCX_BYTES = 30 * 1024 * 1024;
 export const IMPORT_PATH = "/importacao-questoes";
+export const MAX_QUESTION_NUMBER = 2147483647;
+
+export function validateQuestionRange(
+  start?: number | null,
+  end?: number | null,
+): string | null {
+  for (const value of [start, end]) {
+    if (
+      value != null &&
+      (!Number.isInteger(value) || value < 1 || value > MAX_QUESTION_NUMBER)
+    )
+      return "Informe números inteiros positivos para as questões inicial e final.";
+  }
+  if (end != null && end < (start ?? 1))
+    return "A questão final deve ser maior ou igual à questão inicial.";
+  return null;
+}
 
 export function validateDocument(
   file: Pick<File, "name" | "size" | "type">,

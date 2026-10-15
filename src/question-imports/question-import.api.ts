@@ -63,6 +63,8 @@ export async function loadImportRoots(
 export async function uploadImport(options: {
   file: File;
   rootModuleId?: string;
+  startQuestionNumber?: number;
+  endQuestionNumber?: number;
   retryId?: string;
   onProgress: (percent: number) => void;
 }): Promise<AcceptedQuestionImport> {
@@ -74,6 +76,10 @@ export async function uploadImport(options: {
   );
   if (!options.retryId && options.rootModuleId)
     body.append("rootModuleId", options.rootModuleId);
+  if (!options.retryId && options.startQuestionNumber !== undefined)
+    body.append("startQuestionNumber", String(options.startQuestionNumber));
+  if (!options.retryId && options.endQuestionNumber !== undefined)
+    body.append("endQuestionNumber", String(options.endQuestionNumber));
   const path = options.retryId
     ? `/question-imports/${options.retryId}/retry`
     : "/question-imports";

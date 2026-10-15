@@ -8,6 +8,7 @@ import {
   Card,
   Flex,
   Form,
+  InputNumber,
   Progress,
   Select,
   Typography,
@@ -25,7 +26,9 @@ import {
 import {
   DOCX_MIME,
   IMPORT_PATH,
+  MAX_QUESTION_NUMBER,
   validateDocument,
+  validateQuestionRange,
 } from "./question-import.rules";
 
 export function ImportUpload({ retryId }: { retryId?: string }) {
@@ -33,6 +36,12 @@ export function ImportUpload({ retryId }: { retryId?: string }) {
   const { user } = useUser();
   const [file, setFile] = useState<File | null>(null);
   const [rootModuleId, setRootModuleId] = useState<string>();
+  const [startQuestionNumber, setStartQuestionNumber] = useState<number | null>(
+    null,
+  );
+  const [endQuestionNumber, setEndQuestionNumber] = useState<number | null>(
+    null,
+  );
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -65,6 +74,12 @@ export function ImportUpload({ retryId }: { retryId?: string }) {
       setError(validation);
       return;
     }
+    const rangeError =
+      !retryId && validateQuestionRange(startQuestionNumber, endQuestionNumber);
+    if (rangeError) {
+      setError(rangeError);
+      return;
+    }
     submitting.current = true;
     setBusy(true);
     setProgress(0);
@@ -73,6 +88,8 @@ export function ImportUpload({ retryId }: { retryId?: string }) {
       const accepted = await uploadImport({
         file,
         rootModuleId,
+        startQuestionNumber: startQuestionNumber ?? undefined,
+        endQuestionNumber: endQuestionNumber ?? undefined,
         retryId,
         onProgress: setProgress,
       });
@@ -96,7 +113,8 @@ export function ImportUpload({ retryId }: { retryId?: string }) {
         {retryId ? (
           <Typography.Paragraph>
             Selecione o documento novamente. A nova tentativa usará o mesmo
-            módulo raiz e terá seu próprio acompanhamento.
+            módulo raiz e o mesmo intervalo de questões da importação anterior,
+            e terá seu próprio acompanhamento.
           </Typography.Paragraph>
         ) : (
           <>
@@ -152,6 +170,48 @@ export function ImportUpload({ retryId }: { retryId?: string }) {
                 message="Nenhum módulo raiz cadastrado. A importação criará uma raiz com o nome do arquivo."
               />
             )}
+            <Typography.Paragraph>
+              Use os números escritos no DOCX. As questões anteriores à inicial
+              serão ignoradas e a questão final será incluída por completo.
+            </Typography.Paragraph>
+            <Flex gap={16} wrap>
+              <Form.Item
+                label="Questão inicial (opcional)"
+                extra="Em branco, começa na questão 1."
+                style={{ flex: "1 1 220px", minWidth: 0 }}
+              >
+                <InputNumber
+                  aria-label="Questão inicial"
+                  placeholder="1"
+                  min={1}
+                  max={MAX_QUESTION_NUMBER}
+                  step={1}
+                  inputMode="numeric"
+                  value={startQuestionNumber}
+                  onChange={setStartQuestionNumber}
+                  disabled={busy}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Questão final (opcional)"
+                extra="Em branco, segue até o fim do documento."
+                style={{ flex: "1 1 220px", minWidth: 0 }}
+              >
+                <InputNumber
+                  aria-label="Questão final"
+                  placeholder="Até o fim"
+                  min={1}
+                  max={MAX_QUESTION_NUMBER}
+                  step={1}
+                  inputMode="numeric"
+                  value={endQuestionNumber}
+                  onChange={setEndQuestionNumber}
+                  disabled={busy}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Flex>
           </>
         )}
         <Form.Item

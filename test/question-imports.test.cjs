@@ -34,6 +34,27 @@ const rules = loadTypeScript("question-import.rules.ts");
 const previewRules = loadTypeScript("import-preview.rules.ts");
 const file = { name: "questoes.docx", type: rules.DOCX_MIME, size: 100 };
 
+test("question ranges use positive original DOCX numbers and inclusive endpoints", () => {
+  for (const [start, end] of [
+    [null, null],
+    [200, null],
+    [null, 200],
+    [200, 200],
+    [200, 500],
+  ])
+    assert.equal(rules.validateQuestionRange(start, end), null);
+  for (const [start, end] of [
+    [0, null],
+    [1.5, null],
+    [null, -1],
+    [NaN, null],
+    [200, 199],
+    [null, Infinity],
+    [2147483648, null],
+  ])
+    assert.equal(typeof rules.validateQuestionRange(start, end), "string");
+});
+
 test("draft patches preserve canonical images and only send explicitly reviewed fields", () => {
   const canonical = `import-image://${"a".repeat(64)}`;
   const original = {
@@ -342,11 +363,37 @@ test("HTTP contract: multipart upload, retry, status, roots and recoverable fail
   await t.test(
     "new upload without a root sends only the file for automatic root resolution",
     async () => {
-      const accepted = await api.uploadImport({ file: document, onProgress() {} });
+      const accepted = await api.uploadImport({
+        file: document,
+        onProgress() {},
+      });
       assert.equal(accepted.id, importId);
-      assert.equal(requests.at(-1).url, '/question-imports');
+      assert.equal(requests.at(-1).url, "/question-imports");
       assert.doesNotMatch(requests.at(-1).body, /name="rootModuleId"/);
       assert.match(requests.at(-1).body, /filename="sample.docx"/);
+    },
+  );
+
+  await t.test(
+    "upload sends the original DOCX range without requiring a module root",
+    async () => {
+      await api.uploadImport({
+        file: document,
+        startQuestionNumber: 200,
+        endQuestionNumber: 500,
+        onProgress() {},
+      });
+      const body = requests.at(-1).body;
+      assert.match(body, /name="startQuestionNumber"\r\n\r\n200\r\n/);
+      assert.match(body, /name="endQuestionNumber"\r\n\r\n500\r\n/);
+      assert.doesNotMatch(body, /name="rootModuleId"/);
+      await api.uploadImport({
+        file: document,
+        endQuestionNumber: 200,
+        onProgress() {},
+      });
+      assert.doesNotMatch(requests.at(-1).body, /name="startQuestionNumber"/);
+      assert.match(requests.at(-1).body, /name="endQuestionNumber"/);
     },
   );
 
@@ -357,11 +404,17 @@ test("HTTP contract: multipart upload, retry, status, roots and recoverable fail
         file: document,
         rootModuleId: rootId,
         retryId: importId,
+        startQuestionNumber: 200,
+        endQuestionNumber: 500,
         onProgress() {},
       });
       assert.equal(accepted.id, nextId);
       assert.equal(requests.at(-1).url, `/question-imports/${importId}/retry`);
       assert.doesNotMatch(requests.at(-1).body, /name="rootModuleId"/);
+      assert.doesNotMatch(
+        requests.at(-1).body,
+        /name="(?:start|end)QuestionNumber"/,
+      );
     },
   );
 

@@ -101,7 +101,7 @@ export function ImportErrorsDialog({
                       <Typography.Text strong>
                         {problem.scope === "IMPORT"
                           ? "Documento"
-                          : `Questão ${problem.questionOrder} (DOCX: ${problem.sourceNumber ?? "sem número"})`}
+                          : `Questão ${problem.sourceNumber ?? problem.questionOrder} (posição no lote: ${problem.questionOrder})`}
                       </Typography.Text>
                       {problem.reviewStatus && (
                         <Tag>{reviewLabels[problem.reviewStatus]}</Tag>

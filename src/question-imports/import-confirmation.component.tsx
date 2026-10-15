@@ -35,7 +35,10 @@ const BATCH_SIZE = 20;
 type ConfirmationDisplayItemResult = Omit<
   ImportConfirmationItemResult,
   "outcome"
-> & { outcome: ImportConfirmationItemResult["outcome"] | "UNKNOWN" };
+> & {
+  outcome: ImportConfirmationItemResult["outcome"] | "UNKNOWN";
+  sourceNumber?: number | null;
+};
 
 async function loadAllItems(importId: string): Promise<ImportItem[]> {
   const first = await loadImportItems(importId, {
@@ -71,7 +74,7 @@ function outcomeLabel(result: ConfirmationDisplayItemResult) {
 }
 
 function rowDescription(result: ConfirmationDisplayItemResult) {
-  return `Questão ${result.itemOrder ?? "—"} · ${outcomeLabel(result)} · ${result.message}`;
+  return `Questão ${result.sourceNumber ?? result.itemOrder ?? "—"} · ${outcomeLabel(result)} · ${result.message}`;
 }
 
 export function ImportConfirmation({ batch }: { batch: QuestionImport }) {
@@ -271,7 +274,13 @@ export function ImportConfirmation({ batch }: { batch: QuestionImport }) {
           batch.id,
           requestItems.map(({ id, version }) => ({ id, version })),
         );
-        accumulated.push(...response.results);
+        accumulated.push(
+          ...response.results.map((result) => ({
+            ...result,
+            sourceNumber: requestItems.find((item) => item.id === result.itemId)
+              ?.sourceNumber,
+          })),
+        );
         completed += requestItems.length;
         setResults([...accumulated]);
         setProcessed(completed);
@@ -290,6 +299,7 @@ export function ImportConfirmation({ batch }: { batch: QuestionImport }) {
         const unknown = requestItems.map((item) => ({
           itemId: item.id,
           itemOrder: item.itemOrder,
+          sourceNumber: item.sourceNumber,
           outcome: "UNKNOWN" as const,
           code: "CONFIRMATION_RESULT_UNKNOWN",
           message:
