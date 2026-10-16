@@ -14,6 +14,7 @@ import { useUser } from "@/app/context/user.context";
 import { hasStaffAccess } from "@/util/roles";
 import { FreePlanUsageCard } from "./free-plan-usage.component";
 import { FreePlanUsage, hasFreePlanIndicators, nextUsageRefreshDelay } from "./free-plan-usage.model";
+import { useStudyAccess } from "@/free-plan-upgrade/study-access-provider.component";
 
 export interface UserAnswersCurrentMonthDto {
     answeredAt: Date;
@@ -42,6 +43,7 @@ interface HomeContentProps {
 
 export function HomeContent({ userProfile }: HomeContentProps) {
     const { user } = useUser();
+    const { access } = useStudyAccess();
     const dashboard = useQuery({
         queryKey: ["dashboard", user?.id, user?.profile?.role_id],
         enabled: Boolean(user?.profile),
@@ -71,6 +73,8 @@ export function HomeContent({ userProfile }: HomeContentProps) {
     };
     const isLoading = dashboard.isLoading;
     const freePlanUsage = !hasStaffAccess(user) && !dashboard.isError ? dashData.freePlanUsage : null;
+    const freeTrialExpired = !hasStaffAccess(user) && access?.reason === "FREE_TRIAL_EXPIRED";
+    const showFreePlanCard = freeTrialExpired || hasFreePlanIndicators(freePlanUsage);
     const { refetch } = dashboard;
 
     useEffect(() => {
@@ -138,8 +142,8 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                 />
             ) : (
                 <S.Container>
-                    <S.Content $hasFreePlanUsage={hasFreePlanIndicators(freePlanUsage)}>
-                        <FreePlanUsageCard usage={freePlanUsage} />
+                    <S.Content $hasFreePlanUsage={showFreePlanCard}>
+                        <FreePlanUsageCard usage={freePlanUsage} expired={freeTrialExpired} />
                         <S.Card
                             style={{ gridArea: "card1" }}
                             onClick={() => {
@@ -225,7 +229,7 @@ export function HomeContent({ userProfile }: HomeContentProps) {
                             </S.CardTitle>
                                 <S.CardText style={{ fontSize: 13, color: "#999", textAlign: "center" }}>Em breve..</S.CardText>
                         </S.Card>
-                        <S.CardPerformance $large $hasFreePlanUsage={hasFreePlanIndicators(freePlanUsage)}>
+                        <S.CardPerformance $large $hasFreePlanUsage={showFreePlanCard}>
                             <S.CardTitle>Meu Desempenho</S.CardTitle>
                             <S.Spacer />
 

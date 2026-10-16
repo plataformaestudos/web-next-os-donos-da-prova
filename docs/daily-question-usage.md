@@ -38,3 +38,21 @@ Validação local: testes do serviço de consumo e controller HTTP no backend,
 `node --test test/dashboard-free-plan.test.cjs test/daily-question-usage.test.cjs`
 e `test/browser/checkout/daily-question-usage-browser.cjs`. Os testes de navegador
 usam API simulada, conforme `test/browser/checkout/README.md`.
+
+## Ajuste da contagem — 16/10/2026
+
+A API corrigiu os filtros de `timestamp without time zone` para usar a mesma
+convenção local da gravação. Isso inclui no consumo as aberturas entre 00h e 03h,
+antes excluídas indevidamente. A renovação continua à meia-noite do servidor
+(Brasília no Dockerfile), sem janela móvel de 24 horas.
+
+Uma questão não respondida consome uma vez por dia. Se continuar sem resposta,
+consome novamente quando aberta no dia seguinte. Questões já respondidas pelo
+aluno, em qualquer caderno, ficam isentas nas próximas revisões. Responder não
+devolve a cota consumida na abertura inicial. Reabrir uma questão já contabilizada
+hoje também é permitido mesmo com saldo zero. Sessão, propriedade, módulos e
+vigência da assinatura continuam obrigatórios.
+
+O indicador mantém seu contrato e usa o consumo confirmado pela API. O popup diário
+aparece ao tentar abrir uma nova questão que exige saldo, e não nas revisões
+isentas. Não houve alteração no código cliente para esta correção.

@@ -7,6 +7,8 @@ import { AnswerQuestion } from "@/question-books/answer-question/answer-question
 import { QuestionBookModel, QuestionBookNextQuestionModel } from "@/question-books/question-book.model";
 import { ResponseModel } from "@/model/common.model";
 import { AppLoading } from "../AppLoading";
+import { HttpError } from "@/lib/errors";
+import { parseStudyAccessBlock } from "@/free-plan-upgrade/study-access.model";
 
 interface AppQuestionLoaderProps {
     id: string;
@@ -49,6 +51,7 @@ export function AppQuestionLoader({ id, questionBook, question, setQuestion, onA
                 if (url.href !== window.location.href) window.history.pushState(null, "", url);
             }
         } catch (caught) {
+            if (caught instanceof HttpError && parseStudyAccessBlock(caught.status, caught.data)) return;
             if (!controller.signal.aborted) setError(caught instanceof Error ? caught.message : "Não foi possível carregar a questão.");
         } finally {
             if (request.current === controller) {

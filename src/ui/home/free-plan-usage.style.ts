@@ -170,3 +170,15 @@ export const Legend = styled.p`
         line-height: 17px;
     }
 `;
+
+export const Expiration = styled(Legend)`
+    margin-top: 6px;
+    overflow-wrap: anywhere;
+`;
+
+export const ExpiredDescription = styled.p`
+    color: ${({ theme }) => theme.colorTextSecondary};
+    font-size: 14px;
+    line-height: 20px;
+    margin: 0;
+`;

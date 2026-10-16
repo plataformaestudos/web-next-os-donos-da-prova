@@ -8,9 +8,12 @@ import { ModulesTree } from "@/modules/tree/modules-tree.component";
 import { UPSERT_PLAN_FORM_ID } from "./upsert-plan-form.constant";
 import { useUpsertPlan } from "./upsert-plan.context";
 import { queryModules } from "@/modules/tree/load-modules.action";
-import { recurringCycles } from "@/plans/plan-price-display";
+import { getPlanRecurringPrices, recurringCycles } from "@/plans/plan-price-display";
+import { UpgradePlanOption } from "./upsert-plan.dto";
 
 export interface PlanFormValues {
+  upgradePlanId?: string | null;
+  upgradeCycle?: "MONTHLY" | "QUARTERLY" | "SEMIANNUALLY" | "YEARLY" | null;
   id?: string;
   name: string;
   description: string;
@@ -28,6 +31,7 @@ export interface PlanFormValues {
 }
 
 interface UpsertPlanFormProps {
+  upgradeOptions: UpgradePlanOption[];
   plan?: PlanFormValues | null;
   modules: {
     loadData: (key: string) => Promise<Array<ModuleViewModel>>;
@@ -35,10 +39,12 @@ interface UpsertPlanFormProps {
   };
 }
 
-export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
+export function UpsertPlanForm({ plan, modules, upgradeOptions }: UpsertPlanFormProps) {
   const { upsertPlan, error } = useUpsertPlan();
 
   const [values, setValues] = useState<PlanFormValues>({
+    upgradePlanId: plan?.upgradePlanId ?? null,
+    upgradeCycle: plan?.upgradeCycle ?? null,
     id: plan?.id,
     name: plan?.name || "",
     description: plan?.description || "",
@@ -59,6 +65,12 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
   const [filteredModules, setFilteredModules] = useState<ModuleViewModel[]>([]);
   const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
   const [addedModules, setAddedModules] = useState<ModuleViewModel[]>([]);
+  const [upgradeError, setUpgradeError] = useState<string | null>(null);
+  const upgradePlans = upgradeOptions.filter(option => option.id !== values.id && getPlanRecurringPrices(option).length > 0);
+  const selectedUpgrade = upgradePlans.find(option => option.id === values.upgradePlanId);
+  const upgradeCycles = selectedUpgrade ? getPlanRecurringPrices(selectedUpgrade) : [];
+  const upgradeUnavailable = Boolean(values.upgradePlanId && (!selectedUpgrade ||
+    (values.upgradeCycle && !upgradeCycles.some(cycle => cycle.value === values.upgradeCycle))));
 
   const availableDisplayCycles = useMemo(() => recurringCycles.filter(({ value }) => {
     const price = value === "MONTHLY" ? values.monthValue
@@ -155,6 +167,11 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
   };
 
   const handleSubmit = () => {
+    if (values.isFree && values.upgradePlanId && (!selectedUpgrade || !upgradeCycles.some(cycle => cycle.value === values.upgradeCycle))) {
+      setUpgradeError("Selecione um plano disponível e um ciclo com preço cadastrado, ou use a seleção automática.");
+      return;
+    }
+    setUpgradeError(null);
     upsertPlan(values);
   };
 
@@ -286,6 +303,40 @@ export function UpsertPlanForm({ plan, modules }: UpsertPlanFormProps) {
             />
           </Flex>
         </Flex>
+
+        {values.isFree && <>
+          <Divider />
+          <Typography.Title level={5}>Sugestão ao atingir os limites do Free</Typography.Title>
+          <Typography.Paragraph type="secondary">
+            Oferta apresentada quando o limite diário é atingido ou o período gratuito termina.
+          </Typography.Paragraph>
+          <Flex style={{ gap: 16, flexWrap: "wrap" }}>
+            <Flex vertical style={{ flex: 1, minWidth: 220 }}>
+              <Label htmlFor="upgrade-plan">Plano sugerido</Label>
+              <Select id="upgrade-plan" value={values.upgradePlanId ?? ""}
+                options={[
+                  { value: "", label: "Seleção automática" },
+                  ...upgradePlans.map(option => ({ value: option.id, label: option.name })),
+                  ...(values.upgradePlanId && !selectedUpgrade ? [{ value: values.upgradePlanId, label: "Plano sugerido indisponível", disabled: true }] : []),
+                ]}
+                onChange={value => { setValues(previous => ({ ...previous, upgradePlanId: value || null, upgradeCycle: null })); setUpgradeError(null); }}
+              />
+            </Flex>
+            <Flex vertical style={{ flex: 1, minWidth: 220 }}>
+              <Label htmlFor="upgrade-cycle">Ciclo apresentado</Label>
+              <Select id="upgrade-cycle" value={values.upgradeCycle ?? undefined}
+                placeholder={values.upgradePlanId ? "Selecione o ciclo" : "Definido automaticamente"}
+                disabled={!selectedUpgrade}
+                options={upgradeCycles.map(cycle => ({ value: cycle.value, label: cycle.label }))}
+                onChange={value => { handleChange("upgradeCycle", value); setUpgradeError(null); }}
+              />
+            </Flex>
+          </Flex>
+          {upgradeUnavailable && <Typography.Paragraph type="warning">
+            A oferta configurada não está disponível. Escolha outro plano/ciclo ou use a seleção automática.
+          </Typography.Paragraph>}
+          {upgradeError && <Typography.Paragraph type="danger" role="alert">{upgradeError}</Typography.Paragraph>}
+        </>}
 
         {!values.isFree && <>
           <Divider />

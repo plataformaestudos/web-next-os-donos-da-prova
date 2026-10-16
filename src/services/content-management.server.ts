@@ -2,6 +2,7 @@ import HttpClient from "@/util/http-client/fetch-server.util";
 import { ResponseModel } from "@/model/common.model";
 import { FullQuestion } from "@/model/question.model";
 import { PlanFormValues } from "@/plans/upsert/upsert-plan-form.component";
+import { UpgradePlanOption } from "@/plans/upsert/upsert-plan.dto";
 
 export type ManagedPlanSummary = { id: string; name: string; status: string | null };
 export type ManagedQuestion = FullQuestion & { comment: string };
@@ -13,6 +14,11 @@ export async function loadManagedPlans() {
 
 export async function loadManagedPlan(id: string) {
   const result = await HttpClient.fetch<ResponseModel<PlanFormValues>>(`/management/plans/${encodeURIComponent(id)}`, { cache: "no-store" });
+  return result.data;
+}
+
+export async function loadUpgradePlanOptions() {
+  const result = await HttpClient.fetch<ResponseModel<UpgradePlanOption[]>>("/management/plans/upgrade-options", { cache: "no-store" });
   return result.data;
 }
 

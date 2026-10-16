@@ -8,6 +8,7 @@ import { syncSessionWithUser } from "@/services/cookie-consent.service";
 import { ResponseModel } from "@/model/common.model";
 import { useQueryClient } from "@tanstack/react-query";
 import { logoutClient } from "@/services/logout.service";
+import { resetStudyAccessNotices } from "@/free-plan-upgrade/study-access.model";
 
 async function loadOwnProfile() {
     const response = await HttpClient.fetch<ResponseModel<UserProfile>>("/profiles/me", { cache: "no-store" });
@@ -107,6 +108,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     const loginUser = async (userData: UserExtended) => {
+        resetStudyAccessNotices();
         const version = ++requestVersion.current;
         setUser(userData); // já salva o user do login
 
@@ -124,6 +126,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     const logoutUser = async () => {
         await logoutClient();
+        resetStudyAccessNotices();
         ++requestVersion.current;
         setUser(null);
         setLoading(false);

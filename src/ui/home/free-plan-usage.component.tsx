@@ -6,10 +6,20 @@ import * as S from "./free-plan-usage.style";
 
 interface FreePlanUsageCardProps {
     usage: FreePlanUsage | null | undefined;
+    expired?: boolean;
 }
 
-export function FreePlanUsageCard({ usage }: FreePlanUsageCardProps) {
+export function FreePlanUsageCard({ usage, expired = false }: FreePlanUsageCardProps) {
     const theme = useTheme();
+    if (expired) return (
+        <S.Card aria-label="Período gratuito encerrado">
+            <S.Header>
+                <S.Title><CalendarOutlined aria-hidden />Seu período gratuito terminou</S.Title>
+            </S.Header>
+            <S.ExpiredDescription>Veja os planos para continuar estudando.</S.ExpiredDescription>
+            <S.PlansLink href="/assinatura?tab=planos">Ver planos <RightOutlined aria-hidden /></S.PlansLink>
+        </S.Card>
+    );
     if (!hasFreePlanIndicators(usage)) return null;
 
     const showExpiration = usage.hasExpiration && usage.daysRemaining !== null && usage.daysUsed !== null && usage.durationDays !== null;
@@ -19,6 +29,12 @@ export function FreePlanUsageCard({ usage }: FreePlanUsageCardProps) {
     const durationDays = usage.durationDays ?? 0;
     const dailyLimit = usage.dailyQuestionLimit ?? 0;
     const dailyLimitReached = showDailyLimit && usage.questionsViewedToday >= dailyLimit;
+    const expirationDate = usage.expiresAt ? new Date(usage.expiresAt) : null;
+    const expiration = expirationDate && Number.isFinite(expirationDate.getTime())
+        ? new Intl.DateTimeFormat("pt-BR", {
+            dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo",
+        }).format(expirationDate)
+        : null;
 
     return (
         <S.Card aria-label="Seu plano Free">
@@ -47,7 +63,9 @@ export function FreePlanUsageCard({ usage }: FreePlanUsageCardProps) {
                             aria-label="Tempo utilizado do plano Free"
                             aria-valuetext={`${daysUsed} de ${durationDays} dias utilizados; ${daysRemaining} dias restantes`}
                         />
-                        <S.Legend>{daysUsed} de {durationDays} dias utilizados</S.Legend>
+                        {expiration && <S.Expiration>
+                            Vencimento: <time dateTime={usage.expiresAt ?? undefined}>{expiration}</time> (horário de Brasília)
+                        </S.Expiration>}
                     </S.Indicator>
                 )}
                 {showDailyLimit && (

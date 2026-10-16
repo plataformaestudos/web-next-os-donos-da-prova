@@ -9,6 +9,7 @@ import { Footer } from "@/ui/footer/footer.component";
 import { useUser } from "@/app/context/user.context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { StudyAccessProvider } from "@/free-plan-upgrade/study-access-provider.component";
 
 export default function RootLayout({
   children,
@@ -25,6 +26,7 @@ export default function RootLayout({
   if (loading || !user) return null;
 
   return (
+    <StudyAccessProvider key={user.id}>
     <NavbarContextProvider>
       <Styled.Container>
         <Navbar />
@@ -37,5 +39,6 @@ export default function RootLayout({
         </Styled.HeaderAndContentContainer>
       </Styled.Container>
     </NavbarContextProvider>
+    </StudyAccessProvider>
   );
 }
