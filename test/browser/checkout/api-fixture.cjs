@@ -8,7 +8,12 @@ const plans = [
   {...basePlan,id:'55555555-5555-4555-8555-555555555555',name:'Plano indisponível',description:'Sem ciclos contratáveis',monthValue:null,quarterlyValue:null,semiannualValue:null,annualValue:null},
 ];
 const writes=[];
+const extraFreeId = '66666666-6666-4666-8666-666666666666';
+const managedFreePlans = new Map([plans[2], { ...plans[2], id: extraFreeId, name: 'Free de outra campanha' }]
+  .map(plan => [plan.id, { ...plan, modules: [], upgradePlanId: null, upgradeCycle: null }]));
 const study = { mode: 'free', viewed: new Set(), answered: new Set(), usageReads: 0, questionDeliveries: 0, lastOrder: 1 };
+study.sourceFreePlanId = plans[2].id;
+const fixtureTrialExpiredAt = new Date(Date.now() - 86400000).toISOString();
 const bookStats = () => ({ totalQuestions: 12, correctAnswers: study.answered.size, totalAnswers: study.answered.size, firstQuestion: 1, wrongAnswers: 0 });
 const cycleFields = { MONTHLY: 'monthValue', QUARTERLY: 'quarterlyValue', SEMIANNUALLY: 'semiannualValue', YEARLY: 'annualValue' };
 const isFixed = body => body.referralToken === 'f'.repeat(43) || body.code === 'fixed20';
@@ -39,6 +44,15 @@ const dailyUsage = () => ['paid', 'staff', 'unlimited'].includes(study.mode) ? n
   questionsViewedToday: study.viewed.size, questionsRemainingToday: Math.max(0, (study.mode === 'zero' ? 0 : 3) - study.viewed.size),
   dailyResetAt: new Date(Date.now() + 86400000).toISOString(),
 });
+const studyAccess = () => ({
+  ...(['free', 'upgrade-free', 'expired', 'zero', 'unlimited'].includes(study.mode) && managedFreePlans.get(study.sourceFreePlanId)?.upgradePlanId
+    ? { upgradeOffer: { planId: managedFreePlans.get(study.sourceFreePlanId).upgradePlanId, cycle: managedFreePlans.get(study.sourceFreePlanId).upgradeCycle } } : {}),
+  reason: study.mode === 'expired' ? 'FREE_TRIAL_EXPIRED' : study.mode === 'upgrade-free' && study.viewed.size >= 3 ? 'FREE_DAILY_LIMIT_REACHED' : null,
+  expiresAt: study.mode === 'expired' ? fixtureTrialExpiredAt : null,
+  dailyResetAt: dailyUsage()?.dailyResetAt ?? null,
+  dailyQuestionLimit: dailyUsage()?.dailyQuestionLimit ?? null,
+  questionsViewedToday: dailyUsage()?.questionsViewedToday ?? null,
+});
 const quote = body => {
   const plan=plans.find(p=>p.id===body.planId)||plans[0];
   const values={MONTHLY:plan.monthValue,QUARTERLY:plan.quarterlyValue,SEMIANNUALLY:plan.semiannualValue,YEARLY:plan.annualValue};
@@ -57,7 +71,27 @@ const server=http.createServer(async(req,res)=>{
   if(path==='/public/plans')result={data:plans};
   else if(path==='/subscription-plans/availables')result={data:plans.filter(p=>!p.isFree)};
   else if(path==='/auth/me')result={id:'fixture-student',email:'student@example.test'};
-  else if(path==='/profiles/me')result={data:{id:'fixture-profile',user_id:'fixture-student',role_id:study.mode==='staff'?'ebacbfdf-547f-46c7-a31d-8e83225994b7':'8f36e1ce-e12e-4237-b16b-4ad7723d8f2b',name:'Aluno de teste',nickname:'Aluno'}};
+  else if(path==='/profiles/me')result={data:{id:'fixture-profile',user_id:'fixture-student',role_id:['staff','admin'].includes(study.mode)?'ebacbfdf-547f-46c7-a31d-8e83225994b7':'8f36e1ce-e12e-4237-b16b-4ad7723d8f2b',name:'Aluno de teste',nickname:'Aluno'}};
+  else if(path==='/management/plans/upgrade-options')result={data:plans.filter(plan=>!plan.isFree)};
+  else if(path==='/management/plans')result={data:[...managedFreePlans.values()].map(plan=>({id:plan.id,name:plan.name,status:'ACTIVE'}))};
+  else if(path.startsWith('/management/plans/')){
+    const id=path.split('/').pop();
+    if(req.method==='PUT'){
+      managedFreePlans.set(id,{...managedFreePlans.get(id),...body});
+      writes.push({kind:'free-upgrade-config',id,upgradePlanId:body.upgradePlanId,upgradeCycle:body.upgradeCycle});
+      result={data:{id}};
+    }else result={data:managedFreePlans.get(id)??{...plans.find(plan=>plan.id===id),modules:[]}};
+  }
+  else if(path==='/dashboard')result={data:{
+    loginsInCurrentMonth:[],totalAnswers:0,totalBooksFavorited:0,answersByDayInCurrentMonth:[],statsLastBookAnswered:null,
+    freePlanUsage:['free','upgrade-free','zero','unlimited'].includes(study.mode)?{
+      planName:'Free',hasExpiration:true,expiresAt:new Date(Date.now()+15*86400000).toISOString(),
+      durationDays:15,daysRemaining:15,daysUsed:0,
+      hasDailyQuestionLimit:study.mode!=='unlimited',dailyQuestionLimit:dailyUsage()?.dailyQuestionLimit??null,
+      questionsViewedToday:study.viewed.size,questionsRemainingToday:dailyUsage()?.questionsRemainingToday??null,
+      dailyResetAt:dailyUsage()?.dailyResetAt??null,
+    }:null,
+  }};
   else if(path==='/terms')result={data:{termsOfUse:{id:'terms',version:'1',title:'Termos de teste',content:'Fixture local'},privacyPolicy:{id:'privacy',version:'1',title:'Privacidade de teste',content:'Fixture local'}}};
   else if(path==='/affiliate-links/public/preview')result=preview(body);
   else if(path==='/affiliate-links/public/apply-code'){
@@ -81,6 +115,9 @@ const server=http.createServer(async(req,res)=>{
   }else if(path==='/auth/login')result={id:'fixture-student'};
   else if(path==='/__fixture/config'){
     study.mode=body.mode||'free';study.viewed.clear();study.answered.clear();study.usageReads=0;study.questionDeliveries=0;study.lastOrder=1;
+    study.sourceFreePlanId=body.sourceFreePlanId||plans[2].id;
+    if(body.exhausted)for(let i=1;i<=3;i++)study.viewed.add(`question-${i}`);
+    if(body.resetOffers)for(const free of managedFreePlans.values()){free.upgradePlanId=null;free.upgradeCycle=null;}
     result={ok:true};
   }
   else if(path==='/question-books/user/daily-usage'){
@@ -88,6 +125,7 @@ const server=http.createServer(async(req,res)=>{
     if(study.mode==='error'){status=503;result={message:'Consumo temporariamente indisponível.'};}
     else result={data:dailyUsage()};
   }
+  else if(path==='/question-books/user/study-access')result={data:studyAccess()};
   else if(/^\/question-books\/[^/]+\/timer$/.test(path))result={data:{questionBookId:path.split('/')[2],elapsedTimeMs:0,lastUpdated:new Date().toISOString()}};
   else if(/^\/question-books\/[^/]+\/stats$/.test(path))result={data:bookStats()};
   else if(path==='/user-answers'){
@@ -96,15 +134,23 @@ const server=http.createServer(async(req,res)=>{
   }
   else if(/^\/questions\/[^/]+\/general-stats$/.test(path))result={data:{totalAnswers:0,correctAnswers:0,incorrectAnswers:0,accuracyPercentage:0,difficulty:0}};
   else if(/^\/question-books\/[^/]+\/next-question$/.test(path)){
+    if(studyAccess().reason){
+      status=403;result={statusCode:403,code:studyAccess().reason,message:'Limite gratuito atingido.',...studyAccess()};
+    }else{
     const order=url.searchParams.get('seqRandom')==='true'?(study.lastOrder%12)+1:Number(url.searchParams.get('seq'))||1;
     study.viewed.add(`question-${order}`);study.questionDeliveries++;
     study.lastOrder=order;
     await new Promise(resolve=>setTimeout(resolve,150));
     result={data:question(path.split('/')[2],order)};
+    }
   }
   else if(/^\/question-books\/[^/]+$/.test(path)){
+    if(studyAccess().reason){
+      status=403;result={statusCode:403,code:studyAccess().reason,message:'Limite gratuito atingido.',...studyAccess()};
+    }else{
     const id=path.split('/')[2];const order=Math.min(12,Number(url.searchParams.get('seq'))||1);study.viewed.add(`question-${order}`);study.questionDeliveries++;study.lastOrder=order;
     result={data:{id,name:'Caderno de teste',questionsCount:12,folder:null,questionBookStats:bookStats(),nextQuestion:question(id,order)}};
+    }
   }
   else if(path==='/__fixture/state')result={writes,study:{mode:study.mode,views:study.viewed.size,usageReads:study.usageReads,questionDeliveries:study.questionDeliveries}};
   res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(result));

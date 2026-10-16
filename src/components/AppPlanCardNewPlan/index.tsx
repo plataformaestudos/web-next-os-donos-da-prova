@@ -6,6 +6,7 @@ import { ReferralPlanPrice, useReferralPlans } from "@/affiliates/referral-plans
 import {
     Button,
     Descriptions,
+    Grid,
     Typography,
     Form,
     FormInstance,
@@ -46,6 +47,9 @@ const CardPrice = styled.div`
   gap: 4px;
   strong { color: ${({ theme }) => theme.colorTextHeading}; font-size: 24px; }
   del, span { color: ${({ theme }) => theme.colorTextSecondary}; font-size: 12px; }
+  @media (max-width: 575px) {
+    strong { font-size: clamp(16px, 5vw, 24px); }
+  }
 `;
 
 const FlipCardContainer = styled.div`
@@ -101,6 +105,7 @@ interface ModalProps {
 }
 
 export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
+    const screens = Grid.useBreakpoint();
     const app = App.useApp?.();
     const message = app?.message;
     const useForm = <T,>() => {
@@ -373,7 +378,13 @@ export const AppPlanCardNewPlan = ({ plan }: { plan: NewPlanModel }) => {
 
                     <Descriptions
                         bordered
+                        size="small"
                         column={1}
+                        layout={screens.sm ? "horizontal" : "vertical"}
+                        styles={{
+                            label: { padding: screens.sm ? "10px 12px" : undefined, width: screens.sm ? "1%" : undefined, overflowWrap: "normal", wordBreak: "normal" },
+                            content: { padding: screens.sm ? "10px 12px" : undefined },
+                        }}
                     >
                         {getPlanRecurringPrices(plan).length > 0 && <Descriptions.Item label="Assinatura">
                             <CardPrice><ReferralPlanPrice plan={plan} /></CardPrice>

@@ -13,8 +13,9 @@ import { ModuleViewModel, ModuleModel } from "@/model/module.model";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import React from "react";
 import { FullPageLoading } from "@/ui/loading/full-page-loading";
+import { UpgradePlanOption } from "@/plans/upsert/upsert-plan.dto";
 
-export function EditPlanPageClient({ plan }: { plan: PlanFormValues;  }) {
+export function EditPlanPageClient({ plan, upgradeOptions }: { plan: PlanFormValues; upgradeOptions: UpgradePlanOption[]; }) {
     const { loading, allowed } = useAuthGuard({ requireRoles: [Roles.ADMIN] });
 
     const [planModules, setPlanModules] = React.useState<ModuleViewModel[]>([]);
@@ -60,6 +61,7 @@ export function EditPlanPageClient({ plan }: { plan: PlanFormValues;  }) {
             >
                 <UpsertPlanForm
                     plan={plan}
+                    upgradeOptions={upgradeOptions}
                     modules={{
                         data: planModules, // Usar apenas os módulos do plano (todos eles)
                         loadData: loadChildrenModules,

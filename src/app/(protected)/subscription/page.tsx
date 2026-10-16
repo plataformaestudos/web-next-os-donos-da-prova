@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Alert, Tabs } from "antd";
 import { AppPayments } from "@/components/AppPayments";
 import { AppMyPlans } from "@/components/AppMyPlans";
@@ -11,8 +12,12 @@ import { FullPageLoading } from "@/ui/loading/full-page-loading";
 
 const UserProfile = () => {
     const { user, loading, allowed } = useAuthGuard();
+    const searchParams = useSearchParams();
     const [activeTab, setActiveTab] = useState("1");
-    useEffect(() => { if (new URLSearchParams(window.location.search).has("campaign")) setActiveTab("3"); }, []);
+    useEffect(() => {
+        const shouldOpenPlans = searchParams.get("tab") === "planos" || searchParams.has("campaign");
+        setActiveTab(shouldOpenPlans ? "3" : "1");
+    }, [searchParams]);
     if (loading) return <FullPageLoading />;
     if (!allowed) return null;
     if (hasStaffAccess(user)) return <Alert style={{ margin: 24 }} type="info" showIcon
