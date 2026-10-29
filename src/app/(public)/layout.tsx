@@ -2,6 +2,8 @@
 
 import styled from "styled-components";
 import { Footer } from "@/ui/footer/footer.component";
+import { usePathname } from "next/navigation";
+import { isBuiltinEbookPublicPath, isCustomEbookPath } from "@/ebooks/public-path";
 
 const PublicLayoutContainer = styled.div`
   min-height: 100vh;
@@ -23,6 +25,8 @@ export default function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  if (isBuiltinEbookPublicPath(pathname) || isCustomEbookPath(pathname)) return children;
   return (
     <PublicLayoutContainer>
       <MainContent>

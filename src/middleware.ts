@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { isBuiltinEbookPublicPath, isCustomEbookPath } from "@/ebooks/public-path";
 
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const token = request.cookies.get("access_token")?.value; 
   const publicPaths = [
     "/login",
@@ -27,7 +28,17 @@ export function middleware(request: NextRequest) {
     "/configuracoes-cookies",
     "/config-cookies",
   ];
-  const isPublic = publicPaths.some((path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`));
+  const pathname = request.nextUrl.pathname;
+  let isPublic = publicPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`)) || isBuiltinEbookPublicPath(pathname);
+  if (!isPublic && isCustomEbookPath(pathname) && process.env.NEXT_PUBLIC_API_BASE_URL) {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/public/ebook-pages?path=${encodeURIComponent(pathname)}`, { cache: "no-store", credentials: "omit", signal: AbortSignal.timeout(4000) });
+      if (response.ok) {
+        const page: unknown = await response.json();
+        isPublic = typeof page === "object" && page !== null && "path" in page && page.path === pathname;
+      }
+    } catch { /* Fail closed: unpublished pages never open application routes. */ }
+  }
   if (!token && !isPublic) {
     console.log("No access token found, redirecting to login");
     const url = request.nextUrl.clone();
@@ -35,7 +46,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  if (isBuiltinEbookPublicPath(pathname)) {
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
+    response.headers.set("Referrer-Policy", "no-referrer");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+  return response;
 }
 
 
