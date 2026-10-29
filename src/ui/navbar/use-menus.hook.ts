@@ -23,12 +23,16 @@ export function useMenus() {
     },
   });
 
-  const menus = data?.filter((menu) => {
+  const visibleMenus = data?.filter((menu) => {
+    if (/^\/ebooks(\/|$)/.test(menu.link)) return canAccess(user, [Roles.ADMIN]);
     if (/^\/subscription(\/|$)/.test(menu.link) && hasStaffAccess(user)) return false;
     if (/^\/gerenciar-usuarios(\/|$)/.test(menu.link)) return canAccess(user, [Roles.ADMIN]);
     if (/^\/afiliados(\/|$)/.test(menu.link)) return canAccess(user, [Roles.ADMIN]);
     const isImport = /^\/(importacao-questoes|question-imports)(\/|$)/.test(menu.link);
     return !isImport || canAccess(user, [Roles.ADMIN, Roles.COLLABORATOR]);
   });
+  const menus = visibleMenus && canAccess(user, [Roles.ADMIN]) && !visibleMenus.some((menu) => menu.link === "/ebooks/administrar")
+    ? [...visibleMenus, { id: "ebook-admin", description: "Ebooks", icon: "book", level: 1, order: 100, link: "/ebooks/administrar", activeRegex: "^/ebooks/administrar" }]
+    : visibleMenus;
   return { menus, isLoading: loading || isLoading };
 }
