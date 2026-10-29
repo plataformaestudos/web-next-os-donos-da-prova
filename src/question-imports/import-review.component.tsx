@@ -226,6 +226,26 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
   const selection = rows.filter((item) => selected.includes(item.id));
   const approvable = selection.filter(canApproveItem);
 
+  const pagination = (
+    <Pagination
+      current={filters.page}
+      pageSize={filters.pageSize}
+      total={items.data?.total ?? 0}
+      pageSizeOptions={[10, 20, 50]}
+      showSizeChanger
+      showTotal={(total) => `${total} questões`}
+      disabled={busy}
+      responsive
+      onChange={(page, pageSize) => {
+        if (page === filters.page && pageSize === filters.pageSize) return;
+        const next = { ...filters, page, pageSize };
+        requestScroll(JSON.stringify([user?.id, batch.id, next]));
+        setFilters(next);
+        setSelected([]);
+      }}
+    />
+  );
+
   return (
     <Flex vertical gap={20} className="import-review-navigation-space">
       <ImportReviewNavigation startRef={startRef} endRef={endRef} />
@@ -430,6 +450,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
       )}
       {!items.isError && items.data && (
         <>
+          <div className="import-review-pagination">{pagination}</div>
           {items.data.assetErrors.length > 0 && (
             <Alert
               showIcon
@@ -510,23 +531,7 @@ export function ImportReview({ batch }: { batch: QuestionImport }) {
             </Card>
           ))}
           <div ref={endRef} className="import-review-pagination">
-            <Pagination
-              current={filters.page}
-              pageSize={filters.pageSize}
-              total={items.data.total}
-              pageSizeOptions={[10, 20, 50]}
-              showSizeChanger
-              showTotal={(total) => `${total} questões`}
-              disabled={busy}
-              responsive
-              onChange={(page, pageSize) => {
-                if (page === filters.page && pageSize === filters.pageSize) return;
-                const next = { ...filters, page, pageSize };
-                requestScroll(JSON.stringify([user?.id, batch.id, next]));
-                setFilters(next);
-                setSelected([]);
-              }}
-            />
+            {pagination}
           </div>
         </>
       )}
