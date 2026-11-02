@@ -36,7 +36,7 @@ export interface QuestionImport {
   status: QuestionImportStatus;
   progress: number;
   statusMessage: string | null;
-  rootModuleId: string;
+  rootModuleId: string | null;
   startQuestionNumber?: number;
   endQuestionNumber?: number | null;
   sourceFileName: string;
