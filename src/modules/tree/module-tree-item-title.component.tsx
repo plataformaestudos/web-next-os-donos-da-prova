@@ -14,6 +14,8 @@ import { useCreateModule } from "../create/create-module.context";
 import { plural } from "@/util/text.util";
 import { GrFormViewHide } from "react-icons/gr";
 import { TbEyeQuestion } from "react-icons/tb";
+import { useUser } from "@/app/context/user.context";
+import { canAccess, Roles } from "@/util/roles";
 
 
 
@@ -37,6 +39,8 @@ export function ModuleTreeItemTitle({
     onDelete?: () => void;
 }) {
     const { openCreateModal } = useCreateModule();
+    const { user } = useUser();
+    const canDelete = canAccess(user, [Roles.ADMIN]);
     const [menuOpened, setMenuOpened] = useState(false);
     const [showQuestions, setShowQuestions] = useState(false);
     const toggleShowQuestions = (ev: React.MouseEvent) => {
@@ -83,7 +87,7 @@ export function ModuleTreeItemTitle({
         //     });
         // }
 
-        result.push(
+        if (canDelete) result.push(
             {
                 type: "divider",
             },
@@ -92,7 +96,6 @@ export function ModuleTreeItemTitle({
                 style: {
                     padding: 0,
                 },
-                disabled: true,
                 label: (
                     <DeleteModuleButton
                         moduleId={id}
@@ -105,7 +108,7 @@ export function ModuleTreeItemTitle({
             }
         );
         return result;
-    }, [id, title, parentModuleId, isLeaf, openCreateModal, onDelete]);
+    }, [id, title, isLeaf, openCreateModal, onDelete, canDelete]);
 
     return (
         <Flex onClick={onClick} justify="space-between" align="center" style={{ minHeight: 32, cursor: "pointer", padding: "8px 0" }}>
