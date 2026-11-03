@@ -20,6 +20,27 @@ export interface EbookPageContent {
   benefits: Array<{ title: string; description: string }>;
   contents: Array<{ title: string; description: string }>;
   faq: Array<{ question: string; answer: string }>;
+  heroLabel?: string;
+  headlineHighlight?: string;
+  coverUrl?: string;
+  benefitsDescription?: string;
+  contentsDescription?: string;
+  highlights?: Array<{ title: string; description: string }>;
+  strategyTitle?: string;
+  strategyDescription?: string;
+  strategy?: Array<{ title: string; description: string }>;
+  samplesTitle?: string;
+  samplesDescription?: string;
+  samples?: Array<{ title: string; description: string; imageUrl: string }>;
+  audienceTitle?: string;
+  audienceDescription?: string;
+  audience?: Array<{ title: string; description: string }>;
+  finalTitle?: string;
+  finalDescription?: string;
+  showHighlights?: boolean;
+  showStrategy?: boolean;
+  showSamples?: boolean;
+  showAudience?: boolean;
 }
 
 export interface EbookPageSections {

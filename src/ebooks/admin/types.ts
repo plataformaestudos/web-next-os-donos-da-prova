@@ -38,4 +38,10 @@ export const emptyContent = (): EbookPageContent => ({
   headline: "", description: "", bannerDesktopUrl: "", bannerMobileUrl: "", ctaText: "Comprar ebook",
   benefitsTitle: "Por que escolher este ebook?", contentsTitle: "O que você vai encontrar", faqTitle: ebookFaqTitle,
   seoTitle: "", seoDescription: "", socialImageUrl: "", benefits: [], contents: [], faq: [...ebookFaqItems],
+  heroLabel: "", headlineHighlight: "", coverUrl: "", benefitsDescription: "", contentsDescription: "",
+  highlights: [], strategyTitle: "Vá além da memorização.", strategyDescription: "", strategy: [],
+  samplesTitle: "Conheça o material antes de começar.", samplesDescription: "", samples: [],
+  audienceTitle: "Para quem é este ebook?", audienceDescription: "", audience: [],
+  finalTitle: "Sua preparação merece o próximo passo.", finalDescription: "",
+  showHighlights: true, showStrategy: true, showSamples: true, showAudience: true,
 });
