@@ -84,6 +84,10 @@ export function LandingPreview({ expanded, onExpand, ...props }: EbookLandingPro
       viewportMeta.name = "viewport";
       viewportMeta.content = "width=device-width, initial-scale=1";
       doc.head.appendChild(viewportMeta);
+      doc.documentElement.lang = "pt-BR";
+      doc.title = "Prévia da página de venda";
+      // Inherit the same Next font variables used by the public page.
+      doc.body.className = document.body.className;
       syncStyles();
       setTarget(doc.body);
       observer = new MutationObserver(syncStyles);
@@ -91,8 +95,7 @@ export function LandingPreview({ expanded, onExpand, ...props }: EbookLandingPro
       doc.body.style.margin = "0";
       doc.documentElement.style.height = "100%";
       doc.documentElement.style.overflowY = "auto";
-      doc.body.style.height = "100%";
-      doc.body.style.overflowY = "auto";
+      doc.body.style.minHeight = "100%";
     };
     frame.addEventListener("load", load);
     load();
