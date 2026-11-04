@@ -1,27 +1,6 @@
-.import-content,
-.import-rich-editor {
-  overflow-wrap: anywhere;
-}
 .import-content {
-  overflow-x: auto;
-}
-.import-content img,
-.import-rich-editor img {
-  max-width: 100%;
-  height: auto;
-}
-.import-content table,
-.import-rich-editor table {
-  border-collapse: collapse;
-  max-width: 100%;
-}
-.import-content td,
-.import-content th,
-.import-rich-editor td,
-.import-rich-editor th {
-  border: 1px solid #929292;
-  padding: 6px;
-  min-width: 24px;
+  min-width: 0;
+  width: 100%;
 }
 .import-rich-editor {
   border: 1px solid #929292;
@@ -42,9 +21,6 @@
   border: 1px dashed #929292;
   padding: 4px;
   display: inline-block;
-}
-.import-content p:first-child {
-  margin-top: 0;
 }
 .import-rich-editor .Tiptap-mathematics-editor {
   font-family: monospace;

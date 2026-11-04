@@ -25,6 +25,38 @@
   padding: 0 0.25rem;
 }
 
+.tiptap {
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.tiptap table {
+  border-collapse: collapse;
+  max-width: 100%;
+  margin: 8px 0;
+}
+
+.tiptap p {
+  margin: 0;
+}
+
+.tiptap td,
+.tiptap th {
+  border: 1px solid #929292;
+  padding: 6px;
+  min-width: 24px;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+}
+
 .tiptap .Tiptap-mathematics-render--editable {
   cursor: pointer;
   transition: background 0.2s;

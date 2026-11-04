@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- Keep signed image URLs out of the editor document. */
 
 import { createContext, useContext, useEffect } from "react";
-import { Extension, Mark, Node, mergeAttributes } from "@tiptap/core";
+import { QuestionImage, questionContentExtensions } from "@/ui/tiptap-editor/extensions/question-content.tiptap-extension";
 import {
   EditorContent,
   NodeViewWrapper,
@@ -11,14 +11,11 @@ import {
   useEditor,
   type NodeViewProps,
 } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Image from "@tiptap/extension-image";
-import Underline from "@tiptap/extension-underline";
-import TextStyle from "@tiptap/extension-text-style";
-import { Mathematics } from "@tiptap-pro/extension-mathematics";
 import { Button, Flex, Typography } from "antd";
 import "./import-preview.css";
+import "@/ui/tiptap-editor/styles.css";
 import "katex/dist/katex.min.css";
+import { importImageSize } from "./import-image-size";
 
 const ImageUrls = createContext<Record<string, string>>({});
 function ImportImage({ node }: NodeViewProps) {
@@ -32,6 +29,7 @@ function ImportImage({ node }: NodeViewProps) {
           src={url}
           alt={node.attrs.alt || "Imagem da questão"}
           referrerPolicy="no-referrer"
+          style={importImageSize(node.attrs.style)}
         />
       ) : (
         <span data-drag-handle className="import-image-unavailable">
@@ -41,92 +39,10 @@ function ImportImage({ node }: NodeViewProps) {
     </NodeViewWrapper>
   );
 }
-const CanonicalImage = Image.extend({
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-      width: { default: null },
-      height: { default: null },
-      style: { default: null },
-    };
-  },
+const CanonicalImage = QuestionImage.extend({
   addNodeView() {
     return ReactNodeViewRenderer(ImportImage);
   },
-}).configure({ inline: true });
-
-// Keep DOCX tables in the schema. Editing their text must not flatten the table.
-const Table = Node.create({
-  name: "importTable",
-  group: "block",
-  content: "importRow+",
-  isolating: true,
-  parseHTML: () => [{ tag: "table" }],
-  renderHTML: () => ["table", ["tbody", 0]],
-});
-const Row = Node.create({
-  name: "importRow",
-  content: "(importCell | importHeader)+",
-  parseHTML: () => [{ tag: "tr" }],
-  renderHTML: () => ["tr", 0],
-});
-function cell(name: string, tag: string) {
-  return Node.create({
-    name,
-    content: "block+",
-    isolating: true,
-    addAttributes: () => ({ colspan: { default: 1 }, rowspan: { default: 1 } }),
-    parseHTML: () => [{ tag }],
-    renderHTML: ({ HTMLAttributes }) => [tag, HTMLAttributes, 0],
-  });
-}
-const superscript = Mark.create({
-  name: "importSup",
-  parseHTML: () => [{ tag: "sup" }],
-  renderHTML: () => ["sup", 0],
-});
-const subscript = Mark.create({
-  name: "importSub",
-  parseHTML: () => [{ tag: "sub" }],
-  renderHTML: () => ["sub", 0],
-});
-const link = Mark.create({
-  name: "importLink",
-  inclusive: false,
-  addAttributes: () => ({
-    href: {
-      default: null,
-      parseHTML: (el) =>
-        /^(https?:\/\/|mailto:)/i.test(el.getAttribute("href") || "")
-          ? el.getAttribute("href")
-          : null,
-    },
-  }),
-  parseHTML: () => [{ tag: "a[href]" }],
-  renderHTML: ({ HTMLAttributes }) => [
-    "a",
-    mergeAttributes(HTMLAttributes, { rel: "noopener noreferrer" }),
-    0,
-  ],
-});
-const alignment = Extension.create({
-  name: "importAlignment",
-  addGlobalAttributes: () => [
-    {
-      types: ["paragraph", "textStyle"],
-      attributes: {
-        textAlign: {
-          default: null,
-          parseHTML: (el) =>
-            /^(left|right|center|justify)$/.test(el.style.textAlign)
-              ? el.style.textAlign
-              : null,
-          renderHTML: (attrs) =>
-            attrs.textAlign ? { style: `text-align: ${attrs.textAlign}` } : {},
-        },
-      },
-    },
-  ],
 });
 
 export function ImportRichEditor({
@@ -147,22 +63,8 @@ export function ImportRichEditor({
     content: html,
     editable: !disabled,
     extensions: [
-      StarterKit.configure({ heading: false }),
-      Underline,
-      TextStyle,
-      alignment,
+      ...questionContentExtensions(),
       CanonicalImage,
-      Table,
-      Row,
-      cell("importCell", "td"),
-      cell("importHeader", "th"),
-      superscript,
-      subscript,
-      link,
-      Mathematics.configure({
-        shouldRender: (_state, _pos, node) =>
-          Boolean(node.text?.match(/(?<![R\\])\$(.*?)(?<![R\\])\$/g)),
-      }),
     ],
     editorProps: {
       attributes: {
