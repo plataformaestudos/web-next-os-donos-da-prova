@@ -5,17 +5,11 @@ import { useEffect, useState } from "react";
 
 import { Editor } from "@tiptap/core";
 import FileHandler from "@tiptap-pro/extension-file-handler";
-import { FontSize } from "./extensions/font-size.tiptap-extension";
+import { QuestionImage, questionContentExtensions } from "./extensions/question-content.tiptap-extension";
 import { Fragment } from "@tiptap/pm/model";
-import ImageResize from "tiptap-extension-resize-image";
-import ListKeymap from "@tiptap/extension-list-keymap";
-import { Mathematics } from "@tiptap-pro/extension-mathematics";
 import Placeholder from "@tiptap/extension-placeholder";
-import StarterKit from "@tiptap/starter-kit";
 import { StyledEditorContent } from "./tiptap-editor.stye";
-import TextStyle from "@tiptap/extension-text-style";
 import { Transaction } from "@tiptap/pm/state";
-import Underline from "@tiptap/extension-underline";
 import HttpClient from "@/util/http-client/fetch-client.util";
 import { ResponseModel } from "@/model/common.model";
 import { message } from "antd";
@@ -83,27 +77,11 @@ export function TiptapEditor({
     content: defaultValue,
     editable,
     extensions: [
-      StarterKit.configure({
-        bulletList: {
-          HTMLAttributes: {
-            class: "list-disc pl-8",
-          },
-        },
-        orderedList: {
-          HTMLAttributes: {
-            class: "list-decimal pl-8",
-          },
-        },
-      }),
-      TextStyle,
-      Underline,
-      ListKeymap,
+      ...questionContentExtensions(),
       Placeholder.configure({
         placeholder,
       }),
-      FontSize,
-      // DOCX imports place images inside paragraphs, alongside text and marks.
-      ImageResize.configure({ inline: true }),
+      QuestionImage,
       FileHandler.configure({
         allowedMimeTypes: [
           "image/png",
@@ -148,14 +126,6 @@ export function TiptapEditor({
           });
         },
       }),
-      Mathematics.configure({
-        shouldRender: (state, pos, node) => {
-          if (!node.text) return false;
-          const regex = /(?<![R\\])\$(.*?)(?<![R\\])\$/g;
-          const matches = node.text?.match(regex);
-          return matches && matches.length > 0 ? true : false;
-        },
-      }),
     ],
     immediatelyRender: false,
     onFocus: () => {
@@ -177,10 +147,16 @@ export function TiptapEditor({
   useEffect(() => {
     if (!editor) return;
 
+    if (!editable) {
+      // Preview requests can renew signed image URLs without remounting the card.
+      editor.commands.setContent(defaultValue || "", false);
+      return;
+    }
+
     if (defaultValue === "") {
       editor.commands.clearContent();
     }
-  }, [editor, defaultValue]);
+  }, [editor, defaultValue, editable]);
 
   return (
     <StyledEditorContent
