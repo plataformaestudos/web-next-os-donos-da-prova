@@ -102,7 +102,8 @@ export function TiptapEditor({
         placeholder,
       }),
       FontSize,
-      ImageResize,
+      // DOCX imports place images inside paragraphs, alongside text and marks.
+      ImageResize.configure({ inline: true }),
       FileHandler.configure({
         allowedMimeTypes: [
           "image/png",
@@ -165,7 +166,7 @@ export function TiptapEditor({
       setIsFocused(false);
     },
     onUpdate: ({ editor }) =>
-      onChange?.(editor.getText() ? editor.getHTML() : ""),
+      onChange?.(editor.isEmpty ? "" : editor.getHTML()),
     onTransaction({ transaction }) {
       if (editable && transaction.docChanged) {
         void handleImageDeletes(transaction).catch(() => console.error("Não foi possível remover a imagem temporária."));
